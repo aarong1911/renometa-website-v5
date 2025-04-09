@@ -29,7 +29,7 @@ const ServiceCard = ({
           className
         )}>
           <CardHeader>
-            <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-gold-light/30 to-gold-light/10 inline-flex">
+            <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-gold/30 to-gold/10 inline-flex">
               <div className="text-gold">{icon}</div>
             </div>
             <CardTitle className="text-xl font-heading text-blue-dark">{title}</CardTitle>

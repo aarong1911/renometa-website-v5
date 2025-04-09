@@ -72,6 +72,42 @@ export default {
 				'blue-light': '#214B8A',
 				'gold': '#d9ab57',
 				'gold-light': '#e7c989',
+				'teal': '#d9ab57', // Changed from teal to gold
+				'teal-light': '#e7c989', // Changed from teal-light to gold-light
+			},
+			typography: {
+				DEFAULT: {
+					css: {
+						h1: {
+							fontFamily: 'Montserrat, sans-serif',
+							fontWeight: '700',
+							color: '#0B1D35',
+						},
+						h2: {
+							fontFamily: 'Montserrat, sans-serif',
+							fontWeight: '600',
+							color: '#0B1D35',
+							marginTop: '1.5em',
+						},
+						h3: {
+							fontFamily: 'Montserrat, sans-serif',
+							fontWeight: '600',
+							color: '#0B1D35',
+						},
+						a: {
+							color: '#d9ab57',
+							'&:hover': {
+								color: '#e7c989',
+							},
+						},
+						blockquote: {
+							borderLeftColor: '#d9ab57',
+							color: '#555',
+							fontStyle: 'italic',
+							paddingLeft: '1em',
+						},
+					},
+				},
 			},
 			borderRadius: {
 				lg: 'var(--radius)',
@@ -104,6 +140,10 @@ export default {
 				'pulse-soft': {
 					'0%, 100%': { opacity: '1' },
 					'50%': { opacity: '0.8' }
+				},
+				'float': {
+					'0%, 100%': { transform: 'translateY(0)' },
+					'50%': { transform: 'translateY(-10px)' }
 				}
 			},
 			animation: {
@@ -111,9 +151,13 @@ export default {
 				'accordion-up': 'accordion-up 0.2s ease-out',
 				'fade-in-up': 'fade-in-up 0.6s ease-out',
 				'fade-in': 'fade-in 0.4s ease-out',
-				'pulse-soft': 'pulse-soft 2s infinite ease-in-out'
+				'pulse-soft': 'pulse-soft 2s infinite ease-in-out',
+				'float': 'float 3s infinite ease-in-out'
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [
+		require("tailwindcss-animate"),
+		require('@tailwindcss/typography')
+	],
 } satisfies Config;

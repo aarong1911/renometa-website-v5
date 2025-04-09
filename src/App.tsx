@@ -12,6 +12,8 @@ import AIAgents from "./pages/Services/AIAgents";
 import Automation from "./pages/Services/Automation";
 import Integration from "./pages/Services/Integration";
 import PerformanceOptimization from "./pages/Services/PerformanceOptimization";
+import Blog from "./pages/Blog";
+import BlogPost from "./pages/BlogPost";
 import Chatbot from "./components/ui/Chatbot";
 
 const queryClient = new QueryClient();
@@ -30,6 +32,8 @@ const App = () => (
           <Route path="/services/automation" element={<Automation />} />
           <Route path="/services/integration" element={<Integration />} />
           <Route path="/services/performance-optimization" element={<PerformanceOptimization />} />
+          <Route path="/blog" element={<Blog />} />
+          <Route path="/blog/:id" element={<BlogPost />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>

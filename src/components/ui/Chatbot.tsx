@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { MessageSquare, X } from 'lucide-react';
 
 type TimeSlot = {
   hour: number;
@@ -164,17 +165,14 @@ const Chatbot = () => {
     <>
       {/* Chat toggle button */}
       <button 
-        className="fixed bottom-6 right-6 bg-teal text-white p-4 rounded-full shadow-lg z-50 hover:bg-teal-light transition-colors"
+        className="fixed bottom-6 right-6 bg-gold hover:bg-gold-light text-white p-4 rounded-full shadow-lg z-50 transition-colors"
         onClick={toggleChat}
+        aria-label={isOpen ? "Close chat" : "Open chat"}
       >
         {isOpen ? (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <X className="h-6 w-6" />
         ) : (
-          <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 10h.01M12 10h.01M16 10h.01M9 16H5a2 2 0 01-2-2V6a2 2 0 012-2h14a2 2 0 012 2v8a2 2 0 01-2 2h-5l-5 5v-5z" />
-          </svg>
+          <MessageSquare className="h-6 w-6" />
         )}
       </button>
 
@@ -191,10 +189,8 @@ const Chatbot = () => {
               />
               <span className="font-medium">RenoMeta Support</span>
             </div>
-            <button onClick={toggleChat} className="text-white hover:text-gray-200">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
-              </svg>
+            <button onClick={toggleChat} className="text-white hover:text-gray-200" aria-label="Close chat">
+              <X className="h-5 w-5" />
             </button>
           </div>
 
@@ -212,7 +208,7 @@ const Chatbot = () => {
                   className={cn(
                     "max-w-[80%] rounded-lg px-4 py-2",
                     message.type === 'user' 
-                      ? "bg-teal text-white rounded-br-none" 
+                      ? "bg-gold text-white rounded-br-none" 
                       : "bg-gray-100 text-gray-800 rounded-bl-none"
                   )}
                 >
@@ -235,7 +231,7 @@ const Chatbot = () => {
                 </Button>
                 <Button 
                   onClick={() => handleInitialChoice('schedule')}
-                  className="bg-teal hover:bg-teal-light w-full"
+                  className="bg-gold hover:bg-gold-light w-full"
                 >
                   Schedule Appointment
                 </Button>
@@ -247,7 +243,7 @@ const Chatbot = () => {
                 <input 
                   type="text" 
                   placeholder="Type your question here..."
-                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-teal"
+                  className="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-gold"
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') {
                       sendMessage((e.target as HTMLInputElement).value);
@@ -305,7 +301,7 @@ const Chatbot = () => {
             {step === 'confirmation' && (
               <div className="flex flex-col space-y-3">
                 <p className="text-sm text-gray-600">Thank you for scheduling with us! We'll be in touch shortly.</p>
-                <Button onClick={handleReset} className="bg-teal hover:bg-teal-light">
+                <Button onClick={handleReset} className="bg-gold hover:bg-gold-light text-white">
                   Schedule Another Appointment
                 </Button>
               </div>
