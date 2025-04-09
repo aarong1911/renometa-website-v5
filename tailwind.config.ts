@@ -70,8 +70,8 @@ export default {
 				// Custom colors
 				'blue-dark': '#0B1D35',
 				'blue-light': '#214B8A',
-				'gold': '#d9ab57',         // Changed from 'teal'
-				'gold-light': '#e7c989',   // Changed from 'teal-light'
+				'gold': '#d9ab57',
+				'gold-light': '#e7c989',
 			},
 			borderRadius: {
 				lg: 'var(--radius)',

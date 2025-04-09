@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -82,15 +81,23 @@ const Index = () => {
     },
   ];
 
+  // Smooth scroll function
+  const scrollToSection = (id) => {
+    const element = document.getElementById(id);
+    if (element) {
+      element.scrollIntoView({ behavior: 'smooth' });
+    }
+  };
+
   return (
     <MainLayout>
       {/* Hero Section */}
-      <section className="hero-section relative">
+      <section id="hero" className="hero-section relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
         <div className="container-custom flex flex-col md:flex-row items-center z-10 relative">
           <div className="w-full md:w-1/2 py-12 md:py-0">
             <ScrollReveal>
-              <span className="bg-teal/10 text-teal px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
                 For Remodeling & Home Service Businesses
               </span>
             </ScrollReveal>
@@ -109,11 +116,13 @@ const Index = () => {
             
             <ScrollReveal delay={600}>
               <div className="flex flex-wrap gap-4">
-                <Button className="btn-primary" asChild>
-                  <Link to="/contact">Get a Free Strategy Call</Link>
+                <Button className="btn-primary hover:-translate-y-1 transition-transform duration-300" asChild 
+                  onClick={() => scrollToSection('contact')}>
+                  <Link to="#contact">Get a Free Strategy Call</Link>
                 </Button>
-                <Button className="btn-outline" asChild>
-                  <Link to="/services">Explore Services</Link>
+                <Button className="btn-outline hover:-translate-y-1 transition-transform duration-300" asChild
+                  onClick={() => scrollToSection('services')}>
+                  <Link to="#services">Explore Services</Link>
                 </Button>
               </div>
             </ScrollReveal>
@@ -122,7 +131,7 @@ const Index = () => {
           <div className="w-full md:w-1/2 mt-8 md:mt-0">
             <ScrollReveal direction="left">
               <div className="relative">
-                <div className="absolute -top-4 -left-4 w-40 h-40 bg-teal rounded-full opacity-10 animate-pulse-soft"></div>
+                <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft"></div>
                 <div className="absolute -bottom-4 -right-4 w-60 h-60 bg-blue-dark rounded-full opacity-10 animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
                 <img 
                   src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
@@ -157,10 +166,10 @@ const Index = () => {
       </section>
       
       {/* Services Section */}
-      <section className="section bg-white">
+      <section id="services" className="section bg-white">
         <div className="container-custom">
           <ScrollReveal>
-            <span className="text-teal font-medium">Our Services</span>
+            <span className="text-gold font-medium">Our Services</span>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
               Digital Solutions for Modern Contractors
             </h2>
@@ -185,7 +194,7 @@ const Index = () => {
       </section>
       
       {/* Benefits Section */}
-      <section className="section bg-gradient-to-br from-blue-dark to-blue-light text-white">
+      <section id="benefits" className="section bg-gradient-to-br from-blue-dark to-blue-light text-white">
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto">
             <ScrollReveal>
@@ -287,10 +296,10 @@ const Index = () => {
       </section>
       
       {/* Case Studies Section */}
-      <section className="section bg-white">
+      <section id="case-studies" className="section bg-white">
         <div className="container-custom">
           <ScrollReveal>
-            <span className="text-teal font-medium">Case Studies</span>
+            <span className="text-gold font-medium">Case Studies</span>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
               Success Stories
             </h2>
@@ -339,7 +348,7 @@ const Index = () => {
           
           <div className="text-center mt-10">
             <ScrollReveal>
-              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white">
+              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white hover:-translate-y-1 transition-all duration-300">
                 <Link to="/case-studies">View All Case Studies</Link>
               </Button>
             </ScrollReveal>
@@ -348,11 +357,11 @@ const Index = () => {
       </section>
       
       {/* Testimonials Section */}
-      <section className="section bg-gray-50">
+      <section id="testimonials" className="section bg-gray-50">
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <ScrollReveal>
-              <span className="text-teal font-medium">Testimonials</span>
+              <span className="text-gold font-medium">Testimonials</span>
               <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
                 What Our Clients Say
               </h2>
@@ -364,7 +373,7 @@ const Index = () => {
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <TestimonialCard
-              quote="Our website leads have doubled since working with DigitalForge. Their understanding of the remodeling industry made all the difference."
+              quote="Our website leads have doubled since working with RenoMeta. Their understanding of the remodeling industry made all the difference."
               author="Michael Rodriguez"
               position="Owner"
               company="Rodriguez Remodeling"
@@ -391,7 +400,7 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section className="section bg-gradient-to-br from-teal to-blue-light text-white">
+      <section id="contact" className="section bg-gradient-to-br from-gold to-blue-light text-white">
         <div className="container-custom text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading mb-6">
@@ -400,7 +409,7 @@ const Index = () => {
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
               Schedule a free 30-minute strategy call to discover how we can help your remodeling business thrive online.
             </p>
-            <Button size="lg" asChild className="bg-white text-blue-dark hover:bg-gray-100">
+            <Button size="lg" asChild className="bg-white text-blue-dark hover:bg-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
               <Link to="/contact">Book Your Free Strategy Call</Link>
             </Button>
           </ScrollReveal>
@@ -408,10 +417,10 @@ const Index = () => {
       </section>
       
       {/* Latest Blog Posts */}
-      <section className="section bg-white">
+      <section id="blog" className="section bg-white">
         <div className="container-custom">
           <ScrollReveal>
-            <span className="text-teal font-medium">Resources</span>
+            <span className="text-gold font-medium">Resources</span>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
               Latest Articles
             </h2>
@@ -467,7 +476,7 @@ const Index = () => {
           
           <div className="text-center mt-10">
             <ScrollReveal>
-              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white">
+              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white hover:-translate-y-1 transition-all duration-300">
                 <Link to="/blog">Read More Articles</Link>
               </Button>
             </ScrollReveal>
