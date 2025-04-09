@@ -60,27 +60,33 @@ const PerformanceOptimization = () => {
   const processSteps = [
     {
       title: "Comprehensive Audit",
-      description: "We conduct a thorough analysis of your current website performance, identifying all factors affecting speed and responsiveness."
+      description: "We conduct a thorough analysis of your current website performance, identifying all factors affecting speed and responsiveness.",
+      stepNumber: 1
     },
     {
       title: "Custom Optimization Plan",
-      description: "Based on the audit findings, we create a tailored optimization strategy specific to your website's architecture and needs."
+      description: "Based on the audit findings, we create a tailored optimization strategy specific to your website's architecture and needs.",
+      stepNumber: 2
     },
     {
       title: "Technical Implementation",
-      description: "Our experts implement advanced optimization techniques, from code minification to server-side improvements."
+      description: "Our experts implement advanced optimization techniques, from code minification to server-side improvements.",
+      stepNumber: 3
     },
     {
       title: "Media Optimization",
-      description: "We optimize all images and videos on your site for faster loading without compromising visual quality."
+      description: "We optimize all images and videos on your site for faster loading without compromising visual quality.",
+      stepNumber: 4
     },
     {
       title: "Testing & Refinement",
-      description: "We rigorously test all optimizations across various devices and connections to ensure consistent performance."
+      description: "We rigorously test all optimizations across various devices and connections to ensure consistent performance.",
+      stepNumber: 5
     },
     {
       title: "Ongoing Monitoring",
-      description: "After implementation, we continuously monitor your site's performance and make adjustments as needed to maintain optimal speed."
+      description: "After implementation, we continuously monitor your site's performance and make adjustments as needed to maintain optimal speed.",
+      stepNumber: 6
     }
   ];
 
