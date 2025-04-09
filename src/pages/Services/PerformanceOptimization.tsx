@@ -1,7 +1,7 @@
 
 import React from 'react';
 import ServicePageTemplate from '@/components/layout/ServicePageTemplate';
-import FAQ from '@/components/ui/FAQ';
+import { ArrowUpRight, Zap, BarChart2, Layout, Smartphone, Server } from 'lucide-react';
 
 const PerformanceOptimization = () => {
   // FAQ items for this service
@@ -28,31 +28,37 @@ const PerformanceOptimization = () => {
     }
   ];
 
-  // Service benefits
-  const benefits = [
+  // Features with icons
+  const features = [
     {
       title: "Enhanced User Experience",
-      description: "Deliver a smooth, responsive experience that keeps potential clients engaged with your portfolio and services."
+      description: "Deliver a smooth, responsive experience that keeps potential clients engaged with your portfolio and services.",
+      icon: <Layout />
     },
     {
       title: "Improved Search Rankings",
-      description: "Speed is a crucial ranking factor. Faster sites rank higher in search results, bringing more organic traffic."
+      description: "Speed is a crucial ranking factor. Faster sites rank higher in search results, bringing more organic traffic.",
+      icon: <ArrowUpRight />
     },
     {
       title: "Higher Conversion Rates",
-      description: "Faster websites convert more visitors into leads and customers, directly impacting your bottom line."
+      description: "Faster websites convert more visitors into leads and customers, directly impacting your bottom line.",
+      icon: <BarChart2 />
     },
     {
       title: "Reduced Bounce Rates",
-      description: "Keep visitors on your site longer with quick-loading pages that respond instantly to user interactions."
+      description: "Keep visitors on your site longer with quick-loading pages that respond instantly to user interactions.",
+      icon: <Zap />
     },
     {
       title: "Mobile Performance",
-      description: "Optimize for mobile users who are increasingly searching for remodeling services on smartphones and tablets."
+      description: "Optimize for mobile users who are increasingly searching for remodeling services on smartphones and tablets.",
+      icon: <Smartphone />
     },
     {
       title: "Competitive Advantage",
-      description: "Stand out from competitors with a lightning-fast website that showcases your professionalism and attention to detail."
+      description: "Stand out from competitors with a lightning-fast website that showcases your professionalism and attention to detail.",
+      icon: <Server />
     }
   ];
 
@@ -90,102 +96,46 @@ const PerformanceOptimization = () => {
     }
   ];
 
+  // Testimonial example
+  const testimonial = {
+    quote: "RenoMeta's performance optimization services transformed our website. Page load times decreased by 60%, and our mobile conversion rate doubled within two months of implementation.",
+    author: "Jessica Miller",
+    position: "Marketing Director",
+    company: "Central Coast Renovations"
+  };
+
+  // Related services
+  const relatedServices = [
+    {
+      title: "Smart Website Development",
+      description: "Build a modern, responsive website that converts visitors into clients.",
+      link: "/services/website-development"
+    },
+    {
+      title: "Advanced SEO",
+      description: "Boost your visibility and attract more qualified leads through strategic search engine optimization.",
+      link: "/services/advanced-seo"
+    },
+    {
+      title: "Seamless Integration",
+      description: "Connect your website with the tools you already use to streamline your business operations.",
+      link: "/services/integration"
+    }
+  ];
+
   return (
     <ServicePageTemplate
       title="Performance Optimization"
-      subtitle="Accelerate Your Website for Maximum Impact and Conversions"
       description="Transform your remodeling business's website into a lightning-fast digital storefront that converts more visitors into qualified leads. Our performance optimization services focus on delivering the speed, responsiveness, and seamless user experience that today's consumers expect."
-      benefits={benefits}
+      tagline="Speed Matters"
+      features={features}
       processSteps={processSteps}
-      image="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
-    >
-      {/* Additional custom content for the service page */}
-      <section className="py-12 bg-white">
-        <div className="container-custom">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-blue-dark">Performance Metrics We Improve</h2>
-              <p className="text-gray-600">
-                We focus on the core web vitals and performance metrics that matter most for user experience and search engine rankings:
-              </p>
-              <ul className="space-y-4">
-                <li className="flex items-start">
-                  <div className="bg-teal/10 p-2 rounded-full mr-4 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-dark">Page Load Speed</h3>
-                    <p className="text-gray-600">Dramatically reduce the time it takes for your pages to fully load, keeping potential clients engaged from the first second.</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="bg-teal/10 p-2 rounded-full mr-4 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-dark">Core Web Vitals</h3>
-                    <p className="text-gray-600">Optimize Google's key user experience metrics (LCP, FID, CLS) that directly impact your search rankings and visibility.</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="bg-teal/10 p-2 rounded-full mr-4 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-dark">Mobile Responsiveness</h3>
-                    <p className="text-gray-600">Ensure your site loads quickly and functions perfectly across all mobile devices, where more than 60% of remodeling searches now occur.</p>
-                  </div>
-                </li>
-                <li className="flex items-start">
-                  <div className="bg-teal/10 p-2 rounded-full mr-4 mt-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-teal" viewBox="0 0 20 20" fill="currentColor">
-                      <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-                    </svg>
-                  </div>
-                  <div>
-                    <h3 className="text-lg font-medium text-blue-dark">Server Response Time</h3>
-                    <p className="text-gray-600">Optimize your hosting environment and server configuration to deliver content faster to your visitors.</p>
-                  </div>
-                </li>
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h2 className="text-3xl font-bold text-blue-dark">Our Optimization Techniques</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-medium text-blue-dark mb-3">Image Optimization</h3>
-                  <p className="text-gray-600">We compress and properly format all images without quality loss, significantly reducing page weight and load times.</p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-medium text-blue-dark mb-3">Code Minification</h3>
-                  <p className="text-gray-600">We streamline CSS, JavaScript, and HTML to eliminate unnecessary characters and reduce file sizes.</p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-medium text-blue-dark mb-3">Browser Caching</h3>
-                  <p className="text-gray-600">Implement advanced caching strategies so returning visitors experience near-instant page loads.</p>
-                </div>
-                <div className="bg-gray-50 p-6 rounded-lg">
-                  <h3 className="text-xl font-medium text-blue-dark mb-3">CDN Integration</h3>
-                  <p className="text-gray-600">Deliver content from servers closest to your visitors, dramatically reducing load times for all geographical regions.</p>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-      <FAQ 
-        title="Performance Optimization FAQ" 
-        subtitle="Common questions about our performance optimization services" 
-        items={faqItems} 
-        className="py-16 bg-gray-50"
-      />
-    </ServicePageTemplate>
+      faqItems={faqItems}
+      testimonial={testimonial}
+      heroImage="https://images.unsplash.com/photo-1551288049-bebda4e38f71?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2070&q=80"
+      ctaText="Ready to accelerate your website and boost conversions?"
+      relatedServices={relatedServices}
+    />
   );
 };
 
