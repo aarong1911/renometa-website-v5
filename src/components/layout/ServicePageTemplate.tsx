@@ -62,7 +62,7 @@ const ServicePageTemplate = ({
         <div className="container-custom flex flex-col md:flex-row items-center">
           <div className="w-full md:w-1/2 py-12 md:py-0">
             <ScrollReveal>
-              <span className="bg-teal/10 text-teal px-3 py-1 rounded-full text-sm font-medium">
+              <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium">
                 {tagline}
               </span>
             </ScrollReveal>
@@ -94,7 +94,7 @@ const ServicePageTemplate = ({
           <div className="w-full md:w-1/2 mt-8 md:mt-0">
             <ScrollReveal direction="left">
               <div className="relative">
-                <div className="absolute -top-4 -left-4 w-40 h-40 bg-teal rounded-full opacity-10 animate-pulse-soft"></div>
+                <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft"></div>
                 <div className="absolute -bottom-4 -right-4 w-60 h-60 bg-blue-dark rounded-full opacity-10 animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
                 <img 
                   src={heroImage}
@@ -112,7 +112,7 @@ const ServicePageTemplate = ({
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <ScrollReveal>
-              <span className="text-teal font-medium">Features</span>
+              <span className="text-gold font-medium">Features</span>
               <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
                 How We Can Help
               </h2>
@@ -126,7 +126,7 @@ const ServicePageTemplate = ({
             {features.map((feature, index) => (
               <ScrollReveal key={index} delay={index * 100}>
                 <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow h-full">
-                  <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-teal-100 inline-flex">
+                  <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-gold-light/30 inline-flex">
                     <div className="text-blue-dark">{feature.icon}</div>
                   </div>
                   <h3 className="text-xl font-bold font-heading mb-3 text-blue-dark">{feature.title}</h3>
@@ -143,7 +143,7 @@ const ServicePageTemplate = ({
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <ScrollReveal>
-              <span className="text-teal font-medium">Our Process</span>
+              <span className="text-gold font-medium">Our Process</span>
               <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
                 How It Works
               </h2>
@@ -167,7 +167,7 @@ const ServicePageTemplate = ({
                     </div>
                     
                     <div className="relative my-6 md:my-0 z-10">
-                      <div className="w-12 h-12 rounded-full bg-teal text-white font-bold flex items-center justify-center relative z-20">
+                      <div className="w-12 h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center relative z-20">
                         {step.stepNumber}
                       </div>
                     </div>
@@ -214,7 +214,7 @@ const ServicePageTemplate = ({
         <div className="container-custom">
           <div className="text-center max-w-3xl mx-auto mb-12">
             <ScrollReveal>
-              <span className="text-teal font-medium">Explore More</span>
+              <span className="text-gold font-medium">Explore More</span>
               <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
                 Related Services
               </h2>
@@ -231,7 +231,7 @@ const ServicePageTemplate = ({
                   <div className="bg-white p-6 rounded-lg border shadow-sm hover:shadow-md transition-all hover:-translate-y-1 h-full">
                     <h3 className="text-xl font-bold font-heading mb-3 text-blue-dark">{service.title}</h3>
                     <p className="text-gray-600 mb-4">{service.description}</p>
-                    <span className="text-teal font-medium flex items-center group">
+                    <span className="text-gold font-medium flex items-center group">
                       Learn more
                       <svg 
                         xmlns="http://www.w3.org/2000/svg" 

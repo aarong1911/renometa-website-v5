@@ -19,13 +19,13 @@
     --primary: 212 59% 26%;
     --primary-foreground: 210 33% 99%;
 
-    --secondary: 172 47% 40%;
+    --secondary: 39 60% 60%;
     --secondary-foreground: 210 33% 99%;
 
     --muted: 210 10% 96%;
     --muted-foreground: 215 10% 45%;
 
-    --accent: 172 47% 40%;
+    --accent: 39 60% 60%;
     --accent-foreground: 210 33% 99%;
 
     --destructive: 0 84.2% 60.2%;
@@ -78,7 +78,7 @@
   }
 
   .gradient-text {
-    @apply bg-gradient-to-r from-blue-dark to-teal bg-clip-text text-transparent;
+    @apply bg-gradient-to-r from-blue-dark to-gold bg-clip-text text-transparent;
   }
 
   .btn-primary {
@@ -86,7 +86,7 @@
   }
 
   .btn-secondary {
-    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-teal text-white hover:bg-teal-light transition-colors duration-200;
+    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-gold text-white hover:bg-gold-light transition-colors duration-200;
   }
 
   .btn-outline {
@@ -103,7 +103,7 @@
 
   .animated-border::after {
     content: '';
-    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-teal to-blue-dark transition-all duration-300;
+    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-gold to-blue-dark transition-all duration-300;
   }
 
   .animated-border:hover::after {

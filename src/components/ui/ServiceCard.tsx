@@ -29,7 +29,7 @@ const ServiceCard = ({
           className
         )}>
           <CardHeader>
-            <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-teal-100 inline-flex">
+            <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-gold-light/30 inline-flex">
               <div className="text-blue-dark">{icon}</div>
             </div>
             <CardTitle className="text-xl font-heading text-blue-dark">{title}</CardTitle>
@@ -38,7 +38,7 @@ const ServiceCard = ({
             <CardDescription className="text-gray-600">{description}</CardDescription>
           </CardContent>
           <CardFooter>
-            <span className="text-teal font-medium flex items-center group">
+            <span className="text-gold font-medium flex items-center group">
               Learn more
               <svg 
                 xmlns="http://www.w3.org/2000/svg" 
