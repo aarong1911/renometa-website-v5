@@ -31,6 +31,7 @@ const Navbar = () => {
       { name: 'AI-Powered Agents', path: '/services/ai-agents' },
       { name: 'Intelligent Automation', path: '/services/automation' },
       { name: 'Seamless Integration', path: '/services/integration' },
+      { name: 'Performance Optimization', path: '/services/performance-optimization' },
     ]},
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
@@ -52,9 +53,11 @@ const Navbar = () => {
     >
       <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <span className="text-2xl font-bold font-heading text-blue-dark">
-            Digital<span className="text-teal">Forge</span>
-          </span>
+          <img 
+            src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
+            alt="RenoMeta Logo" 
+            className="h-10 md:h-12 mr-2"
+          />
         </Link>
 
         {/* Desktop Navigation */}

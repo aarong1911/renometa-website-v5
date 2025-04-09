@@ -1,5 +1,5 @@
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -69,6 +69,16 @@ const Index = () => {
         </svg>
       ),
       link: '/services/integration',
+    },
+    {
+      title: 'Performance Optimization',
+      description: 'Accelerate your website for lightning-fast speed and improved conversion rates.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+        </svg>
+      ),
+      link: '/services/performance-optimization',
     },
   ];
 

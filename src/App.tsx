@@ -11,6 +11,8 @@ import AdvancedSEO from "./pages/Services/AdvancedSEO";
 import AIAgents from "./pages/Services/AIAgents";
 import Automation from "./pages/Services/Automation";
 import Integration from "./pages/Services/Integration";
+import PerformanceOptimization from "./pages/Services/PerformanceOptimization";
+import Chatbot from "./components/ui/Chatbot";
 
 const queryClient = new QueryClient();
 
@@ -27,9 +29,11 @@ const App = () => (
           <Route path="/services/ai-agents" element={<AIAgents />} />
           <Route path="/services/automation" element={<Automation />} />
           <Route path="/services/integration" element={<Integration />} />
+          <Route path="/services/performance-optimization" element={<PerformanceOptimization />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
+        <Chatbot />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
