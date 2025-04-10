@@ -104,7 +104,7 @@ const Index = () => {
             
             <ScrollReveal delay={200}>
               <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading mt-6 mb-6 leading-tight text-blue-dark">
-                Transform Your Digital <span className="gradient-text">Presence</span>
+                Digital Solutions That Power <span className="gradient-text">Growth</span>
               </h1>
             </ScrollReveal>
             
