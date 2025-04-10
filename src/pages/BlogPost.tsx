@@ -73,8 +73,9 @@ const BlogPost = () => {
             </p>
             <Button 
               className="bg-gold hover:bg-gold-light text-white px-8 py-6 h-auto rounded-md shadow-md hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              asChild
             >
-              Schedule a Free Consultation
+              <Link to="/#contact">Schedule a Free Consultation</Link>
             </Button>
           </div>
         </div>
