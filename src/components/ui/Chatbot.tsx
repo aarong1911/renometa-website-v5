@@ -45,7 +45,7 @@ const faqResponses = {
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [messages, setMessages] = useState<{type: 'user' | 'bot', content: string}[]>([]);
-  const [step, setStep] = useState<'initial' | 'info' | 'schedule' | 'date' | 'time' | 'user_info' | 'confirmation'>('initial');
+  const [step, setStep] = useState<'initial' | 'info' | 'schedule' | 'date' | 'time' | 'user_info' | 'confirmation' | 'post_confirmation'>('initial');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
   const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
   const [userInput, setUserInput] = useState('');
@@ -56,6 +56,7 @@ const Chatbot = () => {
   });
   const [currentInfoField, setCurrentInfoField] = useState<'name' | 'email' | 'phone'>('name');
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [autoCloseTimer, setAutoCloseTimer] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
   
@@ -101,6 +102,18 @@ const Chatbot = () => {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  // Handle auto-close timer for chat
+  useEffect(() => {
+    if (autoCloseTimer) {
+      const timer = setTimeout(() => {
+        setIsOpen(false);
+        setAutoCloseTimer(null);
+      }, 3000);
+      
+      return () => clearTimeout(timer);
+    }
+  }, [autoCloseTimer]);
 
   const handleInitialChoice = (choice: 'info' | 'schedule') => {
     setStep(choice);
@@ -270,8 +283,8 @@ Phone: ${userInfo.phone}
         description: `Your appointment on ${format(selectedDate!, 'MMMM d, yyyy')} at ${selectedTime} has been scheduled.`,
       });
       
-      // Reset to initial state for new queries
-      setStep('info');
+      // Move to post-confirmation state
+      setStep('post_confirmation');
     } catch (error) {
       console.error("Error submitting appointment:", error);
       setMessages([
@@ -289,6 +302,38 @@ Phone: ${userInfo.phone}
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+
+  const handlePostConfirmation = (answer: 'yes' | 'no') => {
+    if (answer === 'no') {
+      setMessages([
+        ...messages,
+        {
+          type: 'user',
+          content: 'No, that\'s all for now.'
+        },
+        {
+          type: 'bot',
+          content: 'Thank you, and have a great day!'
+        }
+      ]);
+      // Set timer to close chat after 3 seconds
+      setAutoCloseTimer(Date.now());
+    } else {
+      setMessages([
+        ...messages,
+        {
+          type: 'user',
+          content: 'Yes, I have another question.'
+        },
+        {
+          type: 'bot',
+          content: 'How can I help?'
+        }
+      ]);
+      // Return to info state to continue conversation
+      setStep('info');
     }
   };
 
@@ -311,6 +356,10 @@ Phone: ${userInfo.phone}
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
+    // Clear the auto-close timer if the user toggles the chat manually
+    if (autoCloseTimer) {
+      setAutoCloseTimer(null);
+    }
   };
 
   const processUserQuery = (query: string) => {
@@ -571,6 +620,26 @@ Phone: ${userInfo.phone}
                     disabled={isSubmitting}
                   >
                     Cancel
+                  </Button>
+                </div>
+              </div>
+            )}
+            
+            {step === 'post_confirmation' && (
+              <div className="flex flex-col space-y-3">
+                <div className="flex gap-2">
+                  <Button 
+                    onClick={() => handlePostConfirmation('yes')} 
+                    className="bg-gold hover:bg-gold-light text-blue-dark flex-1"
+                  >
+                    Yes, I have another question
+                  </Button>
+                  <Button 
+                    onClick={() => handlePostConfirmation('no')} 
+                    variant="outline" 
+                    className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
+                  >
+                    No, that's all
                   </Button>
                 </div>
               </div>
