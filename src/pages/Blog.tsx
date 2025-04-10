@@ -33,6 +33,20 @@ const Blog = () => {
     }
   ];
 
+  // For each blog, assign a more relevant image based on its content
+  const getRelevantImageUrl = (blogId: string) => {
+    switch(blogId) {
+      case 'website-must-haves':
+        return 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+      case 'seo-strategies':
+        return 'https://images.unsplash.com/photo-1571786256017-aee7a0c009b6?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+      case 'ai-revolution':
+        return 'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?ixlib=rb-1.2.1&auto=format&fit=crop&w=800&q=80';
+      default:
+        return '/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png';
+    }
+  };
+
   return (
     <MainLayout>
       {/* Hero Section */}
@@ -57,7 +71,7 @@ const Blog = () => {
                   <div className="bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300">
                     <div className="aspect-w-16 aspect-h-9 relative">
                       <img 
-                        src={blog.image} 
+                        src={getRelevantImageUrl(blog.id)} 
                         alt={blog.title}
                         className="w-full h-48 object-cover"
                       />
