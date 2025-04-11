@@ -9,15 +9,23 @@ interface FAQItem {
 
 interface FAQSectionProps {
   faqItems: FAQItem[];
+  title?: string;
+  subtitle?: string;
+  className?: string;
 }
 
-const FAQSection = ({ faqItems }: FAQSectionProps) => {
+const FAQSection = ({ 
+  faqItems, 
+  title = "Frequently Asked Questions",
+  subtitle = "Get answers to common questions about our services and how we can help your business.",
+  className = "bg-white"
+}: FAQSectionProps) => {
   return (
-    <section className="section bg-white">
+    <section className={`section ${className}`}>
       <div className="container-custom">
         <FAQ
-          title="Frequently Asked Questions"
-          subtitle="Get answers to common questions about our services and how we can help your business."
+          title={title}
+          subtitle={subtitle}
           items={faqItems}
         />
       </div>

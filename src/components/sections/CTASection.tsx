@@ -6,11 +6,16 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 interface CTASectionProps {
   ctaText: string;
   title: string;
+  className?: string;
 }
 
-const CTASection = ({ ctaText, title }: CTASectionProps) => {
+const CTASection = ({ 
+  ctaText, 
+  title, 
+  className = "bg-gradient-to-br from-blue-dark to-blue-light text-white" 
+}: CTASectionProps) => {
   return (
-    <section className="section bg-gradient-to-br from-blue-dark to-blue-light text-white">
+    <section className={`section ${className}`}>
       <div className="container-custom">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="w-full md:w-1/2 mb-8 md:mb-0">

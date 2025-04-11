@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -7,7 +6,7 @@ import ServiceCard from '@/components/ui/ServiceCard';
 import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
-import ContactForm from '@/components/ui/ContactForm';
+import CTASection from '@/components/sections/CTASection';
 
 const Index = () => {
   // Logos for brands section
@@ -417,7 +416,7 @@ const Index = () => {
             </p>
             <Button 
               size="lg" 
-              className="bg-white text-blue-dark hover:bg-gray-100 hover:bg-blue-light hover:text-white transition-colors duration-300"
+              className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
               onClick={() => scrollToSection('contact')}
             >
               Book Your Free Strategy Call
@@ -494,25 +493,12 @@ const Index = () => {
         </div>
       </section>
 
-      {/* Contact Section */}
+      {/* Contact Section - Replaced with CTASection */}
       <section id="contact" className="section bg-gray-50">
-        <div className="container-custom">
-          <div className="text-center max-w-3xl mx-auto mb-12">
-            <ScrollReveal>
-              <span className="text-gold font-medium">Get In Touch</span>
-              <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
-                Contact Us
-              </h2>
-              <p className="text-gray-600">
-                Ready to take your remodeling business to the next level? Fill out the form below and our team will get back to you shortly.
-              </p>
-            </ScrollReveal>
-          </div>
-          
-          <div className="max-w-3xl mx-auto">
-            <ContactForm />
-          </div>
-        </div>
+        <CTASection 
+          ctaText="Transform Your Remodeling Business Today" 
+          title="Digital Marketing" 
+        />
       </section>
     </MainLayout>
   );

@@ -11,11 +11,15 @@ interface TestimonialProps {
 
 interface TestimonialSectionProps {
   testimonial: TestimonialProps;
+  className?: string;
 }
 
-const TestimonialSection = ({ testimonial }: TestimonialSectionProps) => {
+const TestimonialSection = ({ 
+  testimonial,
+  className = "bg-gray-50" 
+}: TestimonialSectionProps) => {
   return (
-    <section className="section bg-gray-50">
+    <section className={`section ${className}`}>
       <div className="container-custom">
         <div className="max-w-3xl mx-auto">
           <TestimonialCard
