@@ -43,8 +43,7 @@ const About = () => {
         title={pageData.title}
         tagline={pageData.tagline}
         description={pageData.description}
-        image={pageData.heroImage}
-        showButton={false}
+        heroImage={pageData.heroImage}
       />
       
       <AboutContentSection />
