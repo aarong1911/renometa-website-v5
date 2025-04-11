@@ -6,6 +6,7 @@ import CTASection from '@/components/sections/CTASection';
 import TestimonialSection from '@/components/sections/TestimonialSection';
 import FAQSection from '@/components/sections/FAQSection';
 import AboutContentSection from '@/components/sections/AboutContentSection';
+import ProcessSection from '@/components/sections/ProcessSection';
 
 const About = () => {
   const pageData = {
@@ -21,6 +22,29 @@ const About = () => {
     position: "Owner",
     company: "Elite Home Renovations",
   };
+
+  const processSteps = [
+    {
+      title: "Discovery & Analysis",
+      description: "We start by understanding your business goals, target audience, and current digital presence to craft a tailored strategy.",
+      stepNumber: 1,
+    },
+    {
+      title: "Strategic Planning",
+      description: "Based on our discovery, we develop a comprehensive plan outlining solutions that will drive growth for your specific business needs.",
+      stepNumber: 2,
+    },
+    {
+      title: "Implementation",
+      description: "Our team executes the plan, building integrated systems that work together to generate and convert leads efficiently.",
+      stepNumber: 3,
+    },
+    {
+      title: "Optimization & Growth",
+      description: "We continually monitor, test, and refine to ensure your digital systems deliver increasing returns over time.",
+      stepNumber: 4,
+    },
+  ];
 
   const faqItems = [
     {
@@ -47,6 +71,8 @@ const About = () => {
       />
       
       <AboutContentSection />
+      
+      <ProcessSection processSteps={processSteps} />
       
       <TestimonialSection testimonial={testimonial} />
       
