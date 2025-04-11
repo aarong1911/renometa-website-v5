@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
@@ -6,6 +7,7 @@ import ServiceCard from '@/components/ui/ServiceCard';
 import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
+import ContactForm from '@/components/ui/ContactForm';
 
 const Index = () => {
   // Logos for brands section
@@ -116,13 +118,17 @@ const Index = () => {
             
             <ScrollReveal delay={600}>
               <div className="flex flex-wrap gap-4">
-                <Button className="btn-primary hover:-translate-y-1 transition-transform duration-300" asChild 
-                  onClick={() => scrollToSection('contact')}>
-                  <Link to="#contact">Get a Free Strategy Call</Link>
+                <Button 
+                  className="btn-primary hover:bg-blue-light transition-colors duration-300" 
+                  onClick={() => scrollToSection('contact')}
+                >
+                  Get a Free Strategy Call
                 </Button>
-                <Button className="btn-outline hover:-translate-y-1 transition-transform duration-300" asChild
-                  onClick={() => scrollToSection('services')}>
-                  <Link to="#services">Explore Services</Link>
+                <Button 
+                  className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300"
+                  onClick={() => scrollToSection('services')}
+                >
+                  Explore Services
                 </Button>
               </div>
             </ScrollReveal>
@@ -400,7 +406,7 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section id="contact" className="section bg-gradient-to-br from-gold to-blue-light text-white">
+      <section id="cta" className="section bg-gradient-to-br from-gold to-blue-light text-white">
         <div className="container-custom text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading mb-6">
@@ -409,8 +415,12 @@ const Index = () => {
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
               Schedule a free 30-minute strategy call to discover how we can help your remodeling business thrive online.
             </p>
-            <Button size="lg" asChild className="bg-white text-blue-dark hover:bg-gray-100 hover:-translate-y-1 hover:shadow-lg transition-all duration-300">
-              <Link to="/contact">Book Your Free Strategy Call</Link>
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-dark hover:bg-gray-100 hover:bg-blue-light hover:text-white transition-colors duration-300"
+              onClick={() => scrollToSection('contact')}
+            >
+              Book Your Free Strategy Call
             </Button>
           </ScrollReveal>
         </div>
@@ -476,10 +486,31 @@ const Index = () => {
           
           <div className="text-center mt-10">
             <ScrollReveal>
-              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white hover:-translate-y-1 transition-all duration-300">
+              <Button asChild variant="outline" className="border-blue-dark text-blue-dark hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300">
                 <Link to="/blog">Read More Articles</Link>
               </Button>
             </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact" className="section bg-gray-50">
+        <div className="container-custom">
+          <div className="text-center max-w-3xl mx-auto mb-12">
+            <ScrollReveal>
+              <span className="text-gold font-medium">Get In Touch</span>
+              <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
+                Contact Us
+              </h2>
+              <p className="text-gray-600">
+                Ready to take your remodeling business to the next level? Fill out the form below and our team will get back to you shortly.
+              </p>
+            </ScrollReveal>
+          </div>
+          
+          <div className="max-w-3xl mx-auto">
+            <ContactForm />
           </div>
         </div>
       </section>

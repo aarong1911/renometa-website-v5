@@ -23,6 +23,18 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Smooth scroll function
+  const scrollToContact = () => {
+    // If on homepage, scroll to contact section
+    if (location.pathname === '/') {
+      const contactSection = document.getElementById('contact');
+      if (contactSection) {
+        contactSection.scrollIntoView({ behavior: 'smooth' });
+        setMobileMenuOpen(false);
+      }
+    }
+  };
+
   const navLinks = [
     { name: 'Home', path: '/' },
     { name: 'Services', path: '/services', submenu: [
@@ -35,7 +47,7 @@ const Navbar = () => {
     ]},
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: '/contact' },
+    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? scrollToContact : null },
   ];
 
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
@@ -103,21 +115,46 @@ const Navbar = () => {
                   </div>
                 </>
               ) : (
-                <Link
-                  to={link.path}
-                  className={cn(
-                    'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                    location.pathname === link.path
-                      ? 'text-teal'
-                      : 'text-gray-700 hover:text-teal'
-                  )}
-                >
-                  {link.name}
-                </Link>
+                link.action ? (
+                  <button
+                    onClick={link.action}
+                    className={cn(
+                      'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      location.pathname === link.path
+                        ? 'text-teal'
+                        : 'text-gray-700 hover:text-teal'
+                    )}
+                  >
+                    {link.name}
+                  </button>
+                ) : (
+                  <Link
+                    to={link.path}
+                    className={cn(
+                      'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                      location.pathname === link.path
+                        ? 'text-teal'
+                        : 'text-gray-700 hover:text-teal'
+                    )}
+                  >
+                    {link.name}
+                  </Link>
+                )
               )}
             </div>
           ))}
-          <Button className="ml-4 bg-blue-dark hover:bg-blue-light">Get Started</Button>
+          <Button 
+            className="ml-4 bg-blue-dark hover:bg-blue-light transition-colors"
+            onClick={() => {
+              if (location.pathname === '/') {
+                scrollToContact();
+              } else {
+                window.location.href = '/#contact';
+              }
+            }}
+          >
+            Get Started
+          </Button>
         </nav>
 
         {/* Mobile Menu Button */}
@@ -186,21 +223,48 @@ const Navbar = () => {
                   </div>
                 </>
               ) : (
-                <Link
-                  to={link.path}
-                  className={cn(
-                    "block px-3 py-2 border-b border-gray-100",
-                    location.pathname === link.path ? "text-teal" : "text-gray-700"
-                  )}
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  {link.name}
-                </Link>
+                link.action ? (
+                  <button
+                    className={cn(
+                      "block px-3 py-2 border-b border-gray-100 w-full text-left",
+                      location.pathname === link.path ? "text-teal" : "text-gray-700"
+                    )}
+                    onClick={() => {
+                      link.action();
+                      setMobileMenuOpen(false);
+                    }}
+                  >
+                    {link.name}
+                  </button>
+                ) : (
+                  <Link
+                    to={link.path}
+                    className={cn(
+                      "block px-3 py-2 border-b border-gray-100",
+                      location.pathname === link.path ? "text-teal" : "text-gray-700"
+                    )}
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    {link.name}
+                  </Link>
+                )
               )}
             </div>
           ))}
           <div className="pt-4">
-            <Button className="w-full bg-blue-dark hover:bg-blue-light">Get Started</Button>
+            <Button 
+              className="w-full bg-blue-dark hover:bg-blue-light transition-colors"
+              onClick={() => {
+                setMobileMenuOpen(false);
+                if (location.pathname === '/') {
+                  scrollToContact();
+                } else {
+                  window.location.href = '/#contact';
+                }
+              }}
+            >
+              Get Started
+            </Button>
           </div>
         </div>
       </div>
