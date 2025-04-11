@@ -15,6 +15,7 @@ import PerformanceOptimization from "./pages/Services/PerformanceOptimization";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
 import Chatbot from "./components/ui/Chatbot";
+import About from "./pages/About";
 
 const queryClient = new QueryClient();
 
@@ -34,6 +35,7 @@ const App = () => (
           <Route path="/services/performance-optimization" element={<PerformanceOptimization />} />
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />
+          <Route path="/about" element={<About />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />
         </Routes>
