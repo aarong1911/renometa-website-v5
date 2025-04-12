@@ -19,10 +19,10 @@ const HeroSection = ({
 }: HeroSectionProps) => {
   return (
     <section className="hero-section bg-white">
-      <div className="container-custom flex flex-col md:flex-row items-center justify-center">
-        <div className="w-full md:w-1/2 py-12 md:py-0 text-center">
+      <div className="container-custom flex flex-col md:flex-row items-center">
+        <div className="w-full md:w-1/2 py-12 md:py-0">
           <ScrollReveal>
-            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium inline-block">
+            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium">
               {tagline}
             </span>
           </ScrollReveal>
@@ -34,13 +34,13 @@ const HeroSection = ({
           </ScrollReveal>
           
           <ScrollReveal delay={400}>
-            <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto">
+            <p className="text-lg text-gray-600 mb-8 max-w-lg">
               {description}
             </p>
           </ScrollReveal>
           
           <ScrollReveal delay={600}>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-wrap gap-4">
               <Button className="btn-primary" asChild>
                 <Link to="/contact">Schedule a Consultation</Link>
               </Button>
@@ -51,7 +51,7 @@ const HeroSection = ({
           </ScrollReveal>
         </div>
         
-        <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
+        <div className="w-full md:w-1/2 mt-8 md:mt-0">
           <ScrollReveal direction="left">
             <div className="relative">
               <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft"></div>
