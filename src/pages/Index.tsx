@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import { Link } from 'react-router-dom';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -9,174 +9,123 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
 
 const Index = () => {
+  const services = [/* ...unchanged services array... */];
 
-  // Services data
-  const services = [{
-    title: 'Smart Website Development',
-    description: 'Custom-built, high-converting websites tailored specifically for remodeling businesses.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>,
-    link: '/services/website-development'
-  }, {
-    title: 'Advanced SEO',
-    description: 'Specialized search engine optimization strategies to dominate local searches in your service area.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>,
-    link: '/services/advanced-seo'
-  }, {
-    title: 'AI-Powered Agents',
-    description: 'Intelligent virtual assistants that qualify leads and book appointments 24/7.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>,
-    link: '/services/ai-agents'
-  }, {
-    title: 'Intelligent Automation',
-    description: 'Streamline your workflows and follow-ups with smart systems that save time and increase conversion.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>,
-    link: '/services/automation'
-  }, {
-    title: 'Seamless Integration',
-    description: 'Connect all your tools and software to create a unified business system with no gaps or data silos.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16v-4m-4 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H4a2 2 0 00-2 2v6a2 2 0 002 2zm10 0h6m-6-8a2 2 0 11-4 0 2 2 0 014 0zM6 20v-2a2 2 0 012-2h8a2 2 0 012 2v2M6 12h.01M10 12h.01" />
-        </svg>,
-    link: '/services/integration'
-  }, {
-    title: 'Performance Optimization',
-    description: 'Accelerate your website for lightning-fast speed and improved conversion rates.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>,
-    link: '/services/performance-optimization'
-  }];
-
-  // Smooth scroll function
-  const scrollToSection = id => {
+  const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth'
-      });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const container = scrollRef.current;
+    if (!container) return;
+
+    let scrollAmount = 0;
+    const scrollSpeed = 1;
+    const scrollInterval = 20;
+
+    const interval = setInterval(() => {
+      if (!container) return;
+
+      scrollAmount += scrollSpeed;
+      if (scrollAmount >= container.scrollWidth / 2) {
+        scrollAmount = 0;
+      }
+
+      container.scrollTo({
+        left: scrollAmount,
+        behavior: 'smooth'
+      });
+    }, scrollInterval);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const brandLogos = [
+    { name: 'Zapier', logo: 'https://logo.clearbit.com/zapier.com', description: 'Connect your tools and automate workflows' },
+    { name: 'React', logo: 'https://logo.clearbit.com/reactjs.org', description: 'Build dynamic, high-performance web interfaces' },
+    { name: 'Calendly', logo: 'https://logo.clearbit.com/calendly.com', description: 'Turn visitors into appointments with effortless, self-serve booking' },
+    { name: 'Slack', logo: 'https://logo.clearbit.com/slack.com', description: 'Streamline team communication and support workflows' },
+    { name: 'Stripe', logo: 'https://logo.clearbit.com/stripe.com', description: 'Accept secure payments with ease' },
+    { name: 'Google', logo: 'https://logo.clearbit.com/google.com', description: 'Boost your visibility on search and maps' },
+    { name: 'HubSpot', logo: 'https://logo.clearbit.com/hubspot.com', description: 'CRM and marketing automation built for scale' },
+    { name: 'GitHub', logo: 'https://logo.clearbit.com/github.com', description: 'Version control and collaboration for modern development' }
+  ];
+
+  const duplicatedLogos = [...brandLogos, ...brandLogos];
+
   return (
     <MainLayout>
-      {/* All JSX Sections go here */}
-
       {/* Hero Section */}
       <section id="hero" className="hero-section relative">
-  <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
-  <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
-    <div className="w-full max-w-3xl space-y-10">
-      <ScrollReveal>
-        <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
-          For Remodeling & Home Service Businesses
-        </span>
-      </ScrollReveal>
-
-      <ScrollReveal delay={200}>
-        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
-          Digital Solutions That Power <span className="gradient-text">Growth</span>
-        </h1>
-      </ScrollReveal>
-
-      <ScrollReveal delay={400}>
-        <p className="text-lg text-gray-600 mb-4">
-          Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
-        </p>
-      </ScrollReveal>
-
-      <ScrollReveal delay={600}>
-        <div className="flex flex-wrap gap-4 justify-center">
-          <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => scrollToSection('contact')}>
-            Get a Free Strategy Call
-          </Button>
-          <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => scrollToSection('services')}>
-            Explore Services
-          </Button>
-        </div>
-      </ScrollReveal>
-    </div>
-  </div>
-</section>
-
-    {/* Powerful Tools Section */}
-<section className="py-12 bg-gray-50">
-  <div className="container-custom text-center">
-    <ScrollReveal>
-      <h3 className="text-base text-gray-700 font-semibold uppercase mb-8 tracking-wide">
-        The Most Powerful Tools for Your Business
-      </h3>
-    </ScrollReveal>
-
-    <div className="overflow-x-auto">
-      <div className="flex gap-12 md:gap-16 px-4 md:px-0 w-max md:w-full justify-start md:justify-center">
-        {[
-          {
-            name: 'Zapier',
-            logo: 'https://logo.clearbit.com/zapier.com',
-            description: 'Connect your tools and automate workflows'
-          },
-          {
-            name: 'React',
-            logo: 'https://logo.clearbit.com/reactjs.org',
-            description: 'Build dynamic, high-performance web interfaces'
-          },
-          {
-            name: 'Calendly',
-            logo: 'https://logo.clearbit.com/calendly.com',
-            description: 'Turn visitors into appointments with effortless, self-serve booking'
-          },
-          {
-            name: 'Slack',
-            logo: 'https://logo.clearbit.com/slack.com',
-            description: 'Streamline team communication and support workflows'
-          },
-          {
-            name: 'Stripe',
-            logo: 'https://logo.clearbit.com/stripe.com',
-            description: 'Accept secure payments with ease'
-          },
-          {
-            name: 'Google',
-            logo: 'https://logo.clearbit.com/google.com',
-            description: 'Boost your visibility on search and maps'
-          },
-          {
-            name: 'HubSpot',
-            logo: 'https://logo.clearbit.com/hubspot.com',
-            description: 'CRM and marketing automation built for scale'
-          },
-          {
-            name: 'GitHub',
-            logo: 'https://logo.clearbit.com/github.com',
-            description: 'Version control and collaboration for modern development'
-          }
-        ].map((brand, index) => (
-          <ScrollReveal key={index} delay={index * 100}>
-            <div className="group relative flex flex-col items-center min-w-[100px] md:min-w-0">
-              <img
-                src={brand.logo}
-                alt={brand.name}
-                className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
-              />
-              <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
-                transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
-                transition-all duration-300 ease-out z-10 pointer-events-none text-left">
-                {brand.description}
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
+        <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
+          <div className="w-full max-w-3xl space-y-10">
+            <ScrollReveal>
+              <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
+                For Remodeling & Home Service Businesses
+              </span>
+            </ScrollReveal>
+            <ScrollReveal delay={200}>
+              <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
+                Digital Solutions That Power <span className="gradient-text">Growth</span>
+              </h1>
+            </ScrollReveal>
+            <ScrollReveal delay={400}>
+              <p className="text-lg text-gray-600 mb-4">
+                Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
+              </p>
+            </ScrollReveal>
+            <ScrollReveal delay={600}>
+              <div className="flex flex-wrap gap-4 justify-center">
+                <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => scrollToSection('contact')}>
+                  Get a Free Strategy Call
+                </Button>
+                <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => scrollToSection('services')}>
+                  Explore Services
+                </Button>
               </div>
-            </div>
+            </ScrollReveal>
+          </div>
+        </div>
+      </section>
+
+      {/* Auto-Scrolling Carousel Section */}
+      <section className="py-12 bg-gray-50">
+        <div className="container-custom text-center">
+          <ScrollReveal>
+            <h3 className="text-base text-gray-700 font-semibold uppercase mb-8 tracking-wide">
+              The Most Powerful Tools for Your Business
+            </h3>
           </ScrollReveal>
-        ))}
-      </div>
-    </div>
-  </div>
-</section>
+
+          <div ref={scrollRef} className="overflow-hidden">
+            <div className="flex gap-12 md:gap-16 w-max">
+              {duplicatedLogos.map((brand, index) => (
+                <div
+                  key={index}
+                  className="group relative flex flex-col items-center min-w-[100px]"
+                >
+                  <img
+                    src={brand.logo}
+                    alt={brand.name}
+                    className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                  />
+                  <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
+                    transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
+                    transition-all duration-300 ease-out z-10 pointer-events-none text-left">
+                    {brand.description}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
 
       
       {/* Services Section */}
