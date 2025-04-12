@@ -22,13 +22,13 @@ const HeroSection = ({
       <div className="container-custom flex flex-col md:flex-row items-center justify-center">
         <div className="w-full md:w-1/2 py-12 md:py-0 text-center">
           <ScrollReveal>
-            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium inline-block mx-auto">
+            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium inline-block">
               {tagline}
             </span>
           </ScrollReveal>
           
-          <ScrollReveal delay={200} className="text-center">
-            <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold font-heading mt-6 mb-6 leading-tight text-blue-dark mx-auto">
+          <ScrollReveal delay={200}>
+            <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold font-heading mt-6 mb-6 leading-tight text-blue-dark">
               {title}
             </h1>
           </ScrollReveal>
