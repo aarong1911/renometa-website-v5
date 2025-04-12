@@ -8,6 +8,8 @@ import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
 
+const Index = () => {
+
   // Services data
   const services = [{
     title: 'Smart Website Development',
@@ -62,7 +64,10 @@ import CTASection from '@/components/sections/CTASection';
       });
     }
   };
-  return <MainLayout>
+  return (
+    <MainLayout>
+      {/* All JSX Sections go here */}
+
       {/* Hero Section */}
       <section id="hero" className="hero-section relative">
   <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
