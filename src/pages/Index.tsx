@@ -7,24 +7,6 @@ import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
-const Index = () => {
-  // Logos for brands section
-  const brandLogos = [{
-    name: 'Brand 1',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+1'
-  }, {
-    name: 'Brand 2',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+2'
-  }, {
-    name: 'Brand 3',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+3'
-  }, {
-    name: 'Brand 4',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+4'
-  }, {
-    name: 'Brand 5',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+5'
-  }];
 
   // Services data
   const services = [{
