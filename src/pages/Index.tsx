@@ -348,13 +348,13 @@ const Index = () => {
       
       {/* Latest Blog Posts */}
       <section id="blog" className="section bg-white">
-        <div className="container-custom">
+        <div className="container-custom text-center">
           <ScrollReveal>
-            <span className="text-gold font-medium">Resources</span>
+            <span className="text-gold font-medium block">Resources</span>
             <h2 className="text-3xl md:text-4xl font-bold font-heading mt-2 mb-4 text-blue-dark">
               Latest Articles
             </h2>
-            <p className="text-gray-600 mb-12 max-w-2xl">
+            <p className="text-gray-600 mb-12 max-w-2xl mx-auto">
               Insights, tips, and strategies to help your remodeling or home service business grow.
             </p>
           </ScrollReveal>
