@@ -119,61 +119,78 @@ const Index = () => {
 </section>
 
     {/* Powerful Tools Section */}
-    <section className="py-12 bg-gray-50">
+<section className="py-12 bg-gray-50">
   <div className="container-custom text-center">
     <ScrollReveal>
-      <h3 className="text-base text-gray-500 uppercase mb-8 tracking-wider">
-        Some of the Most Powerful Tools for Your Business
+      <h3 className="text-base text-gray-700 font-semibold uppercase mb-8 tracking-wide">
+        The Most Powerful Tools for Your Business
       </h3>
     </ScrollReveal>
 
-    <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
-      {[
-        {
-          name: 'Zapier',
-          logo: 'https://logo.clearbit.com/zapier.com',
-          description: 'Connect your tools and automate workflows.'
-        },
-        {
-          name: 'Stripe',
-          logo: 'https://logo.clearbit.com/stripe.com',
-          description: 'Accept secure payments with ease'
-        },
-        
-        {
-          name: 'Calendly',
-          logo: 'https://logo.clearbit.com/calendly.com',
-          description: 'Automated scheduling for smoother sales calls and project consultations'
-        },
-        {
-          name: 'HubSpot',
-          logo: 'https://logo.clearbit.com/hubspot.com',
-          description: 'CRM and marketing automation built for scale'
-        },
-        {
-          name: 'Google',
-          logo: 'https://logo.clearbit.com/google.com',
-          description: 'Boost your visibility on search and maps'
-        }
-      ].map((brand, index) => (
-        <ScrollReveal key={index} delay={index * 100}>
-          <div className="group relative flex flex-col items-center">
-            <img
-              src={brand.logo}
-              alt={brand.name}
-              className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
-            />
-            <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
-              transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
-              transition-all duration-300 ease-out z-10 pointer-events-none">
-              {brand.description}
+    <div className="overflow-x-auto">
+      <div className="flex gap-12 md:gap-16 px-4 md:px-0 w-max md:w-full justify-start md:justify-center">
+        {[
+          {
+            name: 'Zapier',
+            logo: 'https://logo.clearbit.com/zapier.com',
+            description: 'Connect your tools and automate workflows'
+          },
+          {
+            name: 'React',
+            logo: 'https://logo.clearbit.com/reactjs.org',
+            description: 'Build dynamic, high-performance web interfaces'
+          },
+          {
+            name: 'Calendly',
+            logo: 'https://logo.clearbit.com/calendly.com',
+            description: 'Turn visitors into appointments with effortless, self-serve booking'
+          },
+          {
+            name: 'Slack',
+            logo: 'https://logo.clearbit.com/slack.com',
+            description: 'Streamline team communication and support workflows'
+          },
+          {
+            name: 'Stripe',
+            logo: 'https://logo.clearbit.com/stripe.com',
+            description: 'Accept secure payments with ease'
+          },
+          {
+            name: 'Google',
+            logo: 'https://logo.clearbit.com/google.com',
+            description: 'Boost your visibility on search and maps'
+          },
+          {
+            name: 'HubSpot',
+            logo: 'https://logo.clearbit.com/hubspot.com',
+            description: 'CRM and marketing automation built for scale'
+          },
+          {
+            name: 'GitHub',
+            logo: 'https://logo.clearbit.com/github.com',
+            description: 'Version control and collaboration for modern development'
+          }
+        ].map((brand, index) => (
+          <ScrollReveal key={index} delay={index * 100}>
+            <div className="group relative flex flex-col items-center min-w-[100px] md:min-w-0">
+              <img
+                src={brand.logo}
+                alt={brand.name}
+                className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+              />
+              <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
+                transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
+                transition-all duration-300 ease-out z-10 pointer-events-none text-left">
+                {brand.description}
+              </div>
             </div>
-          </div>
-        </ScrollReveal>
-      ))}
+          </ScrollReveal>
+        ))}
+      </div>
     </div>
   </div>
 </section>
+
       
       {/* Services Section */}
       <section id="services" className="section bg-white">
