@@ -7,6 +7,7 @@ import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
+
 const Index = () => {
   // Logos for brands section
   const brandLogos = [{
@@ -84,10 +85,10 @@ const Index = () => {
       {/* Hero Section */}
       <section id="hero" className="hero-section relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
-        <div className="container-custom flex flex-col md:flex-row items-center z-10 relative">
-          <div className="w-full md:w-1/2 py-12 md:py-0">
+        <div className="container-custom flex flex-col md:flex-row items-center justify-center z-10 relative">
+          <div className="w-full md:w-1/2 py-12 md:py-0 text-center">
             <ScrollReveal>
-              <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
+              <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 inline-block">
                 For Remodeling & Home Service Businesses
               </span>
             </ScrollReveal>
@@ -99,13 +100,13 @@ const Index = () => {
             </ScrollReveal>
             
             <ScrollReveal delay={400}>
-              <p className="text-lg text-gray-600 mb-8 max-w-lg">
+              <p className="text-lg text-gray-600 mb-8 max-w-lg mx-auto">
                 Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
               </p>
             </ScrollReveal>
             
             <ScrollReveal delay={600}>
-              <div className="flex flex-wrap gap-4">
+              <div className="flex flex-wrap gap-4 justify-center">
                 <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => scrollToSection('contact')}>
                   Get a Free Strategy Call
                 </Button>
@@ -116,7 +117,7 @@ const Index = () => {
             </ScrollReveal>
           </div>
           
-          <div className="w-full md:w-1/2 mt-8 md:mt-0">
+          <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
             <ScrollReveal direction="left">
               <div className="relative">
                 
