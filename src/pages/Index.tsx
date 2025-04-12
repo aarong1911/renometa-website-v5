@@ -118,7 +118,7 @@ const Index = () => {
   </div>
 </section>
 
-    {/* Trusted By Section - Test */}
+    {/* Powerful Tools Section */}
     <section className="py-12 bg-gray-50">
   <div className="container-custom text-center">
     <ScrollReveal>
@@ -135,19 +135,20 @@ const Index = () => {
           description: 'Connect your tools and automate workflows.'
         },
         {
-          name: 'HubSpot',
-          logo: 'https://logo.clearbit.com/hubspot.com',
-          description: 'CRM and marketing automation built for scale'
+          name: 'Stripe',
+          logo: 'https://logo.clearbit.com/stripe.com',
+          description: 'Accept secure payments with ease'
         },
+        
         {
           name: 'Calendly',
           logo: 'https://logo.clearbit.com/calendly.com',
           description: 'Automated scheduling for smoother sales calls and project consultations'
         },
         {
-          name: 'Stripe',
-          logo: 'https://logo.clearbit.com/stripe.com',
-          description: 'Accept secure payments with ease'
+          name: 'HubSpot',
+          logo: 'https://logo.clearbit.com/hubspot.com',
+          description: 'CRM and marketing automation built for scale'
         },
         {
           name: 'Google',
@@ -173,21 +174,6 @@ const Index = () => {
     </div>
   </div>
 </section>
-      
-      {/* Trusted By Section */}
-      <section className="py-12 bg-gray-50">
-        <div className="container-custom text-center">
-          <ScrollReveal>
-            <h3 className="text-base text-gray-500 uppercase mb-8 tracking-wider">Trusted by home service professionals</h3>
-          </ScrollReveal>
-          
-          <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {brandLogos.map((brand, index) => <ScrollReveal key={index} delay={index * 100}>
-                <img src={brand.logo} alt={brand.name} className="max-h-10 opacity-60 hover:opacity-100 transition-opacity" />
-              </ScrollReveal>)}
-          </div>
-        </div>
-      </section>
       
       {/* Services Section */}
       <section id="services" className="section bg-white">
