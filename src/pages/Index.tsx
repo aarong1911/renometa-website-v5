@@ -131,7 +131,7 @@ const Index = () => {
       {[
         {
           name: 'Zapier',
-          logo: logo: 'https://logo.clearbit.com/zapier.com',
+          logo: 'https://logo.clearbit.com/zapier.com',
           description: 'Connect your tools and automate workflows.'
         },
         {
