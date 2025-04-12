@@ -330,7 +330,7 @@ const Index = () => {
       </section>
       
       {/* CTA Section */}
-      <section id="cta" className="section bg-gradient-to-br from-gold to-blue-light text-white">
+      <section id="cta" className="section bg-gradient-to-br from-blue-dark to-blue-light text-white">
         <div className="container-custom text-center">
           <ScrollReveal>
             <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-heading mb-6">
