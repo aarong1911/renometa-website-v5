@@ -131,27 +131,27 @@ const Index = () => {
       {[
         {
           name: 'Zapier',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Zapier_logo.svg/512px-Zapier_logo.svg.png',
+          logo: 'https://cdn.jsdelivr.net/gh/devicons/devicon/icons/zapier/zapier-original.svg',
           description: 'Connect your tools and automate workflows.'
         },
         {
           name: 'HubSpot',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/HubSpot_Logo.svg/512px-HubSpot_Logo.svg.png',
+          logo: 'https://logo.clearbit.com/hubspot.com',
           description: 'CRM and marketing automation built for scale.'
         },
         {
           name: 'Calendly',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Calendly_logo.svg/512px-Calendly_logo.svg.png',
+          logo: 'https://logo.clearbit.com/calendly.com',
           description: 'Let leads schedule calls instantly.'
         },
         {
           name: 'Stripe',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Stripe_Logo%2C_revised_2016.svg/512px-Stripe_Logo%2C_revised_2016.svg.png',
+          logo: 'https://logo.clearbit.com/stripe.com',
           description: 'Accept secure payments with ease.'
         },
         {
           name: 'Google',
-          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/512px-Google_2015_logo.svg.png',
+          logo: 'https://logo.clearbit.com/google.com',
           description: 'Boost your visibility on search and maps.'
         }
       ].map((brand, index) => (
@@ -173,7 +173,6 @@ const Index = () => {
     </div>
   </div>
 </section>
-
       
       {/* Trusted By Section */}
       <section className="py-12 bg-gray-50">
