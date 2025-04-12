@@ -7,80 +7,91 @@ import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
+
 const Index = () => {
   // Logos for brands section
-  const brandLogos = [{
-    name: 'Brand 1',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+1'
-  }, {
-    name: 'Brand 2',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+2'
-  }, {
-    name: 'Brand 3',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+3'
-  }, {
-    name: 'Brand 4',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+4'
-  }, {
-    name: 'Brand 5',
-    logo: 'https://via.placeholder.com/150x50?text=Brand+5'
-  }];
+  const brandLogos = [
+    { name: 'Brand 1', logo: 'https://via.placeholder.com/150x50?text=Brand+1' },
+    { name: 'Brand 2', logo: 'https://via.placeholder.com/150x50?text=Brand+2' },
+    { name: 'Brand 3', logo: 'https://via.placeholder.com/150x50?text=Brand+3' },
+    { name: 'Brand 4', logo: 'https://via.placeholder.com/150x50?text=Brand+4' },
+    { name: 'Brand 5', logo: 'https://via.placeholder.com/150x50?text=Brand+5' },
+  ];
 
   // Services data
-  const services = [{
-    title: 'Smart Website Development',
-    description: 'Custom-built, high-converting websites tailored specifically for remodeling businesses.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  const services = [
+    {
+      title: 'Smart Website Development',
+      description: 'Custom-built, high-converting websites tailored specifically for remodeling businesses.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-        </svg>,
-    link: '/services/website-development'
-  }, {
-    title: 'Advanced SEO',
-    description: 'Specialized search engine optimization strategies to dominate local searches in your service area.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </svg>
+      ),
+      link: '/services/website-development',
+    },
+    {
+      title: 'Advanced SEO',
+      description: 'Specialized search engine optimization strategies to dominate local searches in your service area.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-        </svg>,
-    link: '/services/advanced-seo'
-  }, {
-    title: 'AI-Powered Agents',
-    description: 'Intelligent virtual assistants that qualify leads and book appointments 24/7.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </svg>
+      ),
+      link: '/services/advanced-seo',
+    },
+    {
+      title: 'AI-Powered Agents',
+      description: 'Intelligent virtual assistants that qualify leads and book appointments 24/7.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z" />
-        </svg>,
-    link: '/services/ai-agents'
-  }, {
-    title: 'Intelligent Automation',
-    description: 'Streamline your workflows and follow-ups with smart systems that save time and increase conversion.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </svg>
+      ),
+      link: '/services/ai-agents',
+    },
+    {
+      title: 'Intelligent Automation',
+      description: 'Streamline your workflows and follow-ups with smart systems that save time and increase conversion.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-        </svg>,
-    link: '/services/automation'
-  }, {
-    title: 'Seamless Integration',
-    description: 'Connect all your tools and software to create a unified business system with no gaps or data silos.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </svg>
+      ),
+      link: '/services/automation',
+    },
+    {
+      title: 'Seamless Integration',
+      description: 'Connect all your tools and software to create a unified business system with no gaps or data silos.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 16v-4m-4 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H4a2 2 0 00-2 2v6a2 2 0 002 2zm10 0h6m-6-8a2 2 0 11-4 0 2 2 0 014 0zM6 20v-2a2 2 0 012-2h8a2 2 0 012 2v2M6 12h.01M10 12h.01" />
-        </svg>,
-    link: '/services/integration'
-  }, {
-    title: 'Performance Optimization',
-    description: 'Accelerate your website for lightning-fast speed and improved conversion rates.',
-    icon: <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        </svg>
+      ),
+      link: '/services/integration',
+    },
+    {
+      title: 'Performance Optimization',
+      description: 'Accelerate your website for lightning-fast speed and improved conversion rates.',
+      icon: (
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-7 w-7" fill="none" viewBox="0 0 24 24" stroke="currentColor">
           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-        </svg>,
-    link: '/services/performance-optimization'
-  }];
+        </svg>
+      ),
+      link: '/services/performance-optimization',
+    },
+  ];
 
   // Smooth scroll function
-  const scrollToSection = id => {
+  const scrollToSection = (id) => {
     const element = document.getElementById(id);
     if (element) {
-      element.scrollIntoView({
-        behavior: 'smooth'
-      });
+      element.scrollIntoView({ behavior: 'smooth' });
     }
   };
-  return <MainLayout>
+
+  return (
+    <MainLayout>
       {/* Hero Section */}
       <section id="hero" className="hero-section relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
@@ -106,10 +117,16 @@ const Index = () => {
             
             <ScrollReveal delay={600}>
               <div className="flex flex-wrap gap-4">
-                <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => scrollToSection('contact')}>
+                <Button 
+                  className="btn-primary hover:bg-blue-light transition-colors duration-300" 
+                  onClick={() => scrollToSection('contact')}
+                >
                   Get a Free Strategy Call
                 </Button>
-                <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => scrollToSection('services')}>
+                <Button 
+                  className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300"
+                  onClick={() => scrollToSection('services')}
+                >
                   Explore Services
                 </Button>
               </div>
@@ -119,9 +136,13 @@ const Index = () => {
           <div className="w-full md:w-1/2 mt-8 md:mt-0">
             <ScrollReveal direction="left">
               <div className="relative">
-                
-                
-                
+                <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft"></div>
+                <div className="absolute -bottom-4 -right-4 w-60 h-60 bg-blue-dark rounded-full opacity-10 animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
+                <img 
+                  src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158"
+                  alt="Digital transformation for home services"
+                  className="w-full h-auto rounded-lg shadow-lg relative z-10"
+                />
               </div>
             </ScrollReveal>
           </div>
@@ -136,9 +157,15 @@ const Index = () => {
           </ScrollReveal>
           
           <div className="flex flex-wrap justify-center items-center gap-8 md:gap-16">
-            {brandLogos.map((brand, index) => <ScrollReveal key={index} delay={index * 100}>
-                <img src={brand.logo} alt={brand.name} className="max-h-10 opacity-60 hover:opacity-100 transition-opacity" />
-              </ScrollReveal>)}
+            {brandLogos.map((brand, index) => (
+              <ScrollReveal key={index} delay={index * 100}>
+                <img 
+                  src={brand.logo} 
+                  alt={brand.name}
+                  className="max-h-10 opacity-60 hover:opacity-100 transition-opacity"
+                />
+              </ScrollReveal>
+            ))}
           </div>
         </div>
       </section>
@@ -157,7 +184,16 @@ const Index = () => {
           </ScrollReveal>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {services.map((service, index) => <ServiceCard key={index} title={service.title} description={service.description} icon={service.icon} link={service.link} delay={index * 100} />)}
+            {services.map((service, index) => (
+              <ServiceCard
+                key={index}
+                title={service.title}
+                description={service.description}
+                icon={service.icon}
+                link={service.link}
+                delay={index * 100}
+              />
+            ))}
           </div>
         </div>
       </section>
@@ -278,29 +314,41 @@ const Index = () => {
           </ScrollReveal>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            <CaseStudyCard title="Elite Remodeling Co." description="How we helped a kitchen remodeler double their qualified leads while cutting ad spend by 30%." image="https://images.unsplash.com/photo-1484154218962-a197022b5858" results={[{
-            label: 'Increase in Leads',
-            value: '+103%'
-          }, {
-            label: 'Cost Per Lead',
-            value: '-32%'
-          }]} link="/case-studies/elite-remodeling" delay={0} />
+            <CaseStudyCard
+              title="Elite Remodeling Co."
+              description="How we helped a kitchen remodeler double their qualified leads while cutting ad spend by 30%."
+              image="https://images.unsplash.com/photo-1484154218962-a197022b5858"
+              results={[
+                { label: 'Increase in Leads', value: '+103%' },
+                { label: 'Cost Per Lead', value: '-32%' },
+              ]}
+              link="/case-studies/elite-remodeling"
+              delay={0}
+            />
             
-            <CaseStudyCard title="Superior Windows & Doors" description="Transforming a window installation company's website into a lead generation machine." image="https://images.unsplash.com/photo-1503174971373-b1f69850bded" results={[{
-            label: 'Conversion Rate',
-            value: '+87%'
-          }, {
-            label: 'Monthly Leads',
-            value: '150+'
-          }]} link="/case-studies/superior-windows" delay={100} />
+            <CaseStudyCard
+              title="Superior Windows & Doors"
+              description="Transforming a window installation company's website into a lead generation machine."
+              image="https://images.unsplash.com/photo-1503174971373-b1f69850bded"
+              results={[
+                { label: 'Conversion Rate', value: '+87%' },
+                { label: 'Monthly Leads', value: '150+' },
+              ]}
+              link="/case-studies/superior-windows"
+              delay={100}
+            />
             
-            <CaseStudyCard title="Precision Plumbing" description="How AI agents helped a plumbing company provide 24/7 service without hiring additional staff." image="https://images.unsplash.com/photo-1581578731548-c64695cc6952" results={[{
-            label: 'After-Hours Bookings',
-            value: '+215%'
-          }, {
-            label: 'Customer Satisfaction',
-            value: '98%'
-          }]} link="/case-studies/precision-plumbing" delay={200} />
+            <CaseStudyCard
+              title="Precision Plumbing"
+              description="How AI agents helped a plumbing company provide 24/7 service without hiring additional staff."
+              image="https://images.unsplash.com/photo-1581578731548-c64695cc6952"
+              results={[
+                { label: 'After-Hours Bookings', value: '+215%' },
+                { label: 'Customer Satisfaction', value: '98%' },
+              ]}
+              link="/case-studies/precision-plumbing"
+              delay={200}
+            />
           </div>
           
           <div className="text-center mt-10">
@@ -329,11 +377,29 @@ const Index = () => {
           </div>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <TestimonialCard quote="Our website leads have doubled since working with RenoMeta. Their understanding of the remodeling industry made all the difference." author="Michael Rodriguez" position="Owner" company="Rodriguez Remodeling" delay={0} />
+            <TestimonialCard
+              quote="Our website leads have doubled since working with RenoMeta. Their understanding of the remodeling industry made all the difference."
+              author="Michael Rodriguez"
+              position="Owner"
+              company="Rodriguez Remodeling"
+              delay={0}
+            />
             
-            <TestimonialCard quote="The AI agents have transformed our business. We're booking jobs 24/7 and our team can focus on the work instead of answering basic questions." author="Sarah Johnson" position="Operations Manager" company="Johnson Home Services" delay={100} />
+            <TestimonialCard
+              quote="The AI agents have transformed our business. We're booking jobs 24/7 and our team can focus on the work instead of answering basic questions."
+              author="Sarah Johnson"
+              position="Operations Manager"
+              company="Johnson Home Services"
+              delay={100}
+            />
             
-            <TestimonialCard quote="The SEO work they've done has put us at the top of local searches. We're now the first call for homeowners in our area." author="David Chen" position="Marketing Director" company="Luxe Bathroom Renovations" delay={200} />
+            <TestimonialCard
+              quote="The SEO work they've done has put us at the top of local searches. We're now the first call for homeowners in our area."
+              author="David Chen"
+              position="Marketing Director"
+              company="Luxe Bathroom Renovations"
+              delay={200}
+            />
           </div>
         </div>
       </section>
@@ -348,7 +414,11 @@ const Index = () => {
             <p className="text-xl opacity-90 mb-8 max-w-2xl mx-auto">
               Schedule a free 30-minute strategy call to discover how we can help your remodeling business thrive online.
             </p>
-            <Button size="lg" className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300" onClick={() => scrollToSection('contact')}>
+            <Button 
+              size="lg" 
+              className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
+              onClick={() => scrollToSection('contact')}
+            >
               Book Your Free Strategy Call
             </Button>
           </ScrollReveal>
@@ -369,10 +439,15 @@ const Index = () => {
           </ScrollReveal>
           
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
-            {[1, 2, 3].map((item, index) => <ScrollReveal key={index} delay={index * 100}>
+            {[1, 2, 3].map((item, index) => (
+              <ScrollReveal key={index} delay={index * 100}>
                 <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
                   <div className="h-48 overflow-hidden">
-                    <img src={`https://picsum.photos/seed/${index}/600/400`} alt="Blog post thumbnail" className="w-full h-full object-cover transition-transform duration-500 hover:scale-105" />
+                    <img 
+                      src={`https://picsum.photos/seed/${index}/600/400`} 
+                      alt="Blog post thumbnail" 
+                      className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
+                    />
                   </div>
                   <div className="p-6">
                     <div className="flex items-center text-sm text-gray-500 mb-3">
@@ -392,13 +467,20 @@ const Index = () => {
                     </p>
                     <Link to={`/blog/post-${index + 1}`} className="text-teal font-medium flex items-center group">
                       Read Article
-                      <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <svg 
+                        xmlns="http://www.w3.org/2000/svg" 
+                        className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" 
+                        fill="none" 
+                        viewBox="0 0 24 24" 
+                        stroke="currentColor"
+                      >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
                       </svg>
                     </Link>
                   </div>
                 </div>
-              </ScrollReveal>)}
+              </ScrollReveal>
+            ))}
           </div>
           
           <div className="text-center mt-10">
@@ -413,8 +495,13 @@ const Index = () => {
 
       {/* Contact Section - Replaced with CTASection */}
       <section id="contact" className="section bg-gray-50">
-        <CTASection ctaText="Transform Your Remodeling Business Today" title="Digital Marketing" />
+        <CTASection 
+          ctaText="Transform Your Remodeling Business Today" 
+          title="Digital Marketing" 
+        />
       </section>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
+
 export default Index;
