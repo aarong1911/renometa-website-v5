@@ -118,6 +118,62 @@ const Index = () => {
   </div>
 </section>
 
+    {/* Trusted By Section - Test */}
+    <section className="py-12 bg-gray-50">
+  <div className="container-custom text-center">
+    <ScrollReveal>
+      <h3 className="text-base text-gray-500 uppercase mb-8 tracking-wider">
+        The Most Powerful Tools for Your Business
+      </h3>
+    </ScrollReveal>
+
+    <div className="flex flex-wrap justify-center items-center gap-12 md:gap-16">
+      {[
+        {
+          name: 'Zapier',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Zapier_logo.svg/512px-Zapier_logo.svg.png',
+          description: 'Connect your tools and automate workflows.'
+        },
+        {
+          name: 'HubSpot',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/3/35/HubSpot_Logo.svg/512px-HubSpot_Logo.svg.png',
+          description: 'CRM and marketing automation built for scale.'
+        },
+        {
+          name: 'Calendly',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/e/e0/Calendly_logo.svg/512px-Calendly_logo.svg.png',
+          description: 'Let leads schedule calls instantly.'
+        },
+        {
+          name: 'Stripe',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/4/4f/Stripe_Logo%2C_revised_2016.svg/512px-Stripe_Logo%2C_revised_2016.svg.png',
+          description: 'Accept secure payments with ease.'
+        },
+        {
+          name: 'Google',
+          logo: 'https://upload.wikimedia.org/wikipedia/commons/thumb/2/2f/Google_2015_logo.svg/512px-Google_2015_logo.svg.png',
+          description: 'Boost your visibility on search and maps.'
+        }
+      ].map((brand, index) => (
+        <ScrollReveal key={index} delay={index * 100}>
+          <div className="group relative flex flex-col items-center">
+            <img
+              src={brand.logo}
+              alt={brand.name}
+              className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+            />
+            <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
+              transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
+              transition-all duration-300 ease-out z-10 pointer-events-none">
+              {brand.description}
+            </div>
+          </div>
+        </ScrollReveal>
+      ))}
+    </div>
+  </div>
+</section>
+
       
       {/* Trusted By Section */}
       <section className="py-12 bg-gray-50">
