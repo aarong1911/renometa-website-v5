@@ -7,6 +7,7 @@ import TestimonialCard from '@/components/ui/TestimonialCard';
 import CaseStudyCard from '@/components/ui/CaseStudyCard';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import CTASection from '@/components/sections/CTASection';
+import HeroSection from '@/components/sections/HeroSection';
 
 const Index = () => {
   // Logos for brands section
@@ -84,9 +85,9 @@ const Index = () => {
   return <MainLayout>
       {/* Hero Section */}
       <section id="hero" className="hero-section relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
-        <div className="container-custom flex flex-col md:flex-row items-center justify-center z-10 relative">
-          <div className="w-full md:w-1/2 py-12 md:py-0 text-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0 flex items-center justify-center"></div>
+        <div className="container-custom flex flex-col md:flex-row items-center justify-center z-10 relative text-center">
+          <div className="w-full md:w-1/2 py-12 md:py-0 flex flex-col items-center">
             <ScrollReveal>
               <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 inline-block">
                 For Remodeling & Home Service Businesses
@@ -117,7 +118,7 @@ const Index = () => {
             </ScrollReveal>
           </div>
           
-          <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center">
+          <div className="w-full md:w-1/2 mt-8 md:mt-0 flex justify-center items-center">
             <ScrollReveal direction="left">
               <div className="relative">
                 
