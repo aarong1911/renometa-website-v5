@@ -87,7 +87,7 @@ const Index = () => {
       <section id="hero" className="hero-section relative">
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0 flex items-center justify-center"></div>
         <div className="container-custom flex flex-col md:flex-row items-center justify-center z-10 relative text-center">
-          <div className="w-full md:w-1/2 py-12 md:py-0 flex flex-col items-center">
+          <div className="w-9/10 md:w-9/10 py-12 md:py-0 flex flex-col items-center mx-auto">
             <ScrollReveal>
               <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 inline-block">
                 For Remodeling & Home Service Businesses
