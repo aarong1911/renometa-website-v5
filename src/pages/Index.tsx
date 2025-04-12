@@ -25,24 +25,19 @@ const Index = () => {
     if (!container) return;
 
     let scrollAmount = 0;
-    const scrollSpeed = 1;
-    const scrollInterval = 20;
+    const scrollSpeed = 0.5;
 
-    const interval = setInterval(() => {
+    const step = () => {
       if (!container) return;
-
       scrollAmount += scrollSpeed;
       if (scrollAmount >= container.scrollWidth / 2) {
         scrollAmount = 0;
       }
+      container.scrollTo({ left: scrollAmount });
+      requestAnimationFrame(step);
+    };
 
-      container.scrollTo({
-        left: scrollAmount,
-        behavior: 'smooth'
-      });
-    }, scrollInterval);
-
-    return () => clearInterval(interval);
+    requestAnimationFrame(step);
   }, []);
 
   const brandLogos = [
@@ -108,12 +103,12 @@ const Index = () => {
               {duplicatedLogos.map((brand, index) => (
                 <div
                   key={index}
-                  className="group relative flex flex-col items-center min-w-[100px]"
+                  className="relative flex flex-col items-center min-w-[100px]"
                 >
                   <img
                     src={brand.logo}
                     alt={brand.name}
-                    className="max-h-10 opacity-60 group-hover:opacity-100 transition-opacity duration-300"
+                    className="max-h-10 transition-opacity duration-300"
                   />
                   <div className="absolute top-full mt-3 w-56 bg-white text-sm text-gray-700 shadow-lg rounded-lg px-4 py-3
                     transform translate-y-2 opacity-0 group-hover:opacity-100 group-hover:translate-y-0
@@ -126,7 +121,6 @@ const Index = () => {
           </div>
         </div>
       </section>
-
       
       {/* Services Section */}
       <section id="services" className="section bg-white">
