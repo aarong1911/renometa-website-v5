@@ -446,6 +446,7 @@ import CTASection from '@/components/sections/CTASection';
       <section id="contact" className="section bg-gray-50">
         <CTASection ctaText="Transform Your Remodeling Business Today" title="Digital Marketing" />
       </section>
-    </MainLayout>;
+    </MainLayout>
+  );
 };
 export default Index;
