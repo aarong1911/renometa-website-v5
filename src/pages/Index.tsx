@@ -123,7 +123,7 @@ const Index = () => {
   <div className="container-custom text-center">
     <ScrollReveal>
       <h3 className="text-base text-gray-500 uppercase mb-8 tracking-wider">
-        The Most Powerful Tools for Your Business
+        Some of the Most Powerful Tools for Your Business
       </h3>
     </ScrollReveal>
 
@@ -137,22 +137,22 @@ const Index = () => {
         {
           name: 'HubSpot',
           logo: 'https://logo.clearbit.com/hubspot.com',
-          description: 'CRM and marketing automation built for scale.'
+          description: 'CRM and marketing automation built for scale'
         },
         {
           name: 'Calendly',
           logo: 'https://logo.clearbit.com/calendly.com',
-          description: 'Let leads schedule calls instantly.'
+          description: 'Automated scheduling for smoother sales calls and project consultations'
         },
         {
           name: 'Stripe',
           logo: 'https://logo.clearbit.com/stripe.com',
-          description: 'Accept secure payments with ease.'
+          description: 'Accept secure payments with ease'
         },
         {
           name: 'Google',
           logo: 'https://logo.clearbit.com/google.com',
-          description: 'Boost your visibility on search and maps.'
+          description: 'Boost your visibility on search and maps'
         }
       ].map((brand, index) => (
         <ScrollReveal key={index} delay={index * 100}>
