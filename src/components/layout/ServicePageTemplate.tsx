@@ -1,7 +1,7 @@
 
 import React from 'react';
 import MainLayout from './MainLayout';
-import HeroSection from '@/components/sections/HeroSection';
+import ServiceHeroSection from '@/components/sections/ServiceHeroSection';
 import FeaturesSection from '@/components/sections/FeaturesSection';
 import ProcessSection from '@/components/sections/ProcessSection';
 import TestimonialSection from '@/components/sections/TestimonialSection';
@@ -59,7 +59,7 @@ const ServicePageTemplate = ({
   return (
     <MainLayout>
       {/* Hero Section */}
-      <HeroSection 
+      <ServiceHeroSection 
         title={title}
         description={description}
         tagline={tagline}
