@@ -22,7 +22,7 @@ const HeroSection = ({
       <div className="container-custom flex flex-col md:flex-row items-center">
         <div className="w-full md:w-1/2 py-12 md:py-0">
           <ScrollReveal>
-            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium">
+            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium mt-16 md:mt-0 inline-block">
               {tagline}
             </span>
           </ScrollReveal>

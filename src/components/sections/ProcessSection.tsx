@@ -36,12 +36,12 @@ const ProcessSection = ({ processSteps }: ProcessSectionProps) => {
             {processSteps.map((step, index) => (
               <ScrollReveal key={index} delay={index * 150}>
                 <div className={`flex flex-col md:flex-row items-center ${index % 2 === 0 ? 'md:flex-row' : 'md:flex-row-reverse'} mb-12`}>
-                  <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-12 text-right' : 'md:pl-12 text-left'}`}>
+                  <div className={`md:w-1/2 ${index % 2 === 0 ? 'md:pr-12 md:text-right' : 'md:pl-12 md:text-left'} text-center md:text-left`}>
                     <h3 className="text-2xl font-bold font-heading mb-3 text-blue-dark">{step.title}</h3>
                     <p className="text-gray-600">{step.description}</p>
                   </div>
                   
-                  <div className="relative my-6 md:my-0 z-10">
+                  <div className="relative order-first mb-4 md:order-none md:mb-0 md:my-0 z-10">
                     <div className="w-12 h-12 rounded-full bg-gold text-white font-bold flex items-center justify-center relative z-20">
                       {step.stepNumber}
                     </div>
