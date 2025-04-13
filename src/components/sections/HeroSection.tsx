@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -18,27 +17,50 @@ const HeroSection = ({
   heroImage
 }: HeroSectionProps) => {
   return (
-    <section className="hero-section bg-white">
-      <div className="container-custom flex flex-col md:flex-row items-center">
+    <section className="hero-section relative overflow-hidden bg-white">
+      {/* Background Video (desktop only) */}
+      <div className="hidden md:block absolute inset-0 z-0">
+        <video
+          autoPlay
+          muted
+          loop
+          playsInline
+          preload="none"
+          className="w-full h-full object-cover"
+          poster="/fallback-image.jpg" // optional fallback
+        >
+          <source src="/hero-background.mp4" type="video/mp4" />
+          Your browser does not support the video tag.
+        </video>
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      {/* Optional mobile fallback image */}
+      <div className="block md:hidden absolute inset-0 bg-cover bg-center z-0" style={{ backgroundImage: `url(${heroImage})` }}>
+        <div className="absolute inset-0 bg-black/40" />
+      </div>
+
+      {/* Hero Content */}
+      <div className="container-custom relative z-10 flex flex-col md:flex-row items-center text-white">
         <div className="w-full md:w-1/2 py-12 md:py-0">
           <ScrollReveal>
             <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium mt-16 md:mt-0 inline-block">
               {tagline}
             </span>
           </ScrollReveal>
-          
+
           <ScrollReveal delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold font-heading mt-6 mb-6 leading-tight text-blue-dark">
+            <h1 className="text-4xl sm:text-5xl md:text-5xl font-bold font-heading mt-6 mb-6 leading-tight">
               {title}
             </h1>
           </ScrollReveal>
-          
+
           <ScrollReveal delay={400}>
-            <p className="text-lg text-gray-600 mb-8 max-w-lg">
+            <p className="text-lg mb-8 max-w-lg opacity-90">
               {description}
             </p>
           </ScrollReveal>
-          
+
           <ScrollReveal delay={600}>
             <div className="flex flex-wrap gap-4">
               <Button className="btn-primary" asChild>
@@ -50,12 +72,13 @@ const HeroSection = ({
             </div>
           </ScrollReveal>
         </div>
-        
-        <div className="w-full md:w-1/2 mt-8 md:mt-0">
+
+        {/* Right-side image preview (desktop only) */}
+        <div className="w-full md:w-1/2 mt-8 md:mt-0 hidden md:block">
           <ScrollReveal direction="left">
             <div className="relative">
-              <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft"></div>
-              <div className="absolute -bottom-4 -right-4 w-60 h-60 bg-blue-dark rounded-full opacity-10 animate-pulse-soft" style={{ animationDelay: '1s' }}></div>
+              <div className="absolute -top-4 -left-4 w-40 h-40 bg-gold rounded-full opacity-10 animate-pulse-soft" />
+              <div className="absolute -bottom-4 -right-4 w-60 h-60 bg-blue-dark rounded-full opacity-10 animate-pulse-soft" style={{ animationDelay: '1s' }} />
               <img 
                 src={heroImage}
                 alt={title}
