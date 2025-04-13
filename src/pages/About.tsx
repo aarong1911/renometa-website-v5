@@ -7,7 +7,7 @@ const About = () => {
   const aboutData = {
     title: 'About RenoMeta',
     tagline: 'Our Story',
-    description: 'Built for Builders. Powered by Automation. RenoMeta isn\'t your average marketing agency — we\'re the digital backbone for remodeling, HVAC, and home service companies ready to scale.',
+    description: 'Built for Builders. Powered by Automation. RenoMeta isn\'t your average marketing agency - we\'re the digital backbone for remodeling, HVAC, and home service companies ready to scale.',
     heroImage: 'https://images.unsplash.com/photo-1552664730-d307ca884978?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
     ctaText: 'Ready to Build Your Digital Empire?',
     features: [
