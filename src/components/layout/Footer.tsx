@@ -133,10 +133,10 @@ const Footer = () => {
             &copy; {currentYear} RenoMeta. All rights reserved.
           </p>
           <div className="mt-4 md:mt-0 flex space-x-4">
-            <Link to="/privacy" className="text-sm text-gray-300 hover:text-teal transition-colors">
+            <Link to="/privacy-policy" className="text-sm text-gray-300 hover:text-teal transition-colors">
               Privacy Policy
             </Link>
-            <Link to="/terms" className="text-sm text-gray-300 hover:text-teal transition-colors">
+            <Link to="/terms-of-service" className="text-sm text-gray-300 hover:text-teal transition-colors">
               Terms of Service
             </Link>
           </div>
