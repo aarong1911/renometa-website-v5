@@ -2,6 +2,7 @@
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
+import { useLocation, useNavigate } from 'react-router-dom';
 
 interface ServiceHeroSectionProps {
   title: string;
@@ -11,6 +12,20 @@ interface ServiceHeroSectionProps {
 }
 
 const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceHeroSectionProps) => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  const scrollToSection = (sectionId: string) => {
+    // If we're already on the page with the section
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+    } else {
+      // Navigate to homepage and then scroll to the section
+      navigate('/', { state: { scrollTo: sectionId } });
+    }
+  };
+
   return (
     <section id="hero" className="hero-section relative">
       <div 
@@ -41,10 +56,17 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceH
           </ScrollReveal>
           <ScrollReveal delay={600}>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300">
+              <Button 
+                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
+                onClick={() => scrollToSection('contact')}
+              >
                 Get Started
               </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-white hover:text-blue-dark transition-colors duration-300">
+              <Button 
+                variant="outline" 
+                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
+                onClick={() => scrollToSection('process')}
+              >
                 Learn More
               </Button>
             </div>

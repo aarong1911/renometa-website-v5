@@ -70,7 +70,9 @@ const ServicePageTemplate = ({
       <FeaturesSection features={features} title={title} />
       
       {/* Process Section */}
-      <ProcessSection processSteps={processSteps} />
+      <div id="process">
+        <ProcessSection processSteps={processSteps} />
+      </div>
       
       {/* Testimonial Section */}
       <TestimonialSection testimonial={testimonial} />
@@ -82,7 +84,9 @@ const ServicePageTemplate = ({
       <RelatedServicesSection relatedServices={relatedServices} title={title} />
       
       {/* CTA Section */}
-      <CTASection ctaText={ctaText} title={title} />
+      <div id="contact">
+        <CTASection ctaText={ctaText} title={title} />
+      </div>
     </MainLayout>
   );
 };

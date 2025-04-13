@@ -1,13 +1,21 @@
-
 import React, { useState, useEffect } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
+import { 
+  NavigationMenu,
+  NavigationMenuList,
+  NavigationMenuItem,
+  NavigationMenuTrigger,
+  NavigationMenuContent,
+  NavigationMenuLink
+} from "@/components/ui/navigation-menu";
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
 
   // Handle navbar background change on scroll
   useEffect(() => {
@@ -23,15 +31,32 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Smooth scroll function
-  const scrollToContact = () => {
-    // If on homepage, scroll to contact section
-    if (location.pathname === '/') {
-      const contactSection = document.getElementById('contact');
-      if (contactSection) {
-        contactSection.scrollIntoView({ behavior: 'smooth' });
-        setMobileMenuOpen(false);
+  // Check for scrollTo in the location state (coming from other pages)
+  useEffect(() => {
+    if (location.state && location.state.scrollTo) {
+      const sectionId = location.state.scrollTo;
+      const section = document.getElementById(sectionId);
+      if (section) {
+        setTimeout(() => {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
       }
+      // Clear the state to avoid scrolling again on re-render
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    // If on any page, try to find the section first
+    const section = document.getElementById(sectionId);
+    if (section) {
+      section.scrollIntoView({ behavior: 'smooth' });
+      setMobileMenuOpen(false);
+    } else {
+      // Navigate to homepage and then scroll to the section
+      navigate('/', { state: { scrollTo: sectionId } });
+      setMobileMenuOpen(false);
     }
   };
 
@@ -47,7 +72,7 @@ const Navbar = () => {
     ]},
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? scrollToContact : null },
+    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? scrollToSection : null },
   ];
 
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
@@ -147,7 +172,7 @@ const Navbar = () => {
             className="ml-4 bg-blue-dark hover:bg-blue-light transition-colors"
             onClick={() => {
               if (location.pathname === '/') {
-                scrollToContact();
+                scrollToSection('contact');
               } else {
                 window.location.href = '/#contact';
               }
@@ -257,7 +282,7 @@ const Navbar = () => {
               onClick={() => {
                 setMobileMenuOpen(false);
                 if (location.pathname === '/') {
-                  scrollToContact();
+                  scrollToSection('contact');
                 } else {
                   window.location.href = '/#contact';
                 }
