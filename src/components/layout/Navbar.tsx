@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -72,7 +73,7 @@ const Navbar = () => {
     ]},
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
-    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? scrollToSection : null },
+    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? (e: React.MouseEvent) => scrollToSection('contact') : null },
   ];
 
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
@@ -170,7 +171,7 @@ const Navbar = () => {
           ))}
           <Button 
             className="ml-4 bg-blue-dark hover:bg-blue-light transition-colors"
-            onClick={() => {
+            onClick={(e: React.MouseEvent) => {
               if (location.pathname === '/') {
                 scrollToSection('contact');
               } else {
@@ -254,8 +255,8 @@ const Navbar = () => {
                       "block px-3 py-2 border-b border-gray-100 w-full text-left",
                       location.pathname === link.path ? "text-teal" : "text-gray-700"
                     )}
-                    onClick={() => {
-                      link.action();
+                    onClick={(e) => {
+                      link.action(e);
                       setMobileMenuOpen(false);
                     }}
                   >
@@ -279,7 +280,7 @@ const Navbar = () => {
           <div className="pt-4">
             <Button 
               className="w-full bg-blue-dark hover:bg-blue-light transition-colors"
-              onClick={() => {
+              onClick={(e: React.MouseEvent) => {
                 setMobileMenuOpen(false);
                 if (location.pathname === '/') {
                   scrollToSection('contact');
