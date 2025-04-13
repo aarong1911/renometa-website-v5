@@ -167,7 +167,6 @@ const Index = () => {
       </div>
     </div>
   </section>
-</MainLayout>
 
       {/* Auto-Scrolling Carousel Section */}
       <section className="py-12 bg-gray-50">
