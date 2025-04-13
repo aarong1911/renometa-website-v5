@@ -118,55 +118,57 @@ const Index = () => {
   return (
     <MainLayout>
   {/* Hero Section */}
-  <section id="hero" className="hero-section relative overflow-hidden">
-    {/* Background Video */}
-    <div className="absolute inset-0 z-0">
-      <video
-        autoPlay
-        muted
-        loop
-        playsInline
-        preload="none"
-        className="w-full h-full object-cover"
-      >
-        <source src="/hero-background.mp4" type="video/mp4" />
-        Your browser does not support the video tag.
-      </video>
-      {/* Optional dark overlay */}
-      <div className="absolute inset-0 bg-black/40" />
-    </div>
+  <section id="hero" className="hero-section relative overflow-hidden min-h-[80vh]">
+  {/* Background Video */}
+  <div className="absolute inset-0 z-0">
+    <video
+      autoPlay
+      muted
+      loop
+      playsInline
+      preload="auto"
+      className="w-full h-full object-cover"
+    >
+      <source src="/hero-background.mp4" type="video/mp4" />
+      Your browser does not support the video tag.
+    </video>
+    <div className="absolute inset-0 bg-black/40" />
+  </div>
 
-    {/* Hero Content */}
-    <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
-      <div className="w-full max-w-3xl space-y-10 text-white">
-        <ScrollReveal>
-          <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
-            For Remodeling & Home Service Businesses
-          </span>
-        </ScrollReveal>
-        <ScrollReveal delay={200}>
-          <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight">
-            Digital Solutions That Power <span className="gradient-text">Growth</span>
-          </h1>
-        </ScrollReveal>
-        <ScrollReveal delay={400}>
-          <p className="text-lg mb-4 opacity-90">
-            Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
-          </p>
-        </ScrollReveal>
-        <ScrollReveal delay={600}>
-          <div className="flex flex-wrap gap-4 justify-center">
-            <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => scrollToSection('contact')}>
-              Get a Free Strategy Call
-            </Button>
-            <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => scrollToSection('services')}>
-              Explore Services
-            </Button>
-          </div>
-        </ScrollReveal>
-      </div>
+  {/* Hero Content */}
+  <div className="relative z-10 flex flex-col items-center justify-center text-center text-white py-20 px-4">
+    <div className="max-w-3xl space-y-8">
+      <ScrollReveal>
+        <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20">
+          For Remodeling & Home Service Businesses
+        </span>
+      </ScrollReveal>
+
+      <ScrollReveal delay={200}>
+        <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight">
+          Digital Solutions That Power <span className="gradient-text">Growth</span>
+        </h1>
+      </ScrollReveal>
+
+      <ScrollReveal delay={400}>
+        <p className="text-lg opacity-90">
+          Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
+        </p>
+      </ScrollReveal>
+
+      <ScrollReveal delay={600}>
+        <div className="flex flex-wrap gap-4 justify-center">
+          <Button className="btn-primary" onClick={() => scrollToSection('contact')}>
+            Get a Free Strategy Call
+          </Button>
+          <Button className="btn-outline" onClick={() => scrollToSection('services')}>
+            Explore Services
+          </Button>
+        </div>
+      </ScrollReveal>
     </div>
-  </section>
+  </div>
+</section>
 
       {/* Auto-Scrolling Carousel Section */}
       <section className="py-12 bg-gray-50">
