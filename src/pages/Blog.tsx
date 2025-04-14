@@ -50,19 +50,16 @@ const Blog = () => {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <section className="hero-section relative">
-        <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0" />
-        <div className="container-custom text-center py-20 relative z-10">
+      <div className="bg-blue-dark py-20 px-6">
+        <div className="container-custom">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-5xl font-bold text-blue-dark">
-              Blog
-            </h1>
-            <p className="text-gray-600 mt-4 max-w-xl mx-auto">
+            <h1 className="text-4xl md:text-5xl font-bold text-white mb-6">Blog</h1>
+            <p className="text-lg text-white/80 max-w-2xl">
               Insights, strategies, and expert advice to help your remodeling and home service business grow.
             </p>
           </ScrollReveal>
         </div>
-      </section>
+      </div>
       
       {/* Blog Listing */}
       <div className="py-16 px-6">

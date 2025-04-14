@@ -3,7 +3,16 @@ import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-import { NavLink } from './types';
+
+interface NavLink {
+  name: string;
+  path: string;
+  action?: (e: React.MouseEvent) => void;
+  submenu?: {
+    name: string;
+    path: string;
+  }[];
+}
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -25,7 +34,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
   return (
     <div
       className={cn(
-        'fixed inset-0 bg-[#e5e6ea] z-40 md:hidden transition-transform transform pt-20',
+        'fixed inset-0 bg-white z-40 md:hidden transition-transform transform pt-20',
         isOpen ? 'translate-x-0' : 'translate-x-full'
       )}
     >
@@ -38,7 +47,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
                   className="w-full text-left px-3 py-2 border-b border-gray-100 flex justify-between items-center"
                   onClick={() => toggleSubmenu(index)}
                 >
-                  <span className={location.pathname.startsWith(link.path) ? 'text-[#3a4150]' : 'text-[#3a4150]/80'}>
+                  <span className={location.pathname.startsWith(link.path) ? 'text-teal' : 'text-gray-700'}>
                     {link.name}
                   </span>
                   <svg
@@ -61,7 +70,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
                       to={subItem.path}
                       className={cn(
                         "block px-3 py-2",
-                        location.pathname === subItem.path ? "text-[#3a4150]" : "text-[#3a4150]/80"
+                        location.pathname === subItem.path ? "text-teal" : "text-gray-600"
                       )}
                       onClick={onClose}
                     >
@@ -75,7 +84,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
                 <button
                   className={cn(
                     "block px-3 py-2 border-b border-gray-100 w-full text-left",
-                    location.pathname === link.path ? "text-[#3a4150]" : "text-[#3a4150]/80"
+                    location.pathname === link.path ? "text-teal" : "text-gray-700"
                   )}
                   onClick={(e) => {
                     link.action(e);
@@ -89,7 +98,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
                   to={link.path}
                   className={cn(
                     "block px-3 py-2 border-b border-gray-100",
-                    location.pathname === link.path ? "text-[#3a4150]" : "text-[#3a4150]/80"
+                    location.pathname === link.path ? "text-teal" : "text-gray-700"
                   )}
                   onClick={onClose}
                 >
@@ -101,7 +110,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
         ))}
         <div className="pt-4">
           <Button 
-            className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
+            className="w-full bg-blue-dark hover:bg-blue-light transition-colors"
             onClick={(e: React.MouseEvent) => {
               onClose();
               if (location.pathname === '/') {
