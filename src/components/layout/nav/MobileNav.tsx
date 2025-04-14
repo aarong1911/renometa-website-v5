@@ -34,7 +34,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
   return (
     <div
       className={cn(
-        'fixed inset-0 bg-white z-40 md:hidden transition-transform transform pt-20',
+        'fixed inset-0 bg-[#e4e5eb] z-40 md:hidden transition-transform transform pt-20', // Updated background color
         isOpen ? 'translate-x-0' : 'translate-x-full'
       )}
     >

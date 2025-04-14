@@ -29,7 +29,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
   };
 
   return (
-    <nav className="hidden md:flex items-center space-x-1">
+    <nav className="hidden md:flex items-center space-x-1 bg-[#e4e5eb]">
       {navLinks.map((link, index) => (
         <div key={link.name} className="relative group">
           {link.submenu ? (
