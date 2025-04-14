@@ -74,7 +74,8 @@ const Navbar = () => {
     <header
       className={cn(
         'fixed top-0 left-0 w-full z-50 transition-all duration-300',
-        isScrolled ? 'bg-white shadow-md py-2' : 'bg-transparent py-4'
+        'bg-[#e5e6ea]', // Updated background color
+        isScrolled ? 'shadow-md py-2' : 'py-4'
       )}
     >
       <div className="container-custom flex justify-between items-center">
