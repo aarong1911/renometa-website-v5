@@ -1,17 +1,9 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
-
-interface NavLink {
-  name: string;
-  path: string;
-  action?: (e: React.MouseEvent) => void;
-  submenu?: {
-    name: string;
-    path: string;
-  }[];
-}
+import { NavLink } from './types';
 
 interface DesktopNavProps {
   navLinks: NavLink[];
@@ -29,7 +21,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
   };
 
   return (
-    <nav className="hidden md:flex items-center space-x-1 bg-[#e4e5eb]">
+    <nav className="hidden md:flex items-center space-x-1">
       {navLinks.map((link, index) => (
         <div key={link.name} className="relative group">
           {link.submenu ? (
@@ -38,8 +30,8 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                 className={cn(
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
-                    ? 'text-teal'
-                    : 'text-gray-700 hover:text-teal'
+                    ? 'text-[#3a4150]'
+                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
                 )}
                 onClick={() => toggleSubmenu(index)}
               >
@@ -67,8 +59,8 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                 className={cn(
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path
-                    ? 'text-teal'
-                    : 'text-gray-700 hover:text-teal'
+                    ? 'text-[#3a4150]'
+                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
                 )}
               >
                 {link.name}
@@ -79,8 +71,8 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                 className={cn(
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path
-                    ? 'text-teal'
-                    : 'text-gray-700 hover:text-teal'
+                    ? 'text-[#3a4150]'
+                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
                 )}
               >
                 {link.name}
@@ -90,7 +82,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
         </div>
       ))}
       <Button 
-        className="ml-4 bg-blue-dark hover:bg-blue-light transition-colors"
+        className="ml-4 bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
         onClick={(e: React.MouseEvent) => {
           if (location.pathname === '/') {
             scrollToSection('contact');
@@ -124,7 +116,7 @@ const SubmenuDropdown: React.FC<SubmenuDropdownProps> = ({ isActive, submenuItem
         <Link
           key={subItem.name}
           to={subItem.path}
-          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-50 hover:text-teal"
+          className="block px-4 py-2 text-sm text-[#3a4150] hover:bg-gray-50 hover:text-[#3a4150]/80"
           onClick={onItemClick}
         >
           {subItem.name}
