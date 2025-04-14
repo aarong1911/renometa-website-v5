@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -31,7 +30,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
                     ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
+                    : 'text-[#3a4150] hover:text-[#d9ab57]'
                 )}
                 onClick={() => toggleSubmenu(index)}
               >
@@ -46,9 +45,9 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
               </button>
-              <SubmenuDropdown 
-                isActive={activeSubmenu === index} 
-                submenuItems={link.submenu} 
+              <SubmenuDropdown
+                isActive={activeSubmenu === index}
+                submenuItems={link.submenu}
                 onItemClick={() => setActiveSubmenu(null)}
               />
             </>
@@ -60,7 +59,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path
                     ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
+                    : 'text-[#3a4150] hover:text-[#d9ab57]'
                 )}
               >
                 {link.name}
@@ -72,7 +71,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
                   location.pathname === link.path
                     ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#3a4150]/80'
+                    : 'text-[#3a4150] hover:text-[#d9ab57]'
                 )}
               >
                 {link.name}
@@ -81,7 +80,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
           )}
         </div>
       ))}
-      <Button 
+      <Button
         className="ml-4 bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
         onClick={(e: React.MouseEvent) => {
           if (location.pathname === '/') {
@@ -116,7 +115,7 @@ const SubmenuDropdown: React.FC<SubmenuDropdownProps> = ({ isActive, submenuItem
         <Link
           key={subItem.name}
           to={subItem.path}
-          className="block px-4 py-2 text-sm text-[#3a4150] hover:bg-gray-50 hover:text-[#3a4150]/80"
+          className="block px-4 py-2 text-sm text-[#3a4150] hover:bg-gray-50 hover:text-[#d9ab57]"
           onClick={onItemClick}
         >
           {subItem.name}
