@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -26,21 +27,21 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
             </span>
           </ScrollReveal>
           <ScrollReveal delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-white">
               Digital Solutions That Power <span className="gradient-text">Growth</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={400}>
-            <p className="text-lg text-gray-600 mb-4">
+            <p className="text-lg text-white mb-4">
               Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={600}>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
+              <Button className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
                 Get a Free Strategy Call
               </Button>
-              <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => onScrollToSection('services')}>
+              <Button variant="outline" className="border-white text-white hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => onScrollToSection('services')}>
                 Explore Services
               </Button>
             </div>
