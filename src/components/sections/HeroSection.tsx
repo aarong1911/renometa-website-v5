@@ -22,7 +22,7 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
           </ScrollReveal>
           <ScrollReveal delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
-              Digital Solutions That Power <span className="gradient-text">Growth</span>
+              Digital Solutions That Power Growth
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={400}>
