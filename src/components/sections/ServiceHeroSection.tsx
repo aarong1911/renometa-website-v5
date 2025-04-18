@@ -31,12 +31,12 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceH
       <div 
         className="absolute inset-0 z-0 bg-cover bg-center bg-no-repeat" 
         style={{ 
-          backgroundImage: `url(${heroImage || '/lovable-uploads/1ea2d555-f5e6-4ea2-a766-d4fe68d02d39.png'})`,
+          backgroundImage: `url(${heroImage})`,
           backgroundSize: 'cover',
-          filter: 'brightness(0.7)'
+          filter: 'brightness(0.3)'
         }}
       ></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark/90 to-blue-light/90 mix-blend-multiply z-0"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-30 z-0"></div>
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[60vh] relative z-10">
         <div className="w-full max-w-3xl space-y-8">
           <ScrollReveal>
@@ -64,7 +64,7 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceH
               </Button>
               <Button 
                 variant="outline" 
-                className="border-white text-white hover:bg-blue-light hover:text-white transition-colors duration-300"
+                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
                 onClick={() => scrollToSection('process')}
               >
                 Learn More

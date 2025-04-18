@@ -10,15 +10,7 @@ interface HeroSectionProps {
 const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
   return (
     <section id="hero" className="hero-section relative">
-      <div 
-        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
-        style={{
-          backgroundImage: "url('/lovable-uploads/1ea2d555-f5e6-4ea2-a766-d4fe68d02d39.png')",
-          backgroundSize: 'cover',
-          filter: 'brightness(0.9)'
-        }}
-      ></div>
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark/80 to-blue-light/80 mix-blend-multiply"></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
         <div className="w-full max-w-3xl space-y-10">
           <ScrollReveal>
@@ -27,21 +19,21 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
             </span>
           </ScrollReveal>
           <ScrollReveal delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-white">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
               Digital Solutions That Power <span className="gradient-text">Growth</span>
             </h1>
           </ScrollReveal>
           <ScrollReveal delay={400}>
-            <p className="text-lg text-white mb-4">
+            <p className="text-lg text-gray-600 mb-4">
               Custom digital solutions designed to help remodeling and home service businesses attract more leads, close more deals, and deliver exceptional customer experiences.
             </p>
           </ScrollReveal>
           <ScrollReveal delay={600}>
             <div className="flex flex-wrap gap-4 justify-center">
-              <Button className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
+              <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
                 Get a Free Strategy Call
               </Button>
-              <Button variant="outline" className="border-white text-white hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => onScrollToSection('services')}>
+              <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => onScrollToSection('services')}>
                 Explore Services
               </Button>
             </div>
