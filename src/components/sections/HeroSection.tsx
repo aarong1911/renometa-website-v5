@@ -10,7 +10,7 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
   return (
     <section
       id="hero"
-      className="hero-section relative bg-cover bg-center bg-no-repeat"
+      className="hero-section relative bg-cover bg-center bg-no-repeat pt-32"
       style={{
         backgroundImage: 'url("/images/ChatGPT Image Hero Section.png")',
       }}
