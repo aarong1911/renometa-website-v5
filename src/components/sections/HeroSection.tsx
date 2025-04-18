@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -10,7 +9,15 @@ interface HeroSectionProps {
 const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
   return (
     <section id="hero" className="hero-section relative">
-      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
+      <div 
+        className="absolute inset-0 bg-cover bg-center bg-no-repeat"
+        style={{
+          backgroundImage: "url('/lovable-uploads/1ea2d555-f5e6-4ea2-a766-d4fe68d02d39.png')",
+          backgroundSize: 'cover',
+          filter: 'brightness(0.9)'
+        }}
+      ></div>
+      <div className="absolute inset-0 bg-gradient-to-br from-blue-dark/80 to-blue-light/80 mix-blend-multiply"></div>
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
         <div className="w-full max-w-3xl space-y-10">
           <ScrollReveal>
