@@ -9,11 +9,8 @@ interface HeroSectionProps {
 const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
   return (
     <section
-      id="hero"
-      className="hero-section relative bg-no-repeat bg-top bg-contain pt-[96px] min-h-[80vh]"
-      style={{
-        backgroundImage: 'url("/images/ChatGPT Image Version 3.png")',
-      }}
+  id="hero"
+  className="hero-section relative pt-[96px] min-h-[80vh]"
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-10">
