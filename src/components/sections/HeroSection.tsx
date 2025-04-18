@@ -19,7 +19,7 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
         loop
         playsInline
         preload="auto"
-        className="absolute top-0 left-0 w-full h-full object-cover z-0"
+        className="absolute top-0 left-0 w-full h-full object-cover z-0 backdrop-brightness-75"
       >
         <source src="/video-hero-section.mp4" type="video/mp4" />
         Your browser does not support the video tag.
