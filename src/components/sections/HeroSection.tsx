@@ -26,7 +26,7 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
       </video>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-black/40 z-10" />
+      <div className="absolute inset-0 bg-black/20 z-10" />
 
       {/* Content */}
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-20">
