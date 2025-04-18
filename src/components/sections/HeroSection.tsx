@@ -12,7 +12,7 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
       id="hero"
       className="hero-section relative bg-cover bg-center bg-no-repeat pt-32"
       style={{
-        backgroundImage: 'url("/images/ChatGPT Image Version 2.png")',
+        backgroundImage: 'url("/images/ChatGPT Image Version 3.png")',
       }}
     >
       <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0"></div>
