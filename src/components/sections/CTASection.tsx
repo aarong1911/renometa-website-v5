@@ -38,6 +38,9 @@ const CTASection = ({
           </div>
         </div>
       </div>
+
+      {/* White padding at bottom */}
+      <div className="w-full mt-12 h-16 bg-white" />
     </section>
   );
 };
