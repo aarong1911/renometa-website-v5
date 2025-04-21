@@ -15,7 +15,8 @@ const CTASection = ({
   className = "bg-gradient-to-br from-blue-dark to-blue-light text-white" 
 }: CTASectionProps) => {
   return (
-    <section className={`section ${className}`}>
+    // Make the section full width and add horizontal padding on the section itself instead of "section" class
+    <section className={`${className} w-full py-20 px-6 md:px-8 lg:px-12`}>
       <div className="container-custom">
         <div className="flex flex-col md:flex-row items-center justify-between">
           <div className="w-full md:w-1/2 mb-8 md:mb-0">
@@ -42,3 +43,4 @@ const CTASection = ({
 };
 
 export default CTASection;
+
