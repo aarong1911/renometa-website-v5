@@ -11,6 +11,7 @@ interface ServiceCardProps {
   link: string;
   className?: string;
   delay?: number;
+  showLearnMore?: boolean;
 }
 
 const ServiceCard = ({
@@ -19,7 +20,8 @@ const ServiceCard = ({
   icon,
   link,
   className,
-  delay = 0
+  delay = 0,
+  showLearnMore = true
 }: ServiceCardProps) => {
   return (
     <ScrollReveal delay={delay}>
@@ -37,20 +39,22 @@ const ServiceCard = ({
           <CardContent>
             <CardDescription className="text-gray-600">{description}</CardDescription>
           </CardContent>
-          <CardFooter>
-            <span className="text-gold font-medium flex items-center group">
-              Learn more
-              <svg 
-                xmlns="http://www.w3.org/2000/svg" 
-                className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" 
-                fill="none" 
-                viewBox="0 0 24 24" 
-                stroke="currentColor"
-              >
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
-            </span>
-          </CardFooter>
+          {showLearnMore && (
+            <CardFooter>
+              <span className="text-gold font-medium flex items-center group">
+                Learn more
+                <svg 
+                  xmlns="http://www.w3.org/2000/svg" 
+                  className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" 
+                  fill="none" 
+                  viewBox="0 0 24 24" 
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                </svg>
+              </span>
+            </CardFooter>
+          )}
         </Card>
       </Link>
     </ScrollReveal>

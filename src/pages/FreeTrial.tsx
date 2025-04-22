@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { Button } from '@/components/ui/button';
@@ -98,6 +97,7 @@ const FreeTrial = () => {
                 icon={feature.icon}
                 link={feature.link}
                 delay={index * 100}
+                showLearnMore={false}
               />
             ))}
           </div>
