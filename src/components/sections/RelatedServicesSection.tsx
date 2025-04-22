@@ -37,6 +37,18 @@ const RelatedServicesSection = ({ relatedServices, title }: RelatedServicesSecti
                 <div className="bg-white p-6 rounded-lg border shadow-sm hover:shadow-md transition-all hover:-translate-y-1 h-full">
                   <h3 className="text-xl font-bold font-heading mb-3 text-blue-dark">{service.title}</h3>
                   <p className="text-gray-600 mb-4">{service.description}</p>
+                  <span className="text-gold font-medium flex items-center group">
+                    Learn more
+                    <svg 
+                      xmlns="http://www.w3.org/2000/svg" 
+                      className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform" 
+                      fill="none" 
+                      viewBox="0 0 24 24" 
+                      stroke="currentColor"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                    </svg>
+                  </span>
                 </div>
               </Link>
             </ScrollReveal>
