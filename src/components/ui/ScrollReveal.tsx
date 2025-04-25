@@ -8,6 +8,7 @@ interface ScrollRevealProps {
   threshold?: number;
   delay?: number;
   direction?: 'up' | 'down' | 'left' | 'right' | 'none';
+  wide?: boolean;
 }
 
 const ScrollReveal = ({
@@ -16,6 +17,7 @@ const ScrollReveal = ({
   threshold = 0.1,
   delay = 0,
   direction = 'up',
+  wide = false
 }: ScrollRevealProps) => {
   const [isVisible, setIsVisible] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
@@ -63,6 +65,7 @@ const ScrollReveal = ({
       ref={ref}
       className={cn(
         'transition-all duration-700 ease-out',
+        wide ? 'w-full' : 'max-w-3xl mx-auto', // Added width control
         !isVisible && 'opacity-0',
         !isVisible && direction !== 'none' && getDirectionStyle(),
         className
@@ -75,3 +78,4 @@ const ScrollReveal = ({
 };
 
 export default ScrollReveal;
+
