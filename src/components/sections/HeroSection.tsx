@@ -20,16 +20,14 @@ const HeroSection = ({
 
       {/* Content */}
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-20">
-        <div className="w-[90%] max-w-5xl space-y-10 text-left">
+        <div className="w-[90%] max-w-3xl space-y-10">
           <ScrollReveal>
             <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 mt-16 md:mt-0 inline-block">
               For Remodeling & Home Service Businesses
             </span>
           </ScrollReveal>
           <ScrollReveal delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark break-words">
-              Our digital tool belt delivers seamless operations and rapid expansion for your business
-            </h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">Our digital tool belt delivers seamless operations and rapid expansion for your business</h1>
           </ScrollReveal>
           <ScrollReveal delay={400}>
             <p className="text-lg text-gray-700 mb-4">
@@ -37,7 +35,7 @@ const HeroSection = ({
             </p>
           </ScrollReveal>
           <ScrollReveal delay={600}>
-            <div className="flex flex-wrap gap-4 justify-start">
+            <div className="flex flex-wrap gap-4 justify-center">
               <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
                 Get a Free Strategy Call
               </Button>
