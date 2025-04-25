@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -19,7 +20,7 @@ const HeroSection = ({
 
       {/* Content */}
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-20">
-        <div className="w-full max-w-3xl space-y-10">
+        <div className="w-[90%] max-w-3xl space-y-10">
           <ScrollReveal>
             <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 mt-16 md:mt-0 inline-block">
               For Remodeling & Home Service Businesses
