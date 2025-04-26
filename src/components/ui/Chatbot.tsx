@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +21,6 @@ type UserInfo = {
   phone: string;
 };
 
-// Common information about services that the chatbot can retrieve
 const serviceInfo = {
   'website development': 'Our Smart Website Development service creates beautiful, responsive websites optimized for remodeling businesses with lead generation capabilities.',
   'seo': 'Our Advanced SEO service improves your online visibility with local search optimization, content strategy, and performance tracking.',
@@ -32,7 +30,6 @@ const serviceInfo = {
   'performance': 'Our Performance Optimization service improves your website speed, user experience, and conversion rates through data-driven improvements.'
 };
 
-// FAQ responses that the chatbot can retrieve
 const faqResponses = {
   'pricing': 'Our service pricing varies based on your specific needs. We offer customized packages starting at $1,500. For a detailed quote, please schedule a consultation.',
   'timeline': 'Most projects are completed within 3-6 weeks, depending on scope and complexity. We provide detailed timelines during our initial consultation.',
@@ -59,8 +56,7 @@ const Chatbot = () => {
   const [autoCloseTimer, setAutoCloseTimer] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
-  
-  // Generate time slots from 8am to 6pm EST
+
   const timeSlots: TimeSlot[] = [];
   for (let hour = 8; hour <= 18; hour++) {
     const period = hour >= 12 ? 'PM' : 'AM';
@@ -83,7 +79,6 @@ const Chatbot = () => {
     }
   }
 
-  // Send welcome message when chat is first opened
   useEffect(() => {
     if (isOpen && messages.length === 0) {
       setMessages([
@@ -96,14 +91,12 @@ const Chatbot = () => {
     }
   }, [isOpen]);
 
-  // Auto scroll to bottom when new messages are added
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
 
-  // Handle auto-close timer for chat
   useEffect(() => {
     if (autoCloseTimer) {
       const timer = setTimeout(() => {
@@ -191,13 +184,11 @@ const Chatbot = () => {
     const updatedInfo = { ...userInfo };
     const updatedMessages = [...messages];
     
-    // Add user message
     updatedMessages.push({
       type: 'user',
       content: userInput
     });
     
-    // Process based on current field
     if (currentInfoField === 'name') {
       updatedInfo.name = userInput;
       updatedMessages.push({
@@ -226,7 +217,6 @@ const Chatbot = () => {
     } else if (currentInfoField === 'phone') {
       updatedInfo.phone = userInput;
       
-      // All info collected, show confirmation
       updatedMessages.push({
         type: 'bot',
         content: `Thank you! Here's a summary of your appointment:
@@ -251,11 +241,8 @@ Would you like to confirm this appointment?`
     setIsSubmitting(true);
     
     try {
-      // In a real app, you would send this data to your backend
-      // For demonstration, we'll simulate an API call
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      // Format the email body
       const emailBody = `
 New Appointment Request:
 -----------------------
@@ -269,7 +256,6 @@ Phone: ${userInfo.phone}
       console.log("Appointment submission:", emailBody);
       console.log("Would send email to: support@renometa.com");
       
-      // Add success message
       setMessages([
         ...messages,
         {
@@ -283,7 +269,6 @@ Phone: ${userInfo.phone}
         description: `Your appointment on ${format(selectedDate!, 'MMMM d, yyyy')} at ${selectedTime} has been scheduled.`,
       });
       
-      // Move to post-confirmation state
       setStep('post_confirmation');
     } catch (error) {
       console.error("Error submitting appointment:", error);
@@ -318,7 +303,6 @@ Phone: ${userInfo.phone}
           content: 'Thank you, and have a great day!'
         }
       ]);
-      // Set timer to close chat after 3 seconds
       setAutoCloseTimer(Date.now());
     } else {
       setMessages([
@@ -332,7 +316,6 @@ Phone: ${userInfo.phone}
           content: 'How can I help?'
         }
       ]);
-      // Return to info state to continue conversation
       setStep('info');
     }
   };
@@ -356,7 +339,6 @@ Phone: ${userInfo.phone}
 
   const toggleChat = () => {
     setIsOpen(!isOpen);
-    // Clear the auto-close timer if the user toggles the chat manually
     if (autoCloseTimer) {
       setAutoCloseTimer(null);
     }
@@ -367,7 +349,6 @@ Phone: ${userInfo.phone}
     
     const lowercaseQuery = query.toLowerCase();
     
-    // Add user message
     setMessages(prev => [
       ...prev,
       {
@@ -376,17 +357,14 @@ Phone: ${userInfo.phone}
       }
     ]);
     
-    // Check if query matches any service information
     const serviceMatch = Object.entries(serviceInfo).find(([key]) => 
       lowercaseQuery.includes(key)
     );
     
-    // Check if query matches any FAQ
     const faqMatch = Object.entries(faqResponses).find(([key]) => 
       lowercaseQuery.includes(key)
     );
     
-    // Determine response based on matches
     let botResponse = '';
     
     if (serviceMatch) {
@@ -399,7 +377,6 @@ Phone: ${userInfo.phone}
                lowercaseQuery.includes('meeting')) {
       botResponse = 'Would you like to schedule an appointment? I can help you with that!';
       
-      // Add option to transition to scheduling flow
       setTimeout(() => {
         setMessages(prev => [
           ...prev,
@@ -409,15 +386,12 @@ Phone: ${userInfo.phone}
           }
         ]);
         
-        // Show scheduling option
         setStep('initial');
       }, 500);
-      
     } else {
       botResponse = "I'm not sure I understand your question. Would you like to know about our services, or would you prefer to schedule an appointment with our team?";
     }
     
-    // Add bot response
     setTimeout(() => {
       setMessages(prev => [
         ...prev,
@@ -433,7 +407,6 @@ Phone: ${userInfo.phone}
 
   return (
     <>
-      {/* Chat toggle button */}
       <button 
         className="fixed bottom-6 right-6 bg-gold hover:bg-gold-light text-blue-dark p-4 rounded-full shadow-lg z-50 transition-colors"
         onClick={toggleChat}
@@ -446,10 +419,8 @@ Phone: ${userInfo.phone}
         )}
       </button>
 
-      {/* Chat window */}
       {isOpen && (
         <div className="fixed bottom-20 right-6 w-80 sm:w-96 bg-white rounded-lg shadow-xl z-50 flex flex-col max-h-[70vh] border border-gray-200">
-          {/* Chat header */}
           <div className="bg-blue-dark text-white px-4 py-3 rounded-t-lg flex justify-between items-center">
             <div className="flex items-center">
               <img 
@@ -464,7 +435,6 @@ Phone: ${userInfo.phone}
             </button>
           </div>
 
-          {/* Chat messages */}
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
               <div 
@@ -489,7 +459,6 @@ Phone: ${userInfo.phone}
             <div ref={messagesEndRef} />
           </div>
 
-          {/* Interactive elements based on current step */}
           <div className="border-t border-gray-200 p-4">
             {step === 'initial' && (
               <div className="flex flex-col space-y-2">
@@ -538,13 +507,12 @@ Phone: ${userInfo.phone}
                   selected={selectedDate}
                   onSelect={handleDateSelect}
                   disabled={(date) => {
-                    // Disable dates in the past and weekends
                     const now = new Date();
                     now.setHours(0, 0, 0, 0);
                     const day = date.getDay();
                     return date < now || day === 0 || day === 6;
                   }}
-                  className="rounded border mx-auto bg-white p-3 pointer-events-auto"
+                  className="rounded border mx-auto bg-white p-2 pointer-events-auto scale-75 transform origin-top"
                 />
                 <Button onClick={handleReset} variant="outline" className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
                   Start Over
