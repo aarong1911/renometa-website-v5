@@ -502,18 +502,21 @@ Phone: ${userInfo.phone}
 
             {step === 'date' && (
               <div className="flex flex-col space-y-3">
-                <Calendar
-                  mode="single"
-                  selected={selectedDate}
-                  onSelect={handleDateSelect}
-                  disabled={(date) => {
-                    const now = new Date();
-                    now.setHours(0, 0, 0, 0);
-                    const day = date.getDay();
-                    return date < now || day === 0 || day === 6;
-                  }}
-                  className="rounded border mx-auto bg-white p-2 pointer-events-auto scale-75 transform origin-top"
-                />
+                <div className="mx-auto transform scale-65 origin-top">
+                  <Calendar
+                    mode="single"
+                    selected={selectedDate}
+                    onSelect={handleDateSelect}
+                    disabled={(date) => {
+                      const now = new Date();
+                      now.setHours(0, 0, 0, 0);
+                      const day = date.getDay();
+                      return date < now || day === 0 || day === 6;
+                    }}
+                    initialFocus
+                    className="rounded border bg-white pointer-events-auto"
+                  />
+                </div>
                 <Button onClick={handleReset} variant="outline" className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
                   Start Over
                 </Button>
