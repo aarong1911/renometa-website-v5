@@ -1,12 +1,16 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Calendar } from '@/components/ui/calendar';
 import { format } from 'date-fns';
-import { cn } from '@/lib/utils';
-import { MessageSquare, X, Calendar as CalendarIcon, Mail, Phone, User } from 'lucide-react';
+import { MessageSquare, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import ChatHeader from '@/components/chat/ChatHeader';
+import ChatMessage from '@/components/chat/ChatMessage';
+import ChatDatePicker from '@/components/chat/ChatDatePicker';
+import ChatTimePicker from '@/components/chat/ChatTimePicker';
+import ChatUserInfoForm from '@/components/chat/ChatUserInfoForm';
+import ChatConfirmation from '@/components/chat/ChatConfirmation';
+import ChatPostConfirmation from '@/components/chat/ChatPostConfirmation';
 
 type TimeSlot = {
   hour: number;
@@ -421,40 +425,11 @@ Phone: ${userInfo.phone}
 
       {isOpen && (
         <div className="fixed bottom-20 right-6 w-80 sm:w-96 bg-white rounded-lg shadow-xl z-50 flex flex-col max-h-[70vh] border border-gray-200">
-          <div className="bg-blue-dark text-white px-4 py-3 rounded-t-lg flex justify-between items-center">
-            <div className="flex items-center">
-              <img 
-                src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
-                alt="RenoMeta Logo" 
-                className="h-8 mr-2"
-              />
-              <span className="font-medium">RenoMeta Support</span>
-            </div>
-            <button onClick={toggleChat} className="text-white hover:text-gray-200" aria-label="Close chat">
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+          <ChatHeader onClose={toggleChat} />
 
           <div className="flex-1 overflow-y-auto p-4 space-y-4">
             {messages.map((message, index) => (
-              <div 
-                key={index}
-                className={cn(
-                  "flex",
-                  message.type === 'user' ? "justify-end" : "justify-start"
-                )}
-              >
-                <div 
-                  className={cn(
-                    "max-w-[80%] rounded-lg px-4 py-2",
-                    message.type === 'user' 
-                      ? "bg-gold text-white rounded-br-none" 
-                      : "bg-gray-100 text-gray-800 rounded-bl-none"
-                  )}
-                >
-                  {message.content}
-                </div>
-              </div>
+              <ChatMessage key={index} type={message.type} content={message.content} />
             ))}
             <div ref={messagesEndRef} />
           </div>
@@ -501,119 +476,42 @@ Phone: ${userInfo.phone}
             )}
 
             {step === 'date' && (
-              <div className="flex flex-col space-y-3">
-                <div className="mx-auto transform scale-65 origin-top">
-                  <Calendar
-                    mode="single"
-                    selected={selectedDate}
-                    onSelect={handleDateSelect}
-                    disabled={(date) => {
-                      const now = new Date();
-                      now.setHours(0, 0, 0, 0);
-                      const day = date.getDay();
-                      return date < now || day === 0 || day === 6;
-                    }}
-                    initialFocus
-                    className="rounded border bg-white pointer-events-auto"
-                  />
-                </div>
-                <Button onClick={handleReset} variant="outline" className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
-                  Start Over
-                </Button>
-              </div>
+              <ChatDatePicker 
+                selectedDate={selectedDate}
+                onDateSelect={handleDateSelect}
+                onReset={handleReset}
+              />
             )}
 
             {step === 'time' && (
-              <div className="flex flex-col space-y-3">
-                <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-                  {timeSlots.map((slot, i) => (
-                    <Button 
-                      key={i}
-                      onClick={() => handleTimeSelect(slot.formatted)}
-                      variant="outline"
-                      className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
-                    >
-                      {slot.formatted}
-                    </Button>
-                  ))}
-                </div>
-                <Button onClick={handleReset} variant="outline" className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
-                  Start Over
-                </Button>
-              </div>
+              <ChatTimePicker 
+                onTimeSelect={handleTimeSelect}
+                onReset={handleReset}
+              />
             )}
             
             {step === 'user_info' && (
-              <div className="flex flex-col space-y-3">
-                <form onSubmit={handleInfoInput} className="flex gap-2">
-                  <div className="relative w-full">
-                    <div className="absolute left-2 top-1/2 -translate-y-1/2 text-gray-500">
-                      {currentInfoField === 'name' && <User className="h-5 w-5" />}
-                      {currentInfoField === 'email' && <Mail className="h-5 w-5" />}
-                      {currentInfoField === 'phone' && <Phone className="h-5 w-5" />}
-                    </div>
-                    <Input 
-                      type={currentInfoField === 'email' ? 'email' : 'text'}
-                      placeholder={
-                        currentInfoField === 'name' ? 'Your name' : 
-                        currentInfoField === 'email' ? 'Your email' : 
-                        'Your phone number'
-                      }
-                      className="pl-10 w-full border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-gold"
-                      value={userInput}
-                      onChange={(e) => setUserInput(e.target.value)}
-                    />
-                  </div>
-                  <Button type="submit" className="bg-gold hover:bg-gold-light text-blue-dark">
-                    Next
-                  </Button>
-                </form>
-                <Button onClick={handleReset} variant="outline" className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
-                  Cancel
-                </Button>
-              </div>
+              <ChatUserInfoForm
+                currentField={currentInfoField}
+                userInput={userInput}
+                onInputChange={setUserInput}
+                onSubmit={handleInfoInput}
+                onReset={handleReset}
+              />
             )}
 
             {step === 'confirmation' && (
-              <div className="flex flex-col space-y-3">
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={submitAppointment} 
-                    className="bg-gold hover:bg-gold-light text-blue-dark flex-1"
-                    disabled={isSubmitting}
-                  >
-                    {isSubmitting ? 'Submitting...' : 'Confirm Appointment'}
-                  </Button>
-                  <Button 
-                    onClick={handleReset} 
-                    variant="outline" 
-                    className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
-                    disabled={isSubmitting}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
+              <ChatConfirmation
+                isSubmitting={isSubmitting}
+                onSubmit={submitAppointment}
+                onReset={handleReset}
+              />
             )}
             
             {step === 'post_confirmation' && (
-              <div className="flex flex-col space-y-3">
-                <div className="flex gap-2">
-                  <Button 
-                    onClick={() => handlePostConfirmation('yes')} 
-                    className="bg-gold hover:bg-gold-light text-blue-dark flex-1"
-                  >
-                    Yes, I have another question
-                  </Button>
-                  <Button 
-                    onClick={() => handlePostConfirmation('no')} 
-                    variant="outline" 
-                    className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
-                  >
-                    No, that's all
-                  </Button>
-                </div>
-              </div>
+              <ChatPostConfirmation
+                onConfirm={handlePostConfirmation}
+              />
             )}
           </div>
         </div>
