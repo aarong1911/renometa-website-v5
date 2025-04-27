@@ -238,36 +238,8 @@ Would you like to confirm this appointment?`);
   const processUserQuery = (query: string) => {
     if (!query.trim()) return;
     
-    const lowercaseQuery = query.toLowerCase();
     addUserMessage(query);
-    
-    const serviceMatch = Object.entries(serviceInfo).find(([key]) => 
-      lowercaseQuery.includes(key)
-    );
-    
-    const faqMatch = Object.entries(faqResponses).find(([key]) => 
-      lowercaseQuery.includes(key)
-    );
-    
-    let botResponse = '';
-    
-    if (serviceMatch) {
-      botResponse = serviceMatch[1];
-    } else if (faqMatch) {
-      botResponse = faqResponses[faqMatch[0] as keyof typeof faqResponses];
-    } else if (lowercaseQuery.includes('appointment') || 
-               lowercaseQuery.includes('schedule') || 
-               lowercaseQuery.includes('book') ||
-               lowercaseQuery.includes('meeting')) {
-      botResponse = 'Would you like to schedule an appointment? I can help you with that!';
-      
-      setTimeout(() => {
-        addBotMessage('Would you like to schedule now?');
-        setStep('initial');
-      }, 500);
-    } else {
-      botResponse = "I'm not sure I understand your question. Would you like to know about our services, or would you prefer to schedule an appointment with our team?";
-    }
+    const botResponse = findRelevantContent(query);
     
     setTimeout(() => {
       addBotMessage(botResponse);
