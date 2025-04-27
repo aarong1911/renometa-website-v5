@@ -57,7 +57,8 @@ const Chatbot = () => {
     messages,
     addUserMessage,
     addBotMessage,
-    resetMessages
+    resetMessages,
+    findRelevantContent
   } = useChatMessages();
 
   const {
