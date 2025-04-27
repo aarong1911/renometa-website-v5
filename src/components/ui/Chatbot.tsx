@@ -13,6 +13,7 @@ import ChatPostConfirmation from '@/components/chat/ChatPostConfirmation';
 import { useChatMessages } from '@/hooks/useChatMessages';
 import { useAppointment } from '@/hooks/useAppointment';
 import { useUserInfo } from '@/hooks/useUserInfo';
+import { Input } from '@/components/ui/input';
 
 type TimeSlot = {
   hour: number;
