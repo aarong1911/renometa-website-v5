@@ -6,7 +6,7 @@ export type Message = {
   content: string;
 };
 
-// Website content knowledge base
+// Enhanced website content knowledge base
 const websiteContent = {
   services: {
     'website development': 'Our Smart Website Development service creates beautiful, responsive websites optimized for remodeling businesses with lead generation capabilities.',
@@ -15,6 +15,21 @@ const websiteContent = {
     'automation': 'Our Intelligent Automation service streamlines repetitive tasks in your remodeling business workflow for increased efficiency.',
     'integration': 'Our Seamless Integration service connects your business tools and software to create a unified system with real-time data flow.',
     'performance': 'Our Performance Optimization service improves your website speed, user experience, and conversion rates through data-driven improvements.'
+  },
+  testimonials: {
+    'kitchen remodeling': 'Our website leads have doubled since working with RenoMeta. Their understanding of the remodeling industry made all the difference. - Michael Rodriguez, Owner at Rodriguez Remodeling',
+    'windows': 'The AI agents have transformed our business. We\'re booking jobs 24/7 and our team can focus on the work instead of answering basic questions. - Sarah Johnson, Operations Manager at Johnson Home Services',
+    'seo results': 'The SEO work they\'ve done has put us at the top of local searches. We\'re now the first call for homeowners in our area. - David Chen, Marketing Director at Luxe Bathroom Renovations'
+  },
+  caseStudies: {
+    'elite remodeling': 'Elite Remodeling Co. doubled their qualified leads while cutting ad spend by 30% through our website development and optimization services.',
+    'superior windows': 'Superior Windows & Doors transformed their website into a lead generation machine, achieving an 87% increase in conversion rate.',
+    'precision plumbing': 'Precision Plumbing increased after-hours bookings by 215% using our AI agents, while maintaining a 98% customer satisfaction rate.'
+  },
+  blog: {
+    'website tips': '7 Website Must-Haves for Remodeling Companies: Essential elements that every remodeling website needs to convert visitors into qualified leads.',
+    'ai revolution': 'How AI is Revolutionizing Customer Service in Home Services: Learn how artificial intelligence is changing how home service businesses handle customer interactions.',
+    'local seo': 'Local SEO: The Ultimate Guide for Contractors - A complete guide to dominating local search results and attracting more customers in your service area.'
   },
   about: 'RenoMeta isn\'t your average marketing agency — we\'re the digital backbone for remodeling, HVAC, and home service companies ready to scale. We combine smart websites, advanced SEO, AI-powered agents, and intelligent automation into one seamless system designed to attract, convert, and retain customers.',
   faq: {
@@ -58,6 +73,27 @@ export const useChatMessages = () => {
         return description;
       }
     }
+
+    // Check for testimonial-related questions
+    for (const [topic, testimony] of Object.entries(websiteContent.testimonials)) {
+      if (lowercaseQuery.includes(topic) || lowercaseQuery.includes('testimonial') || lowercaseQuery.includes('review')) {
+        return testimony;
+      }
+    }
+
+    // Check for case study related questions
+    for (const [company, study] of Object.entries(websiteContent.caseStudies)) {
+      if (lowercaseQuery.includes(company) || lowercaseQuery.includes('case study') || lowercaseQuery.includes('success story')) {
+        return study;
+      }
+    }
+
+    // Check for blog related questions
+    for (const [topic, article] of Object.entries(websiteContent.blog)) {
+      if (lowercaseQuery.includes(topic) || lowercaseQuery.includes('article') || lowercaseQuery.includes('blog')) {
+        return article;
+      }
+    }
     
     // Check for FAQ questions
     for (const [topic, answer] of Object.entries(websiteContent.faq)) {
@@ -74,7 +110,7 @@ export const useChatMessages = () => {
     }
     
     // Default response for unknown queries
-    return "I'll help you learn more about our services. Would you like to know about our website development, SEO, AI agents, automation, integration, or performance optimization services? Or would you prefer to schedule a consultation?";
+    return "I can help you learn more about our services, share success stories, or discuss how we can help your business. Would you like to know about our website development, SEO, AI agents, automation, integration, or performance optimization services? Or would you prefer to hear some client testimonials or case studies?";
   };
 
   return {
@@ -86,4 +122,3 @@ export const useChatMessages = () => {
     findRelevantContent
   };
 };
-
