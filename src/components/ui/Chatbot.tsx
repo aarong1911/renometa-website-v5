@@ -1,9 +1,8 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { format } from 'date-fns';
 import { MessageSquare, X } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
 import ChatHeader from '@/components/chat/ChatHeader';
 import ChatMessage from '@/components/chat/ChatMessage';
 import ChatDatePicker from '@/components/chat/ChatDatePicker';
@@ -11,6 +10,9 @@ import ChatTimePicker from '@/components/chat/ChatTimePicker';
 import ChatUserInfoForm from '@/components/chat/ChatUserInfoForm';
 import ChatConfirmation from '@/components/chat/ChatConfirmation';
 import ChatPostConfirmation from '@/components/chat/ChatPostConfirmation';
+import { useChatMessages } from '@/hooks/useChatMessages';
+import { useAppointment } from '@/hooks/useAppointment';
+import { useUserInfo } from '@/hooks/useUserInfo';
 
 type TimeSlot = {
   hour: number;
@@ -45,61 +47,51 @@ const faqResponses = {
 
 const Chatbot = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<{type: 'user' | 'bot', content: string}[]>([]);
   const [step, setStep] = useState<'initial' | 'info' | 'schedule' | 'date' | 'time' | 'user_info' | 'confirmation' | 'post_confirmation'>('initial');
-  const [selectedDate, setSelectedDate] = useState<Date | undefined>(undefined);
-  const [selectedTime, setSelectedTime] = useState<string | undefined>(undefined);
-  const [userInput, setUserInput] = useState('');
-  const [userInfo, setUserInfo] = useState<UserInfo>({
-    name: '',
-    email: '',
-    phone: ''
-  });
-  const [currentInfoField, setCurrentInfoField] = useState<'name' | 'email' | 'phone'>('name');
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const [autoCloseTimer, setAutoCloseTimer] = useState<number | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const { toast } = useToast();
 
-  const timeSlots: TimeSlot[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour;
-    
-    timeSlots.push({
-      hour,
-      minute: 0,
-      period,
-      formatted: `${displayHour}:00 ${period}`
-    });
-    
-    if (hour < 18) {
-      timeSlots.push({
-        hour,
-        minute: 30,
-        period,
-        formatted: `${displayHour}:30 ${period}`
-      });
-    }
-  }
+  const {
+    messages,
+    addUserMessage,
+    addBotMessage,
+    resetMessages
+  } = useChatMessages();
 
-  useEffect(() => {
-    if (isOpen && messages.length === 0) {
-      setMessages([
-        {
-          type: 'bot',
-          content: 'Welcome to RenoMeta! How can we help you today?'
-        }
-      ]);
-      setStep('initial');
-    }
-  }, [isOpen]);
+  const {
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    isSubmitting,
+    setIsSubmitting,
+    timeSlots,
+    resetAppointment
+  } = useAppointment();
+
+  const {
+    userInfo,
+    userInput,
+    setUserInput,
+    currentInfoField,
+    setCurrentInfoField,
+    updateUserInfo,
+    resetUserInfo
+  } = useUserInfo();
 
   useEffect(() => {
     if (messagesEndRef.current) {
       messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [messages]);
+
+  useEffect(() => {
+    if (isOpen && messages.length === 0) {
+      resetMessages();
+      setStep('initial');
+    }
+  }, [isOpen]);
 
   useEffect(() => {
     if (autoCloseTimer) {
@@ -116,29 +108,11 @@ const Chatbot = () => {
     setStep(choice);
     
     if (choice === 'info') {
-      setMessages([
-        ...messages,
-        {
-          type: 'user',
-          content: 'I need information'
-        },
-        {
-          type: 'bot',
-          content: 'We offer digital services specifically designed for remodeling and home service businesses. Our services include Smart Website Development, Advanced SEO, AI-Powered Agents, Intelligent Automation, Seamless Integration, and Performance Optimization. What would you like to know more about?'
-        }
-      ]);
+      addUserMessage('I need information');
+      addBotMessage('We offer digital services specifically designed for remodeling and home service businesses. Our services include Smart Website Development, Advanced SEO, AI-Powered Agents, Intelligent Automation, Seamless Integration, and Performance Optimization. What would you like to know more about?');
     } else {
-      setMessages([
-        ...messages,
-        {
-          type: 'user',
-          content: 'I want to schedule an appointment'
-        },
-        {
-          type: 'bot',
-          content: 'Great! Let\'s schedule a consultation. Please select a date that works for you:'
-        }
-      ]);
+      addUserMessage('I want to schedule an appointment');
+      addBotMessage('Great! Let\'s schedule a consultation. Please select a date that works for you:');
       setStep('date');
     }
   };
@@ -147,33 +121,15 @@ const Chatbot = () => {
     if (!date) return;
     
     setSelectedDate(date);
-    setMessages([
-      ...messages,
-      {
-        type: 'user',
-        content: `I'd like to schedule on ${format(date, 'MMMM d, yyyy')}`
-      },
-      {
-        type: 'bot',
-        content: 'Great! Now please select a time (EST):'
-      }
-    ]);
+    addUserMessage(`I'd like to schedule on ${format(date, 'MMMM d, yyyy')}`);
+    addBotMessage('Great! Now please select a time (EST):');
     setStep('time');
   };
 
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
-    setMessages([
-      ...messages,
-      {
-        type: 'user',
-        content: `I'd like the ${time} slot`
-      },
-      {
-        type: 'bot',
-        content: 'Perfect! Now I need some basic information to schedule your appointment. What is your name?'
-      }
-    ]);
+    addUserMessage(`I'd like the ${time} slot`);
+    addBotMessage('Perfect! Now I need some basic information to schedule your appointment. What is your name?');
     setStep('user_info');
     setCurrentInfoField('name');
   };
@@ -181,63 +137,40 @@ const Chatbot = () => {
   const handleInfoInput = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!userInput.trim()) {
-      return;
-    }
+    if (!userInput.trim()) return;
     
-    const updatedInfo = { ...userInfo };
-    const updatedMessages = [...messages];
-    
-    updatedMessages.push({
-      type: 'user',
-      content: userInput
-    });
+    addUserMessage(userInput);
     
     if (currentInfoField === 'name') {
-      updatedInfo.name = userInput;
-      updatedMessages.push({
-        type: 'bot',
-        content: `Thanks ${userInput}! What's your email address?`
-      });
+      updateUserInfo('name', userInput);
+      addBotMessage(`Thanks ${userInput}! What's your email address?`);
       setCurrentInfoField('email');
     } else if (currentInfoField === 'email') {
       const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(userInput)) {
-        updatedMessages.push({
-          type: 'bot',
-          content: 'That doesn\'t seem like a valid email. Please enter a valid email address.'
-        });
-        setMessages(updatedMessages);
+        addBotMessage('That doesn\'t seem like a valid email. Please enter a valid email address.');
         setUserInput('');
         return;
       }
       
-      updatedInfo.email = userInput;
-      updatedMessages.push({
-        type: 'bot',
-        content: 'Great! And what\'s the best phone number to reach you?'
-      });
+      updateUserInfo('email', userInput);
+      addBotMessage('Great! And what\'s the best phone number to reach you?');
       setCurrentInfoField('phone');
     } else if (currentInfoField === 'phone') {
-      updatedInfo.phone = userInput;
+      updateUserInfo('phone', userInput);
       
-      updatedMessages.push({
-        type: 'bot',
-        content: `Thank you! Here's a summary of your appointment:
+      addBotMessage(`Thank you! Here's a summary of your appointment:
         
 Date: ${format(selectedDate!, 'MMMM d, yyyy')}
 Time: ${selectedTime} EST
-Name: ${updatedInfo.name}
-Email: ${updatedInfo.email}
-Phone: ${updatedInfo.phone}
+Name: ${userInfo.name}
+Email: ${userInfo.email}
+Phone: ${userInput}
 
-Would you like to confirm this appointment?`
-      });
+Would you like to confirm this appointment?`);
       setStep('confirmation');
     }
     
-    setUserInfo(updatedInfo);
-    setMessages(updatedMessages);
     setUserInput('');
   };
 
@@ -247,26 +180,13 @@ Would you like to confirm this appointment?`
     try {
       await new Promise(resolve => setTimeout(resolve, 1000));
       
-      const emailBody = `
-New Appointment Request:
------------------------
-Date: ${format(selectedDate!, 'MMMM d, yyyy')}
-Time: ${selectedTime} EST
-Name: ${userInfo.name}
-Email: ${userInfo.email}
-Phone: ${userInfo.phone}
-      `;
+      console.log("Appointment submission:", {
+        date: format(selectedDate!, 'MMMM d, yyyy'),
+        time: selectedTime,
+        ...userInfo
+      });
       
-      console.log("Appointment submission:", emailBody);
-      console.log("Would send email to: support@renometa.com");
-      
-      setMessages([
-        ...messages,
-        {
-          type: 'bot',
-          content: 'Your appointment has been scheduled! We\'ve sent the details to your email and our team will contact you to confirm. Is there anything else you\'d like to know?'
-        }
-      ]);
+      addBotMessage('Your appointment has been scheduled! We\'ve sent the details to your email and our team will contact you to confirm. Is there anything else you\'d like to know?');
       
       toast({
         title: "Appointment Scheduled",
@@ -276,13 +196,7 @@ Phone: ${userInfo.phone}
       setStep('post_confirmation');
     } catch (error) {
       console.error("Error submitting appointment:", error);
-      setMessages([
-        ...messages,
-        {
-          type: 'bot',
-          content: 'Sorry, there was an error scheduling your appointment. Please try again or contact us directly at support@renometa.com.'
-        }
-      ]);
+      addBotMessage('Sorry, there was an error scheduling your appointment. Please try again or contact us directly at support@renometa.com.');
       
       toast({
         title: "Error",
@@ -296,49 +210,21 @@ Phone: ${userInfo.phone}
 
   const handlePostConfirmation = (answer: 'yes' | 'no') => {
     if (answer === 'no') {
-      setMessages([
-        ...messages,
-        {
-          type: 'user',
-          content: 'No, that\'s all for now.'
-        },
-        {
-          type: 'bot',
-          content: 'Thank you, and have a great day!'
-        }
-      ]);
+      addUserMessage('No, that\'s all for now.');
+      addBotMessage('Thank you, and have a great day!');
       setAutoCloseTimer(Date.now());
     } else {
-      setMessages([
-        ...messages,
-        {
-          type: 'user',
-          content: 'Yes, I have another question.'
-        },
-        {
-          type: 'bot',
-          content: 'How can I help?'
-        }
-      ]);
+      addUserMessage('Yes, I have another question.');
+      addBotMessage('How can I help?');
       setStep('info');
     }
   };
 
   const handleReset = () => {
-    setMessages([
-      {
-        type: 'bot',
-        content: 'Welcome to RenoMeta! How can we help you today?'
-      }
-    ]);
+    resetMessages();
+    resetAppointment();
+    resetUserInfo();
     setStep('initial');
-    setSelectedDate(undefined);
-    setSelectedTime(undefined);
-    setUserInfo({
-      name: '',
-      email: '',
-      phone: ''
-    });
   };
 
   const toggleChat = () => {
@@ -352,14 +238,7 @@ Phone: ${userInfo.phone}
     if (!query.trim()) return;
     
     const lowercaseQuery = query.toLowerCase();
-    
-    setMessages(prev => [
-      ...prev,
-      {
-        type: 'user',
-        content: query
-      }
-    ]);
+    addUserMessage(query);
     
     const serviceMatch = Object.entries(serviceInfo).find(([key]) => 
       lowercaseQuery.includes(key)
@@ -382,14 +261,7 @@ Phone: ${userInfo.phone}
       botResponse = 'Would you like to schedule an appointment? I can help you with that!';
       
       setTimeout(() => {
-        setMessages(prev => [
-          ...prev,
-          {
-            type: 'bot',
-            content: 'Would you like to schedule now?'
-          }
-        ]);
-        
+        addBotMessage('Would you like to schedule now?');
         setStep('initial');
       }, 500);
     } else {
@@ -397,13 +269,7 @@ Phone: ${userInfo.phone}
     }
     
     setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          type: 'bot',
-          content: botResponse
-        }
-      ]);
+      addBotMessage(botResponse);
     }, 300);
     
     setUserInput('');
