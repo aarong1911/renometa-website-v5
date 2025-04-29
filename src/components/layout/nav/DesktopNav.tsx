@@ -41,7 +41,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
       {navLinks.map((link, index) => (
         <div key={link.name} className="relative group">
           {link.name === "Solutions" ? (
-            <div ref={menuRef} className="relative">
+            <div ref={menuRef} className="relative static-positioned">
               <button
                 className={cn(
                   'px-3 py-2 rounded-md text-sm font-medium transition-colors',
