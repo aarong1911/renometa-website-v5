@@ -1,172 +1,52 @@
-
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { Button } from '@/components/ui/button';
-import { cn } from '@/lib/utils';
-import { NavLink } from './types';
 import MegaMenu from './MegaMenu';
+import { Location } from 'react-router-dom';
 
 interface DesktopNavProps {
-  navLinks: NavLink[];
-  location: {
-    pathname: string;
-  };
-  scrollToSection: (sectionId: string) => void;
+  location: Location;
+  scrollToSection: (id: string) => void;
 }
 
-const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSection }) => {
-  const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
-  const [showMegaMenu, setShowMegaMenu] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  const toggleSubmenu = (index: number) => {
-    setActiveSubmenu(activeSubmenu === index ? null : index);
-  };
-
-  // Close mega menu when clicking outside
-  useEffect(() => {
-    function handleClickOutside(event: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
-        setShowMegaMenu(false);
-      }
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
-  }, [menuRef]);
+const DesktopNav: React.FC<DesktopNavProps> = ({ location, scrollToSection }) => {
+  const [solutionsOpen, setSolutionsOpen] = useState(false);
 
   return (
-    <nav className="hidden md:flex items-center space-x-1">
-      {navLinks.map((link, index) => (
-        <div key={link.name} className="relative group">
-          {link.name === "Solutions" ? (
-            <div ref={menuRef} className="relative static-positioned">
-              <button
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  showMegaMenu || location.pathname.startsWith('/solutions/') 
-                    ? 'text-[#d9ab57]'
-                    : 'text-[#3a4150] hover:text-[#d9ab57]'
-                )}
-                onMouseEnter={() => setShowMegaMenu(true)}
-                onClick={() => setShowMegaMenu(!showMegaMenu)}
-              >
-                {link.name}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 inline-block ml-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <MegaMenu 
-                isOpen={showMegaMenu} 
-                onClose={() => setShowMegaMenu(false)} 
-              />
-            </div>
-          ) : link.submenu ? (
-            <>
-              <button
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
-                    ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#d9ab57]'
-                )}
-                onClick={() => toggleSubmenu(index)}
-              >
-                {link.name}
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  className="h-4 w-4 inline-block ml-1"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-              </button>
-              <SubmenuDropdown
-                isActive={activeSubmenu === index}
-                submenuItems={link.submenu}
-                onItemClick={() => setActiveSubmenu(null)}
-              />
-            </>
-          ) : (
-            link.action ? (
-              <button
-                onClick={link.action}
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  location.pathname === link.path
-                    ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#d9ab57]'
-                )}
-              >
-                {link.name}
-              </button>
-            ) : (
-              <Link
-                to={link.path}
-                className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
-                  location.pathname === link.path
-                    ? 'text-[#3a4150]'
-                    : 'text-[#3a4150] hover:text-[#d9ab57]'
-                )}
-              >
-                {link.name}
-              </Link>
-            )
-          )}
-        </div>
-      ))}
-      <Button
-        className="ml-4 bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
-        onClick={(e: React.MouseEvent) => {
-          if (location.pathname === '/') {
-            scrollToSection('contact');
-          } else {
-            window.location.href = '/#contact';
-          }
-        }}
+    <nav className="hidden md:flex space-x-6 items-center">
+      <Link to="/" className="text-sm font-medium text-gray-800 hover:text-gray-900">Home</Link>
+
+      <div
+        className="relative"
+        onMouseEnter={() => setSolutionsOpen(true)}
+        onMouseLeave={() => setSolutionsOpen(false)}
+      >
+        <button className="text-sm font-medium text-gray-800 hover:text-gray-900">
+          Solutions <span className="ml-1">▾</span>
+        </button>
+        <MegaMenu isOpen={solutionsOpen} onClose={() => setSolutionsOpen(false)} />
+      </div>
+
+      <Link to="/blog" className="text-sm font-medium text-gray-800 hover:text-gray-900">Blog</Link>
+      <Link to="/about" className="text-sm font-medium text-gray-800 hover:text-gray-900">About</Link>
+
+      <Link
+        to={location.pathname === '/' ? '#contact' : '/contact'}
+        onClick={location.pathname === '/' ? (e) => {
+          e.preventDefault();
+          scrollToSection('contact');
+        } : undefined}
+        className="text-sm font-medium text-gray-800 hover:text-gray-900"
+      >
+        Contact
+      </Link>
+
+      <Link
+        to="/get-started"
+        className="ml-4 inline-block bg-gray-800 text-white text-sm font-semibold py-2 px-4 rounded-xl hover:bg-gray-700 transition"
       >
         Get Started
-      </Button>
+      </Link>
     </nav>
-  );
-};
-
-interface SubmenuDropdownProps {
-  isActive: boolean;
-  submenuItems: {
-    name: string;
-    path: string;
-  }[];
-  onItemClick: () => void;
-}
-
-const SubmenuDropdown: React.FC<SubmenuDropdownProps> = ({ isActive, submenuItems, onItemClick }) => {
-  return (
-    <div className={cn(
-      "absolute top-full left-0 bg-white shadow-lg rounded-md py-2 w-64 transition-all transform origin-top",
-      isActive ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"
-    )}>
-      {submenuItems.map(subItem => (
-        <Link
-          key={subItem.name}
-          to={subItem.path}
-          className="block px-4 py-2 text-sm text-[#3a4150] hover:bg-gray-50 hover:text-[#d9ab57]"
-          onClick={onItemClick}
-        >
-          {subItem.name}
-        </Link>
-      ))}
-    </div>
   );
 };
 
