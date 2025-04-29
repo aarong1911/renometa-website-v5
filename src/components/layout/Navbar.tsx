@@ -1,8 +1,10 @@
+
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import DesktopNav from './nav/DesktopNav';
 import MobileNav from './nav/MobileNav';
+import { NavLink } from './nav/types';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -10,44 +12,80 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Scroll shrink behavior
+  // Handle navbar background change on scroll
   useEffect(() => {
     const handleScroll = () => {
-      setIsScrolled(window.scrollY > 10);
+      if (window.scrollY > 10) {
+        setIsScrolled(true);
+      } else {
+        setIsScrolled(false);
+      }
     };
+
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  const scrollToSection = (id: string) => {
-    const section = document.getElementById(id);
+  // Check for scrollTo in the location state (coming from other pages)
+  useEffect(() => {
+    if (location.state && location.state.scrollTo) {
+      const sectionId = location.state.scrollTo;
+      const section = document.getElementById(sectionId);
+      if (section) {
+        setTimeout(() => {
+          section.scrollIntoView({ behavior: 'smooth' });
+        }, 100);
+      }
+      // Clear the state to avoid scrolling again on re-render
+      window.history.replaceState({}, document.title);
+    }
+  }, [location.state]);
+
+  // Smooth scroll function
+  const scrollToSection = (sectionId: string) => {
+    // If on any page, try to find the section first
+    const section = document.getElementById(sectionId);
     if (section) {
       section.scrollIntoView({ behavior: 'smooth' });
+      setMobileMenuOpen(false);
     } else {
-      navigate('/', { state: { scrollTo: id } });
+      // Navigate to homepage and then scroll to the section
+      navigate('/', { state: { scrollTo: sectionId } });
+      setMobileMenuOpen(false);
     }
-    setMobileMenuOpen(false);
   };
+
+  const navLinks: NavLink[] = [
+    { name: 'Home', path: '/' },
+    { name: 'Solutions', path: '/solutions' },
+    { name: 'Blog', path: '/blog' },
+    { name: 'About', path: '/about' },
+    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? (e: React.MouseEvent) => scrollToSection('contact') : null },
+  ];
 
   return (
     <header
       className={cn(
         'fixed top-0 left-0 w-full z-50 transition-all duration-300',
-        isScrolled ? 'shadow-md py-2 bg-white rounded-xl mx-auto max-w-screen-xl mt-4' : 'py-4 bg-white rounded-xl mx-auto max-w-screen-xl mt-6'
+        'bg-[#e5e6ea]', // Updated background color
+        isScrolled ? 'shadow-md py-2' : 'py-4'
       )}
     >
-      <div className="container-custom flex justify-between items-center px-4">
-        {/* Logo */}
+      <div className="container-custom flex justify-between items-center">
         <Link to="/" className="flex items-center">
-          <img
-            src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png"
-            alt="RenoMeta Logo"
+          <img 
+            src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
+            alt="RenoMeta Logo" 
             className="h-10 md:h-12 mr-2"
           />
         </Link>
 
-        {/* Desktop Nav */}
-        <DesktopNav location={location} scrollToSection={scrollToSection} />
+        {/* Desktop Navigation */}
+        <DesktopNav 
+          navLinks={navLinks} 
+          location={location} 
+          scrollToSection={scrollToSection} 
+        />
 
         {/* Mobile Menu Button */}
         <button
@@ -66,9 +104,10 @@ const Navbar = () => {
         </button>
       </div>
 
-      {/* Mobile Nav */}
-      <MobileNav
+      {/* Mobile Navigation */}
+      <MobileNav 
         isOpen={mobileMenuOpen}
+        navLinks={navLinks}
         location={location}
         scrollToSection={scrollToSection}
         onClose={() => setMobileMenuOpen(false)}
