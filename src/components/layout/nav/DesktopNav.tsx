@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+
+import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { NavLink } from './types';
+import MegaMenu from './MegaMenu';
 
 interface DesktopNavProps {
   navLinks: NavLink[];
@@ -14,16 +16,59 @@ interface DesktopNavProps {
 
 const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSection }) => {
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
+  const [showMegaMenu, setShowMegaMenu] = useState(false);
+  const menuRef = useRef<HTMLDivElement>(null);
 
   const toggleSubmenu = (index: number) => {
     setActiveSubmenu(activeSubmenu === index ? null : index);
   };
 
+  // Close mega menu when clicking outside
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (menuRef.current && !menuRef.current.contains(event.target as Node)) {
+        setShowMegaMenu(false);
+      }
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, [menuRef]);
+
   return (
     <nav className="hidden md:flex items-center space-x-1">
       {navLinks.map((link, index) => (
         <div key={link.name} className="relative group">
-          {link.submenu ? (
+          {link.name === "Solutions" ? (
+            <div ref={menuRef} className="relative">
+              <button
+                className={cn(
+                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  showMegaMenu || location.pathname.startsWith('/solutions/') 
+                    ? 'text-[#d9ab57]'
+                    : 'text-[#3a4150] hover:text-[#d9ab57]'
+                )}
+                onMouseEnter={() => setShowMegaMenu(true)}
+                onClick={() => setShowMegaMenu(!showMegaMenu)}
+              >
+                {link.name}
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  className="h-4 w-4 inline-block ml-1"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                </svg>
+              </button>
+              <MegaMenu 
+                isOpen={showMegaMenu} 
+                onClose={() => setShowMegaMenu(false)} 
+              />
+            </div>
+          ) : link.submenu ? (
             <>
               <button
                 className={cn(

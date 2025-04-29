@@ -57,14 +57,7 @@ const Navbar = () => {
 
   const navLinks: NavLink[] = [
     { name: 'Home', path: '/' },
-    { name: 'Services', path: '/services', submenu: [
-      { name: 'Smart Website Development', path: '/services/website-development' },
-      { name: 'Advanced SEO', path: '/services/advanced-seo' },
-      { name: 'AI-Powered Agents', path: '/services/ai-agents' },
-      { name: 'Intelligent Automation', path: '/services/automation' },
-      { name: 'Seamless Integration', path: '/services/integration' },
-      { name: 'Performance Optimization', path: '/services/performance-optimization' },
-    ]},
+    { name: 'Solutions', path: '/solutions' },
     { name: 'Blog', path: '/blog' },
     { name: 'About', path: '/about' },
     { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? (e: React.MouseEvent) => scrollToSection('contact') : null },
