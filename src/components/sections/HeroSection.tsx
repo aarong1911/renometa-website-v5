@@ -1,4 +1,3 @@
-
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,7 @@ const HeroSection = ({
             </span>
           </ScrollReveal>
           <ScrollReveal delay={200}>
-            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">Our digital tool belt delivers seamless operations and rapid expansion for your business</h1>
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">Digital tool belt for seamless operations and rapid expansion</h1>
           </ScrollReveal>
           <ScrollReveal delay={400}>
             <p className="text-lg text-gray-700 mb-4">
