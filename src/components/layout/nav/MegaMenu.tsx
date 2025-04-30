@@ -119,14 +119,10 @@ export const solutionsMenuData = [
 const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose }) => {
   return (
     <div 
-      className={`absolute left-0 top-full mt-8 w-full bg-white shadow-lg rounded-xl transition-all duration-200 z-50 ${
+      className={`absolute left-0 top-full mt-4 w-full bg-white shadow-lg rounded-b-lg transition-all duration-200 z-50 ${
         isOpen ? 'opacity-100 translate-y-0' : 'opacity-0 -translate-y-2 pointer-events-none'
       }`}
-      style={{ 
-        width: '90%', 
-        left: '50%', 
-        transform: 'translateX(-50%)' 
-      }}
+      style={{ width: '100vw', left: '50%', right: '50%', marginLeft: '-50vw', marginRight: '-50vw' }}
     >
       <div className="container-custom py-8">
         <h2 className="text-2xl font-bold text-[#3a4150] mb-6">Solutions for your business</h2>
