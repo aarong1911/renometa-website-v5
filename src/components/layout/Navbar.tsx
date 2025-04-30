@@ -66,21 +66,21 @@ const Navbar = () => {
   return (
     <header
       className={cn(
-        'fixed top-0 left-0 w-full z-50 transition-all duration-300',
+        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between rounded-xl px-6 py-3 transition-all duration-300',
         isScrolled 
-          ? 'bg-white/90 backdrop-blur-sm shadow-md py-2' 
-          : 'bg-white/70 backdrop-blur-sm py-4'
+          ? 'w-[70%] bg-white/60 backdrop-blur-md shadow-lg' 
+          : 'w-[90%] bg-white/90 backdrop-blur-sm'
       )}
     >
-      <div className="max-w-[1200px] mx-auto px-4 flex justify-between items-center">
-        <Link to="/" className="flex items-center">
-          <img 
-            src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
-            alt="RenoMeta Logo" 
-            className="h-10 md:h-12 mr-2"
-          />
-        </Link>
+      <Link to="/" className="flex items-center">
+        <img 
+          src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
+          alt="RenoMeta Logo" 
+          className="h-10 md:h-12 mr-2"
+        />
+      </Link>
 
+      <div className="flex-1 flex justify-end">
         {/* Desktop Navigation */}
         <DesktopNav 
           navLinks={navLinks} 

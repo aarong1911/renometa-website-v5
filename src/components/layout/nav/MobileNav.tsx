@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -173,6 +172,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
             )}
           </div>
         ))}
+        
         <div className="pt-4">
           <Button 
             className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
