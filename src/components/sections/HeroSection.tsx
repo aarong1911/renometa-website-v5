@@ -1,3 +1,4 @@
+
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
@@ -7,19 +8,19 @@ interface HeroSectionProps {
 const HeroSection = ({
   onScrollToSection
 }: HeroSectionProps) => {
-  return <section id="hero" className="hero-section relative min-h-[80vh] pt-[96px] overflow-hidden">
+  return <section id="hero" className="hero-section relative min-h-screen w-full overflow-hidden">
       {/* Background Video */}
-      <video autoPlay muted loop playsInline preload="auto" className="absolute top-0 left-0 w-full h-full object-cover z-0 backdrop-brightness-75">
+      <video autoPlay muted loop playsInline preload="auto" className="absolute top-0 left-0 w-full h-full object-cover z-0">
         <source src="/video-hero-section.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 
       {/* Overlay */}
-      <div className="absolute inset-0 bg-white/70 backdrop-blur-sm z-10" />
+      <div className="absolute inset-0 bg-white/50 backdrop-blur-sm z-10" />
 
       {/* Content */}
-      <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[80vh] relative z-20">
-        <div className="w-[90%] max-w-3xl space-y-10">
+      <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-screen relative z-20">
+        <div className="w-[90%] max-w-3xl space-y-10 mt-16">
           <ScrollReveal>
             <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 mt-16 md:mt-0 inline-block">
               For Remodeling & Home Service Businesses

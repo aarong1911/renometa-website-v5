@@ -47,9 +47,8 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
                   'text-base font-medium transition-colors',
                   showMegaMenu || location.pathname.startsWith('/solutions/') 
                     ? 'text-[#d9ab57]'
-                    : 'text-[#3a4150] hover:text-[#d9ab57]'
+                    : 'text-[#3a4150]'
                 )}
-                onMouseEnter={() => setShowMegaMenu(true)}
                 onClick={() => setShowMegaMenu(!showMegaMenu)}
               >
                 {link.name}

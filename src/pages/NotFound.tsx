@@ -11,10 +11,10 @@ const NotFound = () => {
 
   return (
     <MainLayout>
-      <div className="min-h-[calc(100vh-80px)] flex items-center justify-center bg-gray-50">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="container-custom text-center py-16">
           <ScrollReveal>
-            <h1 className="text-7xl md:text-9xl font-bold text-blue-dark mb-6">404</h1>
+            <h1 className="text-7xl md:text-9xl font-bold text-blue-dark mb-6 mt-16">404</h1>
           </ScrollReveal>
           
           <ScrollReveal delay={200}>
