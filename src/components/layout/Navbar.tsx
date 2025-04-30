@@ -67,11 +67,12 @@ const Navbar = () => {
     <header
       className={cn(
         'fixed top-0 left-0 w-full z-50 transition-all duration-300',
-        'bg-[#e5e6ea]', // Updated background color
-        isScrolled ? 'shadow-md py-2' : 'py-4'
+        isScrolled 
+          ? 'bg-white/90 backdrop-blur-sm shadow-md py-2' 
+          : 'bg-white/70 backdrop-blur-sm py-4'
       )}
     >
-      <div className="container-custom flex justify-between items-center">
+      <div className="max-w-[1200px] mx-auto px-4 flex justify-between items-center">
         <Link to="/" className="flex items-center">
           <img 
             src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 

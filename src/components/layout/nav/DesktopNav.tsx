@@ -37,14 +37,14 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
   }, [menuRef]);
 
   return (
-    <nav className="hidden md:flex items-center space-x-1">
+    <nav className="hidden md:flex items-center space-x-6">
       {navLinks.map((link, index) => (
         <div key={link.name} className="relative group">
           {link.name === "Solutions" ? (
-            <div ref={menuRef} className="relative static-positioned">
+            <div ref={menuRef} className="relative">
               <button
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-base font-medium transition-colors',
                   showMegaMenu || location.pathname.startsWith('/solutions/') 
                     ? 'text-[#d9ab57]'
                     : 'text-[#3a4150] hover:text-[#d9ab57]'
@@ -72,7 +72,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
             <>
               <button
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-base font-medium transition-colors',
                   location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
                     ? 'text-[#3a4150]'
                     : 'text-[#3a4150] hover:text-[#d9ab57]'
@@ -101,9 +101,9 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
               <button
                 onClick={link.action}
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-base font-medium transition-colors',
                   location.pathname === link.path
-                    ? 'text-[#3a4150]'
+                    ? 'text-[#d9ab57]'
                     : 'text-[#3a4150] hover:text-[#d9ab57]'
                 )}
               >
@@ -113,9 +113,9 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
               <Link
                 to={link.path}
                 className={cn(
-                  'px-3 py-2 rounded-md text-sm font-medium transition-colors',
+                  'text-base font-medium transition-colors',
                   location.pathname === link.path
-                    ? 'text-[#3a4150]'
+                    ? 'text-[#d9ab57]'
                     : 'text-[#3a4150] hover:text-[#d9ab57]'
                 )}
               >
@@ -126,7 +126,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
         </div>
       ))}
       <Button
-        className="ml-4 bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
+        className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
         onClick={(e: React.MouseEvent) => {
           if (location.pathname === '/') {
             scrollToSection('contact');
