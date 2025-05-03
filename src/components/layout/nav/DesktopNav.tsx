@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom';
 
 import React, { useState, useRef, useEffect } from 'react';
 import { Link } from 'react-router-dom';
@@ -18,6 +19,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
   const [showMegaMenu, setShowMegaMenu] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
+  const navigate = useNavigate();
 
   const toggleSubmenu = (index: number) => {
     setActiveSubmenu(activeSubmenu === index ? null : index);
@@ -126,17 +128,12 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
         </div>
       ))}
       <Button
-        className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
-        onClick={(e: React.MouseEvent) => {
-          if (location.pathname === '/') {
-            scrollToSection('contact');
-          } else {
-            window.location.href = '/#contact';
-          }
-        }}
-      >
-        Get Started
-      </Button>
+  className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
+  onClick={() => navigate('/free-trial')}
+>
+  Get Started
+</Button>
+
     </nav>
   );
 };

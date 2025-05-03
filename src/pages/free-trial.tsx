@@ -59,10 +59,16 @@ const FreeTrial = () => {
               </p>
             </ScrollReveal>
 
-            {/* Signup Form */}
+            {/* ✅ Replaced Continue with Google with SignupForm */}
             <ScrollReveal delay={400}>
-              <SignupForm />
+              <div className="bg-white p-6 rounded-lg shadow-md text-left text-gray-800">
+                <SignupForm />
+              </div>
             </ScrollReveal>
+
+            <p className="mt-6 text-sm text-white/80">
+              No credit card required. Cancel anytime.
+            </p>
           </div>
         </div>
       </section>
@@ -88,7 +94,9 @@ const FreeTrial = () => {
                 description={feature.description}
                 icon={feature.icon}
                 delay={index * 100}
-                showLearnMore={false} link={''}              />
+                showLearnMore={false}
+                link={''}
+              />
             ))}
           </div>
         </div>
