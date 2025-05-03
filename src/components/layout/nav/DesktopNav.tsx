@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 
 import React, { useState, useRef, useEffect } from 'react';
@@ -128,12 +129,11 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
         </div>
       ))}
       <Button
-  className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
-  onClick={() => navigate('/free-trial')}
->
-  Get Started
-</Button>
-
+        className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
+        onClick={() => navigate('/free-trial')}
+      >
+        Get Started
+      </Button>
     </nav>
   );
 };

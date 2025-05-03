@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Users, TrendingUp, Briefcase, Megaphone } from 'lucide-react';
@@ -123,10 +124,10 @@ const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose }) => {
       }`}
       style={{ 
         width: '90%',
+        maxWidth: '1400px',
         left: '50%',
         top: '80px',
-        transform: 'translateX(-50%)',
-        maxWidth: '1400px'
+        transform: 'translateX(-50%)'
       }}
     >
       <div className="container-custom py-8">
