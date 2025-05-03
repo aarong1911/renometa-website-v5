@@ -72,6 +72,7 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
               <button
                 className={cn(
                   'text-base font-medium transition-colors',
+
                   location.pathname === link.path || location.pathname.startsWith(`${link.path}/`)
                     ? 'text-[#3a4150]'
                     : 'text-[#3a4150] hover:text-[#d9ab57]'
