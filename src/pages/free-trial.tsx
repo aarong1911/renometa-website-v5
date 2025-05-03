@@ -88,8 +88,7 @@ const FreeTrial = () => {
                 description={feature.description}
                 icon={feature.icon}
                 delay={index * 100}
-                showLearnMore={false}
-              />
+                showLearnMore={false} link={''}              />
             ))}
           </div>
         </div>
