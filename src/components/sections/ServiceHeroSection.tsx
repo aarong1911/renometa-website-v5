@@ -37,7 +37,7 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
       <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-screen relative z-20">
         {/* Back button only for solutions pages - positioned at the top left */}
         {isSolutionsPage && (
-          <div className="absolute top-24 left-8 md:left-16 z-10">
+          <div className="absolute top-32 left-8 md:left-16 z-10">
             <Link 
               to="/solutions" 
               className="inline-flex items-center text-blue-dark hover:text-gold transition-colors bg-black/5 px-3 py-1.5 rounded-md text-sm"
