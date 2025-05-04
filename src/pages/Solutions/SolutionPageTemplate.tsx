@@ -80,6 +80,7 @@ const SolutionPageTemplate: React.FC<SolutionPageTemplateProps> = ({
           description={fullDescription}
           tagline={tagline}
           heroImage={heroImage}
+          isSolutionsPage={true} // This is a solutions page
         />
         
         {/* Features Section */}

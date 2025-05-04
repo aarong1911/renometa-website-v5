@@ -64,6 +64,7 @@ const ServicePageTemplate = ({
         description={description}
         tagline={tagline}
         heroImage={heroImage}
+        isSolutionsPage={false} // This is NOT a solutions page
       />
       
       {/* Features Section */}
