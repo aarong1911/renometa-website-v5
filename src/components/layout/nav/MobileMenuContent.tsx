@@ -4,6 +4,7 @@ import { NavLink } from './types';
 import { Button } from '@/components/ui/button';
 import MobileMenuItem from './MobileMenuItem';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface MobileMenuContentProps {
   navLinks: NavLink[];
@@ -21,6 +22,7 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
   onClose 
 }) => {
   const [activeSubmenu, setActiveSubmenu] = useState<number | null>(null);
+  const navigate = useNavigate();
 
   const toggleSubmenu = (index: number) => {
     setActiveSubmenu(activeSubmenu === index ? null : index);
@@ -53,17 +55,14 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
       >
         <Button 
           className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors py-6 text-lg"
-          onClick={(e: React.MouseEvent) => {
+          onClick={() => {
             onClose();
-            if (location.pathname === '/') {
-              scrollToSection('contact');
-            } else {
-              window.location.href = '/#contact';
-            }
+            navigate('/free-trial');
           }}
         >
-          Get Started
+          Start Free
         </Button>
+        <p className="text-xs text-center text-gray-600 mt-2">No credit card required. Cancel anytime.</p>
       </div>
     </>
   );

@@ -2,12 +2,17 @@
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+
 interface HeroSectionProps {
   onScrollToSection: (id: string) => void;
 }
+
 const HeroSection = ({
   onScrollToSection
 }: HeroSectionProps) => {
+  const navigate = useNavigate();
+  
   return <section id="hero" className="hero-section relative min-h-screen w-full overflow-hidden">
       {/* Background Video */}
       <video autoPlay muted loop playsInline preload="auto" className="absolute top-0 left-0 w-full h-full object-cover z-0">
@@ -35,17 +40,19 @@ const HeroSection = ({
             </p>
           </ScrollReveal>
           <ScrollReveal delay={600}>
-            <div className="flex flex-wrap gap-4 justify-center">
-              <Button className="btn-primary hover:bg-blue-light transition-colors duration-300" onClick={() => onScrollToSection('contact')}>
-                Get a Free Strategy Call
+            <div className="flex flex-col items-center justify-center">
+              <Button 
+                className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors w-40 py-6"
+                onClick={() => navigate('/free-trial')}
+              >
+                Start Free
               </Button>
-              <Button className="btn-outline hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300" onClick={() => onScrollToSection('services')}>
-                Explore Services
-              </Button>
+              <p className="text-sm text-gray-600 mt-2">No credit card required. Cancel anytime.</p>
             </div>
           </ScrollReveal>
         </div>
       </div>
     </section>;
 };
+
 export default HeroSection;

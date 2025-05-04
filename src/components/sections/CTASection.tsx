@@ -2,6 +2,8 @@
 import React from 'react';
 import ContactForm from '@/components/ui/ContactForm';
 import ScrollReveal from '@/components/ui/ScrollReveal';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
 
 interface CTASectionProps {
   ctaText: string;
@@ -14,6 +16,8 @@ const CTASection = ({
   title, 
   className = "bg-gradient-to-br from-blue-dark to-blue-light text-white" 
 }: CTASectionProps) => {
+  const navigate = useNavigate();
+
   return (
     <>
       {/* Original section */}
@@ -28,6 +32,15 @@ const CTASection = ({
                 <p className="text-xl opacity-90 max-w-lg">
                   Schedule a free consultation to discuss how our {title.toLowerCase()} services can help your remodeling business grow.
                 </p>
+                <div className="mt-6 flex flex-col items-start">
+                  <Button 
+                    className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 w-40 py-6"
+                    onClick={() => navigate('/free-trial')}
+                  >
+                    Start Free
+                  </Button>
+                  <p className="text-sm opacity-80 mt-2">No credit card required. Cancel anytime.</p>
+                </div>
               </ScrollReveal>
             </div>
             
@@ -47,4 +60,3 @@ const CTASection = ({
 };
 
 export default CTASection;
-

@@ -55,20 +55,14 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceH
             </p>
           </ScrollReveal>
           <ScrollReveal delay={600}>
-            <div className="flex flex-wrap gap-4 justify-center">
+            <div className="flex flex-col items-center justify-center">
               <Button 
-                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
-                onClick={() => scrollToSection('contact')}
+                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 w-40 py-6"
+                onClick={() => navigate('/free-trial')}
               >
-                Get Started
+                Start Free
               </Button>
-              <Button 
-                variant="outline" 
-                className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300"
-                onClick={() => scrollToSection('process')}
-              >
-                Learn More
-              </Button>
+              <p className="text-sm text-gray-100 mt-2">No credit card required. Cancel anytime.</p>
             </div>
           </ScrollReveal>
         </div>
