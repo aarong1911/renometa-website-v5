@@ -5,6 +5,7 @@ import { useAppointment } from '@/hooks/useAppointment';
 import { useUserInfo } from '@/hooks/useUserInfo';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { findRelevantContent } from '@/utils/contentSearch';
 
 export type ChatbotStep = 'initial' | 'info' | 'schedule' | 'date' | 'time' | 'user_info' | 'confirmation' | 'post_confirmation';
 
@@ -19,7 +20,6 @@ export const useChatbotState = () => {
     addUserMessage,
     addBotMessage,
     resetMessages,
-    findRelevantContent
   } = useChatMessages();
 
   const {
