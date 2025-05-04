@@ -111,7 +111,7 @@ const Chatbot = () => {
     
     if (choice === 'info') {
       addUserMessage('I need information');
-      addBotMessage('We offer digital services specifically designed for remodeling and home service businesses. Our services include Smart Website Development, Advanced SEO, AI-Powered Agents, Intelligent Automation, Seamless Integration, and Performance Optimization. What would you like to know more about?');
+      addBotMessage('Sure, what would you like to know more about? I can help with our services like Website Development, SEO, AI Agents, or our solutions for CRM, Sales, Marketing, and Job Management.');
     } else {
       addUserMessage('I want to schedule an appointment');
       addBotMessage('Great! Let\'s schedule a consultation. Please select a date that works for you:');
