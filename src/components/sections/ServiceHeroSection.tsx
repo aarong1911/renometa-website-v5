@@ -33,9 +33,9 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
       {/* Background */}
       <div className="absolute inset-0 z-0 bg-white"></div>
       
-      {/* Back button only for solutions pages */}
+      {/* Back button only for solutions pages - adjusted position */}
       {isSolutionsPage && (
-        <div className="container-custom relative z-10 pt-8">
+        <div className="container-custom relative z-10 pt-16">
           <Link 
             to="/solutions" 
             className="inline-flex items-center text-blue-dark hover:text-gold transition-colors bg-black/5 px-4 py-2 rounded-md"

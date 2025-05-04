@@ -73,45 +73,43 @@ const SolutionPageTemplate: React.FC<SolutionPageTemplateProps> = ({
   
   return (
     <MainLayout>
-      <div className="pt-16">
-        {/* Hero Section */}
-        <ServiceHeroSection 
-          title={title}
-          description={fullDescription}
-          tagline={tagline}
-          heroImage={heroImage}
-          isSolutionsPage={true} // This is a solutions page
-        />
-        
-        {/* Features Section */}
-        {features.length > 0 && (
-          <FeaturesSection features={features} title={title} />
-        )}
-        
-        {/* Process Section */}
-        {processSteps.length > 0 && (
-          <div id="process">
-            <ProcessSection processSteps={processSteps} />
-          </div>
-        )}
-        
-        {/* Testimonial Section */}
-        <TestimonialSection testimonial={testimonial} />
-        
-        {/* FAQ Section */}
-        {faqItems.length > 0 && (
-          <FAQSection faqItems={faqItems} />
-        )}
-        
-        {/* Related Services Section */}
-        {relatedServices.length > 0 && (
-          <RelatedServicesSection relatedServices={relatedServices} title={title} />
-        )}
-        
-        {/* CTA Section */}
-        <div id="contact">
-          <CTASection ctaText={ctaText} title={title} />
+      {/* Hero Section - removed the pt-16 class to match home and service pages */}
+      <ServiceHeroSection 
+        title={title}
+        description={fullDescription}
+        tagline={tagline}
+        heroImage={heroImage}
+        isSolutionsPage={true} // This is a solutions page
+      />
+      
+      {/* Features Section */}
+      {features.length > 0 && (
+        <FeaturesSection features={features} title={title} />
+      )}
+      
+      {/* Process Section */}
+      {processSteps.length > 0 && (
+        <div id="process">
+          <ProcessSection processSteps={processSteps} />
         </div>
+      )}
+      
+      {/* Testimonial Section */}
+      <TestimonialSection testimonial={testimonial} />
+      
+      {/* FAQ Section */}
+      {faqItems.length > 0 && (
+        <FAQSection faqItems={faqItems} />
+      )}
+      
+      {/* Related Services Section */}
+      {relatedServices.length > 0 && (
+        <RelatedServicesSection relatedServices={relatedServices} title={title} />
+      )}
+      
+      {/* CTA Section */}
+      <div id="contact">
+        <CTASection ctaText={ctaText} title={title} />
       </div>
     </MainLayout>
   );
