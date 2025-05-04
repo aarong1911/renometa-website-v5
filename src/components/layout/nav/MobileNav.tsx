@@ -1,9 +1,16 @@
+
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { cn } from '@/lib/utils';
 import { NavLink } from './types';
 import { solutionsMenuData } from './MegaMenu';
+import {
+  Drawer,
+  DrawerContent,
+  DrawerTrigger,
+  DrawerClose,
+} from "@/components/ui/drawer";
 
 interface MobileNavProps {
   isOpen: boolean;
@@ -33,11 +40,12 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
   return (
     <div
       className={cn(
-        'fixed inset-0 bg-white/95 backdrop-blur-sm z-40 md:hidden transition-transform transform pt-20',
+        'fixed inset-x-0 top-0 bottom-0 bg-white/95 backdrop-blur-sm z-40 md:hidden transition-transform transform pt-20',
         isOpen ? 'translate-x-0' : 'translate-x-full'
       )}
+      style={{ overflowY: 'auto', maxHeight: '100vh' }}
     >
-      <div className="container-custom flex flex-col space-y-4 pt-4 overflow-y-auto max-h-[calc(100vh-80px)]">
+      <div className="container-custom flex flex-col space-y-4 pt-4 pb-24">
         {navLinks.map((link, index) => (
           <div key={link.name}>
             {link.name === 'Solutions' ? (
@@ -173,7 +181,7 @@ const MobileNav: React.FC<MobileNavProps> = ({ isOpen, navLinks, location, scrol
           </div>
         ))}
         
-        <div className="pt-4">
+        <div className="pt-4 pb-8">
           <Button 
             className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
             onClick={(e: React.MouseEvent) => {

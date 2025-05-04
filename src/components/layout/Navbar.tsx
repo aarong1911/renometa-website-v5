@@ -26,6 +26,18 @@ const Navbar = () => {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (mobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [mobileMenuOpen]);
+
   // Check for scrollTo in the location state (coming from other pages)
   useEffect(() => {
     if (location.state && location.state.scrollTo) {
@@ -68,8 +80,8 @@ const Navbar = () => {
       className={cn(
         'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between rounded-xl px-6 py-3 transition-all duration-300',
         isScrolled 
-          ? 'w-[70%] bg-white/60 backdrop-blur-md shadow-lg' 
-          : 'w-[90%] bg-white/90 backdrop-blur-sm'
+          ? 'w-[95%] md:w-[70%] bg-white/60 backdrop-blur-md shadow-lg' 
+          : 'w-[95%] md:w-[90%] bg-white/90 backdrop-blur-sm'
       )}
     >
       <Link to="/" className="flex items-center">
@@ -90,8 +102,9 @@ const Navbar = () => {
 
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2"
+          className="md:hidden p-2 z-50"
           onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          aria-label="Toggle mobile menu"
         >
           {mobileMenuOpen ? (
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
