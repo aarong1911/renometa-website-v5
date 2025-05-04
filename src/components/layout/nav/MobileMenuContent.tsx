@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { NavLink } from './types';
 import { Button } from '@/components/ui/button';
 import MobileMenuItem from './MobileMenuItem';
+import { cn } from '@/lib/utils';
 
 interface MobileMenuContentProps {
   navLinks: NavLink[];
@@ -29,19 +30,27 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
     <>
       <div className="flex-1 overflow-y-auto px-6 py-4">
         {navLinks.map((link, index) => (
-          <MobileMenuItem
+          <div 
             key={link.name}
-            link={link}
-            index={index}
-            activeSubmenu={activeSubmenu}
-            toggleSubmenu={toggleSubmenu}
-            location={location}
-            onClose={onClose}
-          />
+            className="animate-fade-in-up"
+            style={{ animationDelay: `${index * 75}ms` }}
+          >
+            <MobileMenuItem
+              link={link}
+              index={index}
+              activeSubmenu={activeSubmenu}
+              toggleSubmenu={toggleSubmenu}
+              location={location}
+              onClose={onClose}
+            />
+          </div>
         ))}
       </div>
 
-      <div className="p-6 mt-auto border-t">
+      <div 
+        className="p-6 mt-auto border-t animate-fade-in-up"
+        style={{ animationDelay: `${navLinks.length * 75}ms` }}
+      >
         <Button 
           className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors py-6 text-lg"
           onClick={(e: React.MouseEvent) => {

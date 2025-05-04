@@ -18,7 +18,11 @@ const MobileSolutionsMenu: React.FC<MobileSolutionsMenuProps> = ({ onClose }) =>
   return (
     <div className="pl-2 space-y-2 py-2">
       {solutionsMenuData.map((category, catIdx) => (
-        <div key={catIdx} className="border-b border-gray-100 pb-2">
+        <div 
+          key={catIdx} 
+          className="border-b border-gray-100 pb-2 animate-fade-in-up" 
+          style={{ animationDelay: `${catIdx * 75}ms` }}
+        >
           <button
             className="flex items-center justify-between w-full py-3 px-2"
             onClick={() => toggleSolutionCategory(category.category)}
@@ -46,7 +50,8 @@ const MobileSolutionsMenu: React.FC<MobileSolutionsMenuProps> = ({ onClose }) =>
               <Link
                 key={itemIdx}
                 to={item.path}
-                className="block py-2"
+                className="block py-2 animate-fade-in-up"
+                style={{ animationDelay: `${itemIdx * 50}ms` }}
                 onClick={onClose}
               >
                 <div>
