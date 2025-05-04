@@ -123,7 +123,7 @@ const MegaMenu: React.FC<MegaMenuProps> = ({ isOpen, onClose }) => {
         isOpen ? 'opacity-100 visible' : 'opacity-0 invisible pointer-events-none'
       }`}
       style={{ 
-        width: '90%',
+        width: '90vw',
         maxWidth: '1400px',
         left: '50%',
         top: '80px',
