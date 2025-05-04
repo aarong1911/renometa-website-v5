@@ -1,7 +1,6 @@
 
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
-import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbSeparator } from '@/components/ui/breadcrumb';
 import { ChevronLeft } from 'lucide-react';
 import { Link } from 'react-router-dom';
 import ServiceHeroSection from '@/components/sections/ServiceHeroSection';
@@ -75,32 +74,6 @@ const SolutionPageTemplate: React.FC<SolutionPageTemplateProps> = ({
   return (
     <MainLayout>
       <div className="pt-16">
-        <Breadcrumb className="container-custom py-4">
-          <BreadcrumbList>
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/">Home</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to="/solutions">Solutions</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <BreadcrumbLink asChild>
-                <Link to={`/solutions/${categoryPath}`}>{category}</Link>
-              </BreadcrumbLink>
-            </BreadcrumbItem>
-            <BreadcrumbSeparator />
-            <BreadcrumbItem>
-              <span className="text-muted-foreground">{title}</span>
-            </BreadcrumbItem>
-          </BreadcrumbList>
-        </Breadcrumb>
-
         {/* Hero Section */}
         <ServiceHeroSection 
           title={title}

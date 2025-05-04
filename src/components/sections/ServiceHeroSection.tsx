@@ -2,7 +2,8 @@
 import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
-import { useLocation, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate, Link } from 'react-router-dom';
+import { ChevronLeft } from 'lucide-react';
 
 interface ServiceHeroSectionProps {
   title: string;
@@ -37,7 +38,18 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage }: ServiceH
         }}
       ></div>
       <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-30 z-0"></div>
-      <div className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-[60vh] relative z-10">
+      
+      <div className="container-custom relative z-10 pt-8">
+        <Link 
+          to="/solutions" 
+          className="inline-flex items-center text-white hover:text-gold transition-colors bg-black/20 px-4 py-2 rounded-md"
+        >
+          <ChevronLeft className="h-4 w-4 mr-1" />
+          <span>Back to Solutions</span>
+        </Link>
+      </div>
+      
+      <div className="container-custom flex flex-col items-center justify-center text-center py-16 min-h-[60vh] relative z-10">
         <div className="w-full max-w-3xl space-y-8">
           <ScrollReveal>
             <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 mt-16 md:mt-0 inline-block">
