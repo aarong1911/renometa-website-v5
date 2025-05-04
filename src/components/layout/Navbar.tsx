@@ -82,7 +82,7 @@ const Navbar = () => {
   return (
     <header
       className={cn(
-        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between rounded-xl px-6 py-3 transition-all duration-300',
+        'fixed top-4 left-1/2 transform -translate-x-1/2 z-50 flex items-center justify-between rounded-xl px-6 py-3 transition-all duration-300 border border-gray-200',
         isScrolled 
           ? 'w-[95%] md:w-[70%] bg-white/60 backdrop-blur-md shadow-lg' 
           : 'w-[95%] md:w-[90%] bg-white/90 backdrop-blur-sm'

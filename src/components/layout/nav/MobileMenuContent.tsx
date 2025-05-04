@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import MobileMenuItem from './MobileMenuItem';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
+import { ArrowRight } from 'lucide-react';
 
 interface MobileMenuContentProps {
   navLinks: NavLink[];
@@ -54,13 +55,14 @@ const MobileMenuContent: React.FC<MobileMenuContentProps> = ({
         style={{ animationDelay: `${navLinks.length * 75}ms` }}
       >
         <Button 
-          className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors py-6 text-lg"
+          className="w-full bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors py-6"
           onClick={() => {
             onClose();
             navigate('/free-trial');
           }}
         >
-          Start Free
+          <span className="text-lg">Start Free</span>
+          <ArrowRight className="h-5 w-5 ml-1" />
         </Button>
         <p className="text-xs text-center text-gray-600 mt-2">No credit card required. Cancel anytime.</p>
       </div>

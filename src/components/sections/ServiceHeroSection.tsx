@@ -3,7 +3,7 @@ import React from 'react';
 import ScrollReveal from '@/components/ui/ScrollReveal';
 import { Button } from '@/components/ui/button';
 import { useLocation, useNavigate, Link } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
+import { ChevronLeft, ArrowRight } from 'lucide-react';
 
 interface ServiceHeroSectionProps {
   title: string;
@@ -40,9 +40,9 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
           <div className="absolute top-24 left-8 md:left-16 z-10">
             <Link 
               to="/solutions" 
-              className="inline-flex items-center text-blue-dark hover:text-gold transition-colors bg-black/5 px-4 py-2 rounded-md"
+              className="inline-flex items-center text-blue-dark hover:text-gold transition-colors bg-black/5 px-3 py-1.5 rounded-md text-sm"
             >
-              <ChevronLeft className="h-4 w-4 mr-1" />
+              <ChevronLeft className="h-3.5 w-3.5 mr-1" />
               <span>Back to Solutions</span>
             </Link>
           </div>
@@ -70,7 +70,8 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
                 className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors w-40 py-6"
                 onClick={() => navigate('/free-trial')}
               >
-                Start Free
+                <span className="text-lg">Start Free</span>
+                <ArrowRight className="h-5 w-5 ml-1" />
               </Button>
               <p className="text-sm text-gray-600 mt-2">No credit card required. Cancel anytime.</p>
             </div>
