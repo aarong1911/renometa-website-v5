@@ -240,7 +240,29 @@ Would you like to confirm this appointment?`);
     if (!query.trim()) return;
     
     addUserMessage(query);
-    const botResponse = findRelevantContent(query);
+    let botResponse = findRelevantContent(query);
+    
+    // Ensure responses focus on benefits and are concise
+    if (botResponse.length > 300) {
+      // Extract the most relevant part and focus on benefits
+      const sentences = botResponse.split(/[.!?]+/);
+      const benefitSentences = sentences.filter(s => 
+        s.toLowerCase().includes('benefit') || 
+        s.toLowerCase().includes('improve') || 
+        s.toLowerCase().includes('increase') || 
+        s.toLowerCase().includes('help') ||
+        s.toLowerCase().includes('save') ||
+        s.toLowerCase().includes('grow')
+      );
+      
+      if (benefitSentences.length > 0) {
+        // Include at least one benefit sentence if available
+        botResponse = benefitSentences.slice(0, 2).join('. ') + '.';
+      } else {
+        // Just truncate if no specific benefit sentences found
+        botResponse = sentences.slice(0, 3).join('. ') + '.';
+      }
+    }
     
     setTimeout(() => {
       addBotMessage(botResponse);

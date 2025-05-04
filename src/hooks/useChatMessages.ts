@@ -559,7 +559,7 @@ export const useChatMessages = () => {
   const resetMessages = () => {
     setMessages([{
       type: 'bot',
-      content: 'Welcome to RenoMeta! How can we help you today?'
+      content: 'Welcome to RenoMeta! We offer services like Website Development, SEO, and AI Agents, as well as solutions for CRM, Sales, Marketing, and Job Management. How can I help your remodeling business grow?'
     }]);
   };
 
