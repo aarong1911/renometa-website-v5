@@ -75,6 +75,10 @@ const Navbar = () => {
     { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? (e: React.MouseEvent) => scrollToSection('contact') : null },
   ];
 
+  const toggleMobileMenu = () => {
+    setMobileMenuOpen(!mobileMenuOpen);
+  };
+
   return (
     <header
       className={cn(
@@ -103,7 +107,7 @@ const Navbar = () => {
         {/* Mobile Menu Button */}
         <button
           className="md:hidden p-2 z-50 relative"
-          onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+          onClick={toggleMobileMenu}
           aria-label="Toggle mobile menu"
         >
           {mobileMenuOpen ? (
