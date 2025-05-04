@@ -240,6 +240,18 @@ Would you like to confirm this appointment?`);
     if (!query.trim()) return;
     
     addUserMessage(query);
+    
+    // Handle free trial related questions
+    if (query.toLowerCase().includes('free trial') || 
+        query.toLowerCase().includes('trial') || 
+        query.toLowerCase().includes('try for free')) {
+      setTimeout(() => {
+        addBotMessage("Yes! We offer a 14-day free trial with full access to our AI customer support agent, smart landing page, and other features. No credit card required and you can cancel anytime. Click the 'Start Free' or 'Get Started' button to begin your trial today!");
+      }, 300);
+      setUserInput('');
+      return;
+    }
+    
     let botResponse = findRelevantContent(query);
     
     // Ensure responses focus on benefits and are concise
