@@ -27,59 +27,38 @@ const SignupForm = () => {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    formState: { errors: errors, isSubmitting },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
   });
 
   const onSubmit = async (data: FormData) => {
-    setMessage(null);
-
-    const { data: signupData, error } = await supabase.auth.signUp({
+    const redirect = `${window.location.origin}/trial-success`;   // 👈 dynamic!
+  
+    const { error } = await supabase.auth.signUp({
       email: data.email,
       password: data.password,
       options: {
         data: {
           first_name: data.firstName,
-          last_name: data.lastName,
+          last_name:  data.lastName,
+          emailRedirectTo: redirect,
         },
-        emailRedirectTo: 'http://localhost:8081/trial-success',
+        emailRedirectTo: redirect,
       },
     });
-
+  
     if (error) {
-      setMessage({ type: 'error', text: error.message });
-      return;
+      setMessage({ type: 'error', text: error.message });   // shows 429 plainly
+      return;                                               // ⬅︎ stop here
     }
-
-    const user = signupData.user;
-
-    // Direct insert into Supabase "trials" table
-    if (user) {
-      const { error: insertError } = await supabase.from('trials').insert([
-        {
-          user_id: user.id,
-          email: data.email,
-          first_name: data.firstName,
-          last_name: data.lastName,
-        },
-      ]);
-
-      if (insertError) {
-        console.warn('Insert failed (possibly due to unconfirmed user):', insertError.message);
-        setMessage({
-          type: 'success',
-          text: 'Signup succeeded! Please check your email to confirm. Trial activation will complete after confirmation.',
-        });
-        return;
-      }
-    }
-
+  
     setMessage({
       type: 'success',
       text: 'Account created! Please check your email to confirm your free trial.',
     });
   };
+  
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-lg shadow-md p-6 w-full max-w-md mx-auto space-y-4">
