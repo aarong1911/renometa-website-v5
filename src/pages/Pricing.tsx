@@ -1,6 +1,6 @@
 // src/pages/Pricing.tsx
 import React from 'react';
-import ServicePageTemplate from '@/components/layout/ServicePageTemplate';
+import PricingPageTemplate from '@/components/layout/PricingPageTemplate';
 import {
   Table,
   TableBody,
