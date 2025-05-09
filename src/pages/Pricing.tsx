@@ -1,4 +1,4 @@
-
+// src/pages/Pricing.tsx
 import React from 'react';
 import ServicePageTemplate from '@/components/layout/ServicePageTemplate';
 import {
@@ -186,6 +186,7 @@ const Pricing = () => {
   return (
     <ServicePageTemplate 
       {...pricingData}
+      hideHero
       customContent={renderPricingContent()}
     />
   );
