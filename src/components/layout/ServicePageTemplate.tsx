@@ -56,8 +56,8 @@ const addOns = [
 export default function Pricing() {
   return (
     <MainLayout>
-      {/* Page Header */}
-      <section className="pt-12 text-center">
+      {/* Page Header with increased top and bottom padding */}
+      <section className="pt-24 pb-12 text-center">
         <h1 className="text-4xl md:text-5xl font-bold text-[#3a4150]">
           Simple, Transparent Pricing
         </h1>
