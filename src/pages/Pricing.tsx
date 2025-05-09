@@ -1,6 +1,6 @@
 
 import React from 'react';
-import ServicePageTemplate from '@/components/layout/ServicePageTemplate';
+import MainLayout from '@/components/layout/MainLayout';
 import {
   Table,
   TableBody,
@@ -13,30 +13,62 @@ import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 const Pricing = () => {
-  const pricingData = {
-    title: 'Simple, Transparent Pricing',
-    tagline: 'Pricing',
-    description: "Choose the plan that's right for your remodeling business. All plans include our core platform features.",
-    heroImage: 'https://images.unsplash.com/photo-1554224155-8d04cb21cd6c?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80',
-    ctaText: 'Ready to Transform Your Business?',
-    features: [
-      {
-        title: 'Simple Pricing',
-        description: 'No hidden fees, just straightforward pricing tailored for remodeling businesses of all sizes.',
-      },
-      {
-        title: 'Flexible Options',
-        description: 'Choose between monthly or annual billing with discounts for longer commitments.',
-      },
-      {
-        title: 'Scale With Your Business',
-        description: 'Add capabilities as you grow with our optional add-on services.',
-      }
-    ]
-  };
+  const tiers = [
+    {
+      name: "Starter",
+      description: "Solo contractors / very small teams",
+      price: 99,
+      features: [
+        "Hosted smart website",
+        "Basic CRM (contact & lead capture)",
+        "Email notifications"
+      ]
+    },
+    {
+      name: "Growth",
+      description: "Growing businesses",
+      price: 299,
+      popular: true,
+      features: [
+        "Everything in Starter",
+        "SMS & missed‑call textback",
+        "Review generation",
+        "Call tracking"
+      ]
+    },
+    {
+      name: "Enterprise",
+      description: "Agencies & multi‑team remodelers",
+      price: 699,
+      features: [
+        "Everything in Growth",
+        "AI‑powered lead nurturing campaigns",
+        "AI chat & voice agents",
+        "Advanced analytics & dashboards"
+      ]
+    }
+  ];
 
-  const renderPricingContent = () => (
-    <>
+  const addOns = [
+    { name: "Appointment‑booking agent", price: 149 },
+    { name: "Funnel‑as‑a‑Service", price: 199 },
+    { name: "Citation / local‑SEO updates", price: 99 }
+  ];
+
+  return (
+    <MainLayout>
+      {/* Hero Section */}
+      <div className="bg-gradient-to-b from-white to-gray-50 py-24 px-6 md:px-12 lg:px-24">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#3a4150] mb-6">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            Choose the plan that's right for your remodeling business. All plans include our core platform features.
+          </p>
+        </div>
+      </div>
+
       {/* Pricing Table */}
       <div className="py-16 px-6 md:px-12 lg:px-24 bg-white">
         <div className="max-w-7xl mx-auto">
@@ -126,56 +158,7 @@ const Pricing = () => {
           </div>
         </div>
       </div>
-    </>
-  );
-
-  const tiers = [
-    {
-      name: "Starter",
-      description: "Solo contractors / very small teams",
-      price: 99,
-      features: [
-        "Hosted smart website",
-        "Basic CRM (contact & lead capture)",
-        "Email notifications"
-      ]
-    },
-    {
-      name: "Growth",
-      description: "Growing businesses",
-      price: 299,
-      popular: true,
-      features: [
-        "Everything in Starter",
-        "SMS & missed‑call textback",
-        "Review generation",
-        "Call tracking"
-      ]
-    },
-    {
-      name: "Enterprise",
-      description: "Agencies & multi‑team remodelers",
-      price: 699,
-      features: [
-        "Everything in Growth",
-        "AI‑powered lead nurturing campaigns",
-        "AI chat & voice agents",
-        "Advanced analytics & dashboards"
-      ]
-    }
-  ];
-
-  const addOns = [
-    { name: "Appointment‑booking agent", price: 149 },
-    { name: "Funnel‑as‑a‑Service", price: 199 },
-    { name: "Citation / local‑SEO updates", price: 99 }
-  ];
-
-  return (
-    <ServicePageTemplate 
-      {...pricingData}
-      customContent={renderPricingContent()}
-    />
+    </MainLayout>
   );
 };
 
