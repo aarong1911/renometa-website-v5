@@ -15,9 +15,10 @@ import { cn } from '@/lib/utils';
 const Pricing = () => {
   const pricingData = {
     title: 'Simple, Transparent Pricing',
-    tagline: 'Pricing',
     description: "Choose the plan that's right for your remodeling business. All plans include our core platform features.",
+    tagline: '', // Empty tagline to prevent the yellow pill from showing
     ctaText: 'Ready to Transform Your Business?',
+    heroImage: '',
     features: [
       {
         title: 'Simple Pricing',
@@ -36,6 +37,18 @@ const Pricing = () => {
 
   const renderPricingContent = () => (
     <>
+      {/* Custom Hero Section without the yellow pill */}
+      <div className="bg-gradient-to-b from-white to-gray-50 py-24 px-6 md:px-12 lg:px-24">
+        <div className="max-w-7xl mx-auto text-center">
+          <h1 className="text-4xl md:text-5xl font-bold text-[#3a4150] mb-6">
+            Simple, Transparent Pricing
+          </h1>
+          <p className="text-lg md:text-xl text-gray-600 max-w-3xl mx-auto">
+            Choose the plan that's right for your remodeling business. All plans include our core platform features.
+          </p>
+        </div>
+      </div>
+
       {/* Pricing Table */}
       <div className="py-16 px-6 md:px-12 lg:px-24 bg-white">
         <div className="max-w-7xl mx-auto">
