@@ -50,9 +50,7 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
         
         <div className="w-full max-w-3xl space-y-8">
           <ScrollReveal>
-            <span className="bg-gold/10 text-gold px-3 py-1 rounded-full text-sm font-medium border border-gold/20 mt-16 md:mt-0 inline-block">
-              {tagline}
-            </span>
+            {/* Removed the yellow span that was here */}
           </ScrollReveal>
           <ScrollReveal delay={200}>
             <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
