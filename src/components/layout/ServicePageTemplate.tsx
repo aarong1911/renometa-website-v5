@@ -1,4 +1,3 @@
-
 import React from 'react';
 import MainLayout from './MainLayout';
 import ServiceHeroSection from '@/components/sections/ServiceHeroSection';
@@ -43,6 +42,8 @@ interface ServicePageTemplateProps {
     link: string;
   }[];
   customContent?: React.ReactNode;
+  /** When true, skip rendering the hero section */
+  hideHero?: boolean;
 }
 
 const ServicePageTemplate = ({
@@ -62,44 +63,50 @@ const ServicePageTemplate = ({
   ctaText,
   relatedServices = [],
   customContent,
+  hideHero = false,
 }: ServicePageTemplateProps) => {
   return (
     <MainLayout>
-      {/* Hero Section */}
-      <ServiceHeroSection 
-        title={title}
-        description={description}
-        tagline={tagline}
-        heroImage={heroImage}
-        isSolutionsPage={false} // This is NOT a solutions page
-      />
-      
+      {/* Hero Section (skipped if hideHero is true) */}
+      {!hideHero && (
+        <ServiceHeroSection
+          title={title}
+          description={description}
+          tagline={tagline}
+          heroImage={heroImage}
+          isSolutionsPage={false}
+        />
+      )}
+
       {/* Render custom content if provided */}
       {customContent}
-      
+
       {/* Only render these sections if they have content */}
       {features.length > 0 && (
         <FeaturesSection features={features} title={title} />
       )}
-      
+
       {processSteps.length > 0 && (
         <div id="process">
           <ProcessSection processSteps={processSteps} />
         </div>
       )}
-      
+
       {testimonial.quote && (
         <TestimonialSection testimonial={testimonial} />
       )}
-      
+
       {faqItems.length > 0 && (
         <FAQSection faqItems={faqItems} />
       )}
-      
+
       {relatedServices.length > 0 && (
-        <RelatedServicesSection relatedServices={relatedServices} title={title} />
+        <RelatedServicesSection
+          relatedServices={relatedServices}
+          title={title}
+        />
       )}
-      
+
       {/* CTA Section */}
       <div id="contact">
         <CTASection ctaText={ctaText} title={title} />
