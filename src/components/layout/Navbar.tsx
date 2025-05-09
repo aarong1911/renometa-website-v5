@@ -1,10 +1,10 @@
-
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
 import DesktopNav from './nav/DesktopNav';
 import MobileNav from './nav/MobileNav';
 import { NavLink } from './nav/types';
+import { navLinks } from './navLinks';
 
 const Navbar = () => {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -67,13 +67,21 @@ const Navbar = () => {
     }
   };
 
-  const navLinks: NavLink[] = [
-    { name: 'Home', path: '/' },
-    { name: 'Solutions', path: '/solutions' },
-    { name: 'Blog', path: '/blog' },
-    { name: 'About', path: '/about' },
-    { name: 'Contact', path: location.pathname === '/' ? '#contact' : '/contact', action: location.pathname === '/' ? (e: React.MouseEvent) => scrollToSection('contact') : null },
-  ];
+  // Create navLinks with the appropriate action based on the current path
+  const navLinksWithActions: NavLink[] = navLinks.map(link => {
+    // If the link is to #contact and we're on the homepage, use scrollToSection
+    if (link.name === 'Contact' && location.pathname === '/') {
+      return {
+        ...link,
+        action: (e: React.MouseEvent) => {
+          e.preventDefault();
+          scrollToSection('contact');
+        }
+      };
+    }
+    // Otherwise, just return the link as is
+    return link;
+  });
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -99,7 +107,7 @@ const Navbar = () => {
       <div className="flex-1 flex justify-end">
         {/* Desktop Navigation */}
         <DesktopNav 
-          navLinks={navLinks} 
+          navLinks={navLinksWithActions} 
           location={location} 
           scrollToSection={scrollToSection} 
         />
@@ -125,7 +133,7 @@ const Navbar = () => {
       {/* Mobile Navigation */}
       <MobileNav 
         isOpen={mobileMenuOpen}
-        navLinks={navLinks}
+        navLinks={navLinksWithActions}
         location={location}
         scrollToSection={scrollToSection}
         onClose={() => setMobileMenuOpen(false)}

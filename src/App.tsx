@@ -13,6 +13,7 @@ import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
 import FreeTrial from "./pages/free-trial";
 import TrialSuccess from './pages/trial-success';
+import Pricing from "./pages/Pricing";
 
 // Solutions pages
 import SolutionsOverview from "./pages/Solutions/SolutionsOverview";
@@ -62,6 +63,7 @@ const App = () => (
           <Route path="/" element={<Index />} />
           <Route path="/free-trial" element={<FreeTrial />} />
           <Route path="/trial-success" element={<TrialSuccess />} />
+          <Route path="/pricing" element={<Pricing />} />
 
           {/* Legacy Service Routes (keeping for backward compatibility) */}
           <Route path="/services/website-development" element={<WebsiteDevelopment />} />
