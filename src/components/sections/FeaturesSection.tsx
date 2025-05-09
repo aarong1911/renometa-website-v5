@@ -5,7 +5,7 @@ import ScrollReveal from '@/components/ui/ScrollReveal';
 interface FeatureItem {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode; // Make icon optional
 }
 
 interface FeaturesSectionProps {
@@ -33,9 +33,11 @@ const FeaturesSection = ({ features, title }: FeaturesSectionProps) => {
           {features.map((feature, index) => (
             <ScrollReveal key={index} delay={index * 100}>
               <div className="bg-white p-6 rounded-lg shadow-sm hover:shadow-md transition-shadow h-full">
-                <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-gold-light/30 inline-flex">
-                  <div className="text-blue-dark">{feature.icon}</div>
-                </div>
+                {feature.icon && (
+                  <div className="mb-4 p-3 rounded-full bg-gradient-to-br from-blue-100 to-gold-light/30 inline-flex">
+                    <div className="text-blue-dark">{feature.icon}</div>
+                  </div>
+                )}
                 <h3 className="text-xl font-bold font-heading mb-3 text-blue-dark">{feature.title}</h3>
                 <p className="text-gray-600">{feature.description}</p>
               </div>
