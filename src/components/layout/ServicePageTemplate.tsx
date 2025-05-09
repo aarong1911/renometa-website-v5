@@ -12,24 +12,24 @@ import CTASection from '@/components/sections/CTASection';
 interface ServiceFeature {
   title: string;
   description: string;
-  icon: React.ReactNode;
+  icon?: React.ReactNode;
 }
 
 interface ServicePageTemplateProps {
   title: string;
   description: string;
   tagline: string;
-  features: ServiceFeature[];
-  processSteps: {
+  features?: ServiceFeature[];
+  processSteps?: {
     title: string;
     description: string;
     stepNumber: number;
   }[];
-  faqItems: {
+  faqItems?: {
     question: string;
     answer: string;
   }[];
-  testimonial: {
+  testimonial?: {
     quote: string;
     author: string;
     position: string;
@@ -37,24 +37,31 @@ interface ServicePageTemplateProps {
   };
   heroImage: string;
   ctaText: string;
-  relatedServices: {
+  relatedServices?: {
     title: string;
     description: string;
     link: string;
   }[];
+  customContent?: React.ReactNode;
 }
 
 const ServicePageTemplate = ({
   title,
   description,
   tagline,
-  features,
-  processSteps,
-  faqItems,
-  testimonial,
+  features = [],
+  processSteps = [],
+  faqItems = [],
+  testimonial = {
+    quote: '',
+    author: '',
+    position: '',
+    company: ''
+  },
   heroImage,
   ctaText,
-  relatedServices,
+  relatedServices = [],
+  customContent,
 }: ServicePageTemplateProps) => {
   return (
     <MainLayout>
@@ -67,22 +74,31 @@ const ServicePageTemplate = ({
         isSolutionsPage={false} // This is NOT a solutions page
       />
       
-      {/* Features Section */}
-      <FeaturesSection features={features} title={title} />
+      {/* Render custom content if provided */}
+      {customContent}
       
-      {/* Process Section */}
-      <div id="process">
-        <ProcessSection processSteps={processSteps} />
-      </div>
+      {/* Only render these sections if they have content */}
+      {features.length > 0 && (
+        <FeaturesSection features={features} title={title} />
+      )}
       
-      {/* Testimonial Section */}
-      <TestimonialSection testimonial={testimonial} />
+      {processSteps.length > 0 && (
+        <div id="process">
+          <ProcessSection processSteps={processSteps} />
+        </div>
+      )}
       
-      {/* FAQ Section */}
-      <FAQSection faqItems={faqItems} />
+      {testimonial.quote && (
+        <TestimonialSection testimonial={testimonial} />
+      )}
       
-      {/* Related Services Section */}
-      <RelatedServicesSection relatedServices={relatedServices} title={title} />
+      {faqItems.length > 0 && (
+        <FAQSection faqItems={faqItems} />
+      )}
+      
+      {relatedServices.length > 0 && (
+        <RelatedServicesSection relatedServices={relatedServices} title={title} />
+      )}
       
       {/* CTA Section */}
       <div id="contact">
