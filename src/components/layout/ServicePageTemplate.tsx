@@ -11,6 +11,22 @@ import {
 import { Check } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
+// Feature highlights above pricing
+const featureHighlights = [
+  {
+    title: "Simple Pricing",
+    description: "No hidden fees—just straightforward, transparent pricing."
+  },
+  {
+    title: "Flexible Billing",
+    description: "Choose monthly or annual subscriptions, with savings for longer commitments."
+  },
+  {
+    title: "Scalable Add‑Ons",
+    description: "Enhance your plan with optional services as your business grows."
+  }
+];
+
 const tiers = [
   {
     name: "Starter",
@@ -56,8 +72,8 @@ const addOns = [
 export default function Pricing() {
   return (
     <MainLayout>
-      {/* Page Header with increased top and bottom padding */}
-      <section className="pt-24 pb-12 text-center">
+      {/* Page Header with extra padding */}
+      <section className="pt-32 pb-16 text-center bg-white">
         <h1 className="text-4xl md:text-5xl font-bold text-[#3a4150]">
           Simple, Transparent Pricing
         </h1>
@@ -66,8 +82,22 @@ export default function Pricing() {
         </p>
       </section>
 
+      {/* Feature Highlights */}
+      <section className="py-12 px-4 md:px-12 lg:px-24 bg-gray-50">
+        <div className="max-w-5xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
+          {featureHighlights.map((feat) => (
+            <div key={feat.title} className="text-center">
+              <h3 className="text-xl font-semibold text-[#3a4150] mb-2">
+                {feat.title}
+              </h3>
+              <p className="text-gray-600">{feat.description}</p>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* Pricing Cards */}
-      <section className="py-12 px-4 md:px-12 lg:px-24">
+      <section className="mt-16 py-12 px-4 md:px-12 lg:px-24">
         <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {tiers.map((tier) => (
             <div
@@ -111,7 +141,7 @@ export default function Pricing() {
               </ul>
 
               <button
-                className="mt-8 w-full bg-[#3a4150] hover:bg-[#3a4150]/90 text-white py-2 rounded"
+                className="mt-8 w-full bg-[#3a4150] hover:bg-[#3a4150]/90 text-white py-3 rounded"
                 onClick={() => window.location.href = '/free-trial'}
               >
                 Get Started
