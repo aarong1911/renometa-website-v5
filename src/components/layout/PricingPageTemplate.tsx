@@ -73,7 +73,7 @@ export default function Pricing() {
   return (
     <MainLayout>
       {/* Page Header with extra padding */}
-      <section className="pt-32 pb-16 text-center bg-white">
+      <section className="container-custom flex flex-col items-center justify-center text-center py-20 min-h-screen relative z-20">
         <h1 className="text-4xl md:text-5xl font-bold text-[#3a4150]">
           Simple, Transparent Pricing
         </h1>
