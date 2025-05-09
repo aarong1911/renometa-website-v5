@@ -16,7 +16,7 @@ const Pricing = () => {
   const pricingData = {
     title: 'Simple, Transparent Pricing',
     description: "Choose the plan that's right for your remodeling business. All plans include our core platform features.",
-    tagline: '', // Empty tagline to prevent the yellow pill from showing
+    tagline: 'Pricing',
     ctaText: 'Ready to Transform Your Business?',
     heroImage: '',
     features: [
