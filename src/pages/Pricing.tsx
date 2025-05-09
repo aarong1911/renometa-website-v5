@@ -184,7 +184,7 @@ const Pricing = () => {
   ];
 
   return (
-    <ServicePageTemplate 
+    <PricingPageTemplate 
       {...pricingData}
       hideHero
       customContent={renderPricingContent()}
