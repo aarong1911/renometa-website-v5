@@ -1,54 +1,18 @@
 
-import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useToast } from '@/hooks/use-toast';
 import ScrollReveal from './ScrollReveal';
+import { useContactForm } from '@/hooks/useContactForm';
 
-const ContactForm = () => {
-  const { toast } = useToast();
-  const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    company: '',
-    message: '',
-    service: 'general', // Default service
+interface ContactFormProps {
+  onSuccess?: () => void;
+}
+
+const ContactForm = ({ onSuccess }: ContactFormProps) => {
+  const { formData, isSubmitting, handleChange, handleSubmit } = useContactForm({
+    onSuccess
   });
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
-      toast({
-        title: "Message Sent!",
-        description: "We'll get back to you as soon as possible.",
-      });
-      
-      // Reset form
-      setFormData({
-        name: '',
-        email: '',
-        phone: '',
-        company: '',
-        message: '',
-        service: 'general',
-      });
-      
-      setIsSubmitting(false);
-    }, 1000);
-  };
 
   return (
     <ScrollReveal>
