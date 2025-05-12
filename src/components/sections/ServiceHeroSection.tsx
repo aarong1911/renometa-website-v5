@@ -66,13 +66,17 @@ const ServiceHeroSection = ({ title, description, tagline, heroImage, isSolution
           </ScrollReveal>
           <ScrollReveal delay={600}>
             <div className="flex flex-col items-center justify-center">
-              <Button 
-                className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors w-44 py-6"
-                onClick={() => navigate('/free-trial')}
-              >
-                <span className="text-lg">Get Started</span>
-                <ArrowRight className="h-5 w-5 ml-1" />
-              </Button>
+
+  <Button 
+    className="group bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors w-48 py-6 flex items-center justify-center"
+    onClick={() => navigate('/free-trial')}
+  >
+    <span className="text-lg">Start Free Trial</span>
+    <span className="ml-1 text-lg transform transition-transform duration-200 group-hover:translate-x-1">
+      ➜
+    </span>
+  </Button>
+    
               <p className="text-sm text-gray-600 mt-2">No credit card required. Cancel anytime.</p>
             </div>
           </ScrollReveal>

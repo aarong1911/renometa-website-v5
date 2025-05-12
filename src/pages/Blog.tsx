@@ -54,10 +54,10 @@ const Blog = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0" />
         <div className="container-custom text-center py-20 relative z-10">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-5xl font-bold text-blue-dark">
+            <h1 className="text-4xl sm:text-5xl md:text-6xl font-bold font-heading leading-tight text-blue-dark">
               Blog
             </h1>
-            <p className="text-gray-600 mt-4 max-w-xl mx-auto">
+            <p className="text-gray-700 mt-6 max-w-xl mx-auto">
               Insights, strategies, and expert advice to help your remodeling and home service business grow.
             </p>
           </ScrollReveal>

@@ -22,12 +22,11 @@ const CTAHeroSection = ({ onScrollToSection }: CTAHeroSectionProps) => {
             Schedule a free 30-minute strategy call to discover how we can help your remodeling business thrive online.
           </p>
           <div className="flex flex-col items-center justify-center">
-            <Button 
-              size="lg" 
-              className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 w-40 py-6" 
-              onClick={() => navigate('/free-trial')}
-            >
-              Start Free
+            <Button className="group bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors w-48 py-6 flex items-center justify-center">
+              <span className="text-lg">Start Free Trial</span>
+              <span className="ml-1 text-lg transform transition-transform duration-200 group-hover:translate-x-1">
+                ➜
+              </span>
             </Button>
             <p className="text-sm opacity-80 mt-2">No credit card required. Cancel anytime.</p>
           </div>

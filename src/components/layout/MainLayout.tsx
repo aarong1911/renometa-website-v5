@@ -14,8 +14,12 @@ const MainLayout = ({ children }: MainLayoutProps) => {
   
   // Scroll to top on page change
   useEffect(() => {
-    window.scrollTo(0, 0);
-  }, [pathname]);
+  if ('scrollRestoration' in window.history) {
+    window.history.scrollRestoration = 'manual';
+  }
+  window.scrollTo(0, 0);
+}, [pathname]);
+
 
   // Initialize intersection observer for fade in animations
   useEffect(() => {

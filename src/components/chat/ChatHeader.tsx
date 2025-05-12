@@ -14,7 +14,7 @@ const ChatHeader = ({ onClose }: ChatHeaderProps) => {
           alt="RenoMeta Logo" 
           className="h-8 mr-2"
         />
-        <span className="font-medium">RenoMeta Support</span>
+        
       </div>
       <button onClick={onClose} className="text-white hover:text-gray-200" aria-label="Close chat">
         <X className="h-5 w-5" />

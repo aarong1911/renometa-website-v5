@@ -34,11 +34,15 @@ const CTASection = ({
                 </p>
                 <div className="mt-6 flex flex-col items-start">
                   <Button 
-                    className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 w-40 py-6"
-                    onClick={() => navigate('/free-trial')}
-                  >
-                    Start Free
-                  </Button>
+  className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 w-46 py-6 flex items-center justify-center group"
+  onClick={() => navigate('/free-trial')}
+>
+  <span className="text-lg">Start Free Trial</span>
+  <span className="ml-1 text-lg text-blue-dark group-hover:text-white transform transition-transform duration-300 group-hover:translate-x-1">
+    ➜
+  </span>
+</Button>
+
                   <p className="text-sm opacity-80 mt-2">No credit card required. Cancel anytime.</p>
                 </div>
               </ScrollReveal>

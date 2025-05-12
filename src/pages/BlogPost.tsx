@@ -26,14 +26,15 @@ const BlogPost = () => {
   return (
     <MainLayout>
       {/* Hero Section */}
-      <div className="bg-blue-dark py-16 px-6">
+      <div className="bg-blue-dark pt-32 pb-16 px-6">
+
         <div className="container-custom max-w-4xl">
           <ScrollReveal>
-            <Link to="/blog" className="inline-flex items-center text-gold hover:underline mb-6">
+            <Link to="/blog" className="inline-flex items-center text-gold hover:underline mb-24">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Blog
             </Link>
-            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-6">{blogContent.title}</h1>
+            <h1 className="text-3xl md:text-4xl lg:text-5xl font-bold text-white mb-10">{blogContent.title}</h1>
             <div className="flex flex-wrap items-center text-white/80 mb-8">
               <div className="flex items-center mr-6 mb-2">
                 <Calendar className="w-4 h-4 mr-2" />
