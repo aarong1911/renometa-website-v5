@@ -1,34 +1,109 @@
-// src/components/ContactModal.tsx
+
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
-import React from 'react';
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/lib/supabaseClient';
+import { useToast } from '@/components/ui/use-toast';
 
 interface ContactModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
+interface FormData {
+  name: string;
+  email: string;
+  phone: string;
+  company: string;
+  service: string;
+  message: string;
+}
+
 export default function ContactModal({ open, onOpenChange }: ContactModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [formData, setFormData] = useState<FormData>({
+    name: '',
+    email: '',
+    phone: '',
+    company: '',
+    service: '',
+    message: ''
+  });
+  const { toast } = useToast();
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // Submit the form data to Supabase
+      const { error } = await supabase
+        .from('contacts')
+        .insert([
+          {
+            name: formData.name,
+            email: formData.email,
+            phone: formData.phone || null,
+            company: formData.company || null,
+            service_interest: formData.service || null,
+            message: formData.message
+          },
+        ]);
+
+      if (error) throw error;
+
+      toast({
+        title: "Message sent!",
+        description: "We'll be in touch with you shortly.",
+      });
+
+      // Reset form and close modal after successful submission
+      setFormData({
+        name: '',
+        email: '',
+        phone: '',
+        company: '',
+        service: '',
+        message: ''
+      });
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error submitting contact form:', error);
+      toast({
+        title: "Something went wrong",
+        description: "Your message couldn't be sent. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <Dialog.Root open={open} onOpenChange={onOpenChange}>
       <Dialog.Portal>
-        {/* Backdrop */}
+        {/* Backdrop - reduced animation duration for smoother fading */}
         <Dialog.Overlay
           className="
             fixed inset-0 bg-black/50
-            opacity-0 transition-opacity duration-1000
+            opacity-0 transition-opacity duration-300
             data-[state=open]:opacity-50
             z-50
           "
         />
 
-        {/* Centered content wrapper (allows overall scrolling if needed) */}
+        {/* Centered content wrapper - reduced animation duration */}
         <Dialog.Content
           className="
             fixed inset-0 flex items-center justify-center p-4
             overflow-auto
-            opacity-0 scale-95 transition-all duration-1000
+            opacity-0 scale-95 transition-all duration-300
             data-[state=open]:opacity-100 data-[state=open]:scale-100
             z-[9999]
           "
@@ -60,10 +135,7 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
 
             {/* Form */}
             <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                // your submit logic here...
-              }}
+              onSubmit={handleSubmit}
               className="grid grid-cols-1 md:grid-cols-2 gap-4"
             >
               <div>
@@ -78,6 +150,8 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   placeholder="Your full name"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900"
                   required
+                  value={formData.name}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -93,6 +167,8 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   placeholder="you@example.com"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900"
                   required
+                  value={formData.email}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -107,6 +183,8 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   autoComplete="tel"
                   placeholder="(123) 456-7890"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900"
+                  value={formData.phone}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -121,6 +199,8 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   autoComplete="organization"
                   placeholder="Your company name"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900"
+                  value={formData.company}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -133,8 +213,10 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   name="service"
                   type="text"
                   autoComplete="off"
-                  placeholder=""
+                  placeholder="What service are you interested in?"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900"
+                  value={formData.service}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -148,6 +230,8 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                   placeholder="Tell us about your project or inquiry"
                   className="w-full p-3 rounded border border-gray-300 text-gray-900 h-32 resize-none"
                   required
+                  value={formData.message}
+                  onChange={handleChange}
                 />
               </div>
 
@@ -155,8 +239,9 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
                 <Button
                   type="submit"
                   className="bg-white text-blue-dark hover:bg-blue-light hover:text-white transition-colors duration-300 py-3 px-6"
+                  disabled={isSubmitting}
                 >
-                  Send Message
+                  {isSubmitting ? 'Sending...' : 'Send Message'}
                 </Button>
               </div>
             </form>
