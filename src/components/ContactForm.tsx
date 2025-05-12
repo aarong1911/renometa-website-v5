@@ -49,7 +49,7 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
             email: formData.email,
             phone: formData.phone || null,
             company: formData.company || null,
-            service_interest: formData.service || null,
+            service: formData.service || null,
             message: formData.message
           },
         ]);
