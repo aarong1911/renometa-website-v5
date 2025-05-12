@@ -1,4 +1,3 @@
-
 // src/components/ContactModal.tsx
 import * as Dialog from '@radix-ui/react-dialog';
 import { X } from 'lucide-react';
