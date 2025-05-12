@@ -1,3 +1,4 @@
+
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Montserrat:wght@400;500;600;700;800&display=swap');
 
 @tailwind base;
@@ -107,6 +108,29 @@
 
   .animated-border:hover::after {
     @apply w-full;
+  }
+  
+  /* Add modal specific animations */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 z-50;
+    opacity: 0;
+    transition: opacity 300ms ease-in-out;
+  }
+  
+  .modal-overlay[data-state="open"] {
+    opacity: 0.5;
+  }
+  
+  .modal-content {
+    @apply fixed inset-0 flex items-center justify-center p-4 overflow-auto z-[9999];
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 300ms ease-in-out, transform 300ms ease-in-out;
+  }
+  
+  .modal-content[data-state="open"] {
+    opacity: 1;
+    transform: scale(1);
   }
 }
 
