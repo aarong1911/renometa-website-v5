@@ -27,7 +27,7 @@ export default function ContactModal({ open, onOpenChange }: ContactModalProps) 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/50" />
-      <DialogContent className="bg-[#1d2939] text-white sm:max-w-xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className= "fixed z-50 bg-[#1d2939] text-white w-[90%] max-w-[420px] sm:max-w-xl max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 animate-fade-in-up" >
         <DialogTitle className="text-2xl font-bold mb-4">Get in Touch</DialogTitle>
         <DialogDescription className="sr-only">
           Fill out the form below to send us a message.

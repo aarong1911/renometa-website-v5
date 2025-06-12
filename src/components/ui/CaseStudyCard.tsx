@@ -15,10 +15,12 @@ interface CaseStudyCardProps {
   description: string;
   image: string;
   results: Result[];
-  link: string;
+  link?: string;
+  onClick?: () => void;
   className?: string;
   delay?: number;
 }
+
 
 const CaseStudyCard = ({
   title,
@@ -26,13 +28,19 @@ const CaseStudyCard = ({
   image,
   results,
   link,
+  onClick,
   className,
   delay = 0,
 }: CaseStudyCardProps) => {
   return (
     <ScrollReveal delay={delay}>
-      <Card className={cn("overflow-hidden", className)}>
-        <div className="relative h-60">
+      <Card
+  className={cn(
+    "h-full flex flex-col justify-between overflow-hidden transition-all duration-300 hover:shadow-lg hover:-translate-y-1",
+    className
+  )}
+>
+      <div className="relative h-60">
           <img 
             src={image} 
             alt={title} 
@@ -53,13 +61,25 @@ const CaseStudyCard = ({
             ))}
           </div>
         </CardContent>
-        <CardFooter>
-          <Link to={link}>
-            <Button variant="outline" className="border-teal text-teal hover:bg-teal hover:text-white">
-              View Case Study
-            </Button>
-          </Link>
-        </CardFooter>
+        <CardFooter className="justify-center">
+  {onClick ? (
+    <Button
+      onClick={onClick}
+      variant="outline"
+      className="border-teal text-teal hover:bg-teal hover:text-white"
+    >
+      View Case Study
+    </Button>
+  ) : (
+    <Link to={link || '#'}>
+      <Button variant="outline" className="border-teal text-teal hover:bg-teal hover:text-white">
+        View Case Study
+      </Button>
+    </Link>
+  )}
+</CardFooter>
+
+
       </Card>
     </ScrollReveal>
   );

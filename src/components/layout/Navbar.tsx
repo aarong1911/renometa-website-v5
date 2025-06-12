@@ -1,4 +1,3 @@
-// src/components/layout/Navbar.tsx
 import React, { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { cn } from '@/lib/utils';
@@ -14,20 +13,19 @@ const Navbar = () => {
   const location = useLocation();
   const navigate = useNavigate();
 
-  // Navbar background on scroll
   useEffect(() => {
     const handleScroll = () => setIsScrolled(window.scrollY > 10);
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Prevent body scroll when mobile menu is open
   useEffect(() => {
     document.body.style.overflow = mobileMenuOpen ? 'hidden' : '';
-    return () => { document.body.style.overflow = ''; };
+    return () => {
+      document.body.style.overflow = '';
+    };
   }, [mobileMenuOpen]);
 
-  // Handle scrollTo state from other pages
   useEffect(() => {
     if (location.state?.scrollTo) {
       const section = document.getElementById(location.state.scrollTo);
@@ -49,8 +47,18 @@ const Navbar = () => {
     }
   };
 
-  // Build nav links, overriding Contact
-  const navLinksWithActions = navLinks.map(link => {
+  const extendedNavLinks = [
+    ...navLinks,
+    {
+      name: 'Login',
+      path: 'http://localhost:8888/login',
+      external: true,
+    },
+  ];
+
+  const navLinksWithActions = extendedNavLinks.map(link => {
+    if (link.external) return link;
+
     if (link.name === 'Contact') {
       return {
         ...link,
@@ -58,22 +66,20 @@ const Navbar = () => {
           e.preventDefault();
           setContactOpen(true);
           setMobileMenuOpen(false);
-        }
+        },
       };
     }
-    if (link.name === 'Contact' && location.pathname === '/') {
-      // (no-op; Contact always opens modal now)
-    }
-    // existing scroll vs. normal nav for others
+
     if (link.path.startsWith('/#') && location.pathname === '/') {
       return {
         ...link,
         action: (e: React.MouseEvent) => {
           e.preventDefault();
           scrollToSection(link.path.replace('/#', ''));
-        }
+        },
       };
     }
+
     return link;
   });
 
@@ -97,15 +103,26 @@ const Navbar = () => {
           />
         </Link>
 
-        <div className="flex-1 flex justify-end">
-          {/* Desktop Navigation */}
+        <div className="flex-1 flex justify-end items-center gap-4">
           <DesktopNav
-            navLinks={navLinksWithActions}
+            navLinks={navLinksWithActions.filter(link => link.name !== 'Login')}
             location={location}
             scrollToSection={scrollToSection}
           />
 
-          {/* Mobile Menu Button */}
+          {/* Login Button */}
+        <a
+            className="hidden md:inline-block px-5 py-2 text-sm font-semibold rounded-md bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition"
+            href="http://localhost:8081/login"
+          >
+            Login
+          </a>
+
+
+          {/* Get Started Button */}
+          
+
+          {/* Mobile Menu Toggle */}
           <button
             className="md:hidden p-2 z-50 relative"
             onClick={toggleMobileMenu}
@@ -133,7 +150,6 @@ const Navbar = () => {
         />
       </header>
 
-      {/* Contact Modal */}
       <ContactModal open={contactOpen} onOpenChange={setContactOpen} />
     </>
   );

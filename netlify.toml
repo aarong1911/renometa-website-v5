@@ -1,6 +1,26 @@
+# renometa-website-v5/netlify.toml
+
+[build]
+  # This tells Netlify how to build your frontend project
+  # Assuming "npm run build" is your command and it outputs to a "dist" folder
+  command = "npm run build"
+  publish = "dist" # Make sure this matches your Vite build output directory
+
+[functions]
+  # This tells Netlify where to find your serverless functions
+  directory = "netlify/functions"
+  # You can optionally specify a Node.js version if needed
+  # node_bundler = "esbuild" # Optional: Can speed up local function builds
+
+  [dev] # <--- This section is crucial for local development with Netlify CLI
+  framework = "#custom" # This tells Netlify CLI to use custom settings for frontend
+  command = "npm run dev" # The command to start your frontend dev server
+  targetPort = 8080 # <--- THIS IS THE CRITICAL CHANGE: Now set to 8080
+  port = 8888 # The port Netlify CLI will proxy everything through (you'll access your site on http://localhost:8888)
+# This is the port you will use to access your site locally
+# Make sure your Vite dev server is configured to run on port 8080
 
 [[redirects]]
   from = "/*"
   to = "/index.html"
   status = 200
-

@@ -47,10 +47,10 @@ const BlogPreviewSection = () => {
           </p>
         </ScrollReveal>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
           {blogPosts.map((post, index) => (
             <ScrollReveal key={post.slug} delay={index * 100}>
-              <div className="bg-white rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-shadow">
+              <div className="h-full flex flex-col justify-between rounded-lg overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <div className="h-48 overflow-hidden">
                   <img
                     src={`https://picsum.photos/seed/${post.imageSeed}/600/400`}
@@ -58,29 +58,29 @@ const BlogPreviewSection = () => {
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />
                 </div>
-                <div className="p-6">
-                  <div className="flex items-center text-sm text-gray-500 mb-3">
-                    <span>{post.date}</span>
-                    <span className="mx-2">•</span>
-                    <span>{post.readTime}</span>
+
+                <div className="flex-grow p-6 flex flex-col justify-between">
+                  <div>
+                    <div className="flex items-center text-sm text-gray-500 mb-3">
+                      <span>{post.date}</span>
+                      <span className="mx-2">•</span>
+                      <span>{post.readTime}</span>
+                    </div>
+                    <h3 className="text-xl font-bold mb-2 text-blue-dark">{post.title}</h3>
+                    <p className="text-gray-600 mb-6">{post.description}</p>
                   </div>
-                  <h3 className="text-xl font-bold mb-2 text-blue-dark">{post.title}</h3>
-                  <p className="text-gray-600 mb-4">{post.description}</p>
-                  <Link
-                    to={`/blog/${post.slug}`}
-                    className="text-teal font-medium flex items-center group"
-                  >
-                    Read Article
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      className="h-5 w-5 ml-1 group-hover:translate-x-1 transition-transform"
-                      fill="none"
-                      viewBox="0 0 24 24"
-                      stroke="currentColor"
-                    >
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                    </svg>
-                  </Link>
+
+                  {/* Button-style CTA */}
+                  <div className="text-center mt-auto">
+                    <Link to={`/blog/${post.slug}`}>
+                      <Button
+                        variant="outline"
+                        className="border-teal text-teal hover:bg-teal hover:text-white transition-all duration-300"
+                      >
+                        Read Article
+                      </Button>
+                    </Link>
+                  </div>
                 </div>
               </div>
             </ScrollReveal>
@@ -92,7 +92,7 @@ const BlogPreviewSection = () => {
             <Button
               asChild
               variant="outline"
-              className="border-blue-dark text-blue-dark hover:bg-blue-light hover:text-white hover:border-blue-light transition-colors duration-300"
+              className="border-teal text-teal hover:bg-teal hover:text-white transition-all duration-300 rounded-lg font-medium px-6 py-3"
             >
               <Link to="/blog">Read More Articles</Link>
             </Button>

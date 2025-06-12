@@ -76,27 +76,45 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           </div>
         </div>
         
-        <div>
-          <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
-            Service of Interest
-          </label>
-          <select
-            id="service"
-            name="service"
-            value={formData.service}
-            onChange={handleChange}
-            className="w-full border-input border rounded-md px-3 py-2 bg-transparent"
-          >
-            <option value="general">General Inquiry</option>
-            <option value="website-development">Smart Website Development</option>
-            <option value="advanced-seo">Advanced SEO</option>
-            <option value="ai-agents">AI-Powered Agents</option>
-            <option value="automation">Intelligent Automation</option>
-            <option value="integration">Seamless Integration</option>
-          </select>
-        </div>
-        
-        <div>
+        <div className="relative">
+  <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
+    Service of Interest
+  </label>
+  <select
+    id="service"
+    name="service"
+    value={formData.service}
+    onChange={handleChange}
+    className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 pl-3 pr-12 text-sm"
+  >
+    <option value="general">General Inquiry</option>
+    <option value="website-development">Smart Website Development</option>
+    <option value="advanced-seo">Advanced SEO</option>
+    <option value="ai-agents">AI-Powered Agents</option>
+    <option value="automation">Intelligent Automation</option>
+    <option value="integration">Seamless Integration</option>
+  </select>
+
+  {/* Centered, larger arrow */}
+  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
+  <svg
+    className="w-7 h-7 text-gray-500" // Keep the larger size, e.g., w-7 h-7
+    viewBox="0 0 20 20"
+    fill="currentColor"
+  >
+    <path
+      fillRule="evenodd"
+      d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
+      clipRule="evenodd"
+    />
+  </svg>
+</div>
+</div>
+
+
+
+
+          <div>
           <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
             Message *
           </label>

@@ -127,12 +127,13 @@ const DesktopNav: React.FC<DesktopNavProps> = ({ navLinks, location, scrollToSec
           )}
         </div>
       ))}
-      <Button
-        className="bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition-colors"
-        onClick={() => navigate('/free-trial')}
-      >
-        Get Started
-      </Button>
+      <Link
+  to="/free-trial"
+  className="px-5 py-2 text-sm font-semibold rounded-md bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition"
+>
+  Get Started
+</Link>
+
     </nav>
   );
 };

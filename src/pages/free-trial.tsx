@@ -6,6 +6,7 @@ import ServiceCard from '@/components/ui/ServiceCard';
 import TestimonialCard from '@/components/ui/TestimonialCard';
 import Chatbot from '@/components/ui/Chatbot';
 import SignupForm from '../components/ui/SignupForm';
+import { Hero } from '@/components/Hero'; // <--- ADD THIS LINE
 
 const FreeTrial = () => {
   const features = [
@@ -112,6 +113,10 @@ const FreeTrial = () => {
           </ScrollReveal>
           <div className="max-w-3xl mx-auto">
             <Chatbot />
+          {/* Add the AI Customer Service Agent button here */}
+            <div className="mt-8 text-center"> {/* Added some margin-top for spacing */}
+                <Hero />
+            </div>
           </div>
         </div>
       </section>
