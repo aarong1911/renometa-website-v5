@@ -13,11 +13,13 @@ const HeroSection = ({ onScrollToSection }: HeroSectionProps) => {
   return (
     <section
   id="hero"
-  className="relative w-full min-h-screen bg-no-repeat bg-cover bg-top overflow-hidden"
+  className="relative w-full min-h-[90vh] md:min-h-screen bg-no-repeat bg-cover overflow-hidden"
   style={{
-    backgroundImage: `url("/Background-image-sandy4.png")`,
-    backgroundSize: '100% 100%',
-  }}
+  backgroundImage: `url("/Background-image-sandy4.png")`,
+  backgroundSize: 'cover',
+  backgroundPosition: 'center',
+}}
+
 >
 
       {/* Overlay */}

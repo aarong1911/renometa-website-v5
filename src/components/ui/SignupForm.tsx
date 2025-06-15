@@ -52,6 +52,10 @@ const SignupForm = () => {
       setMessage({ type: 'error', text: error.message });   // shows 429 plainly
       return;                                               // ⬅︎ stop here
     }
+
+    // ✅ Save credentials to localStorage for auto-login
+  localStorage.setItem("trial_email", data.email);
+  localStorage.setItem("trial_password", data.password);
   
     setMessage({
       type: 'success',

@@ -29,8 +29,7 @@ const Blog = () => {
                     readTime: '8 min read',
                     summary:
                       'Discover the essential elements every remodeling website needs to convert visitors into qualified leads.',
-                    image:
-                      'https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&w=800&q=80',
+                    image: '/images/website-must-haves.png'
                   },
                   {
                     id: 'seo-strategies',
@@ -39,8 +38,8 @@ const Blog = () => {
                     readTime: '6 min read',
                     summary:
                       'Learn how to optimize your online presence and attract more local customers with these proven SEO techniques.',
-                    image:
-                      'https://images.unsplash.com/photo-1571786256017-aee7a0c009b6?auto=format&fit=crop&w=800&q=80',
+                    image: '/images/seo-strategies.png',
+                     
                   },
                   {
                     id: 'ai-revolution',
@@ -49,9 +48,9 @@ const Blog = () => {
                     readTime: '7 min read',
                     summary:
                       'Explore how artificial intelligence is transforming customer interactions and helping businesses provide exceptional service.',
-                    image:
-                      'https://images.unsplash.com/photo-1488590528505-98d2b5aba04b?auto=format&fit=crop&w=800&q=80',
-                  },
+                    image: '/images/ai-revolution.png'
+                      
+                    },
                 ][i];
 
                 return (

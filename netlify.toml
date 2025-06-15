@@ -15,11 +15,11 @@
   [dev] # <--- This section is crucial for local development with Netlify CLI
   framework = "#custom" # This tells Netlify CLI to use custom settings for frontend
   command = "npm run dev" # The command to start your frontend dev server
-  targetPort = 8080 # <--- THIS IS THE CRITICAL CHANGE: Now set to 8080
+  targetPort = 8081 # <--- THIS IS THE CRITICAL CHANGE: Now set to 8080
   port = 8888 # The port Netlify CLI will proxy everything through (you'll access your site on http://localhost:8888)
 # This is the port you will use to access your site locally
 # Make sure your Vite dev server is configured to run on port 8080
-
+   auttoLaunch = true # Automatically open the browser when starting the dev server
 [[redirects]]
   from = "/*"
   to = "/index.html"

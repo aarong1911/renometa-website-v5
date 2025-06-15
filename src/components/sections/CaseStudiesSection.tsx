@@ -25,7 +25,7 @@ const CaseStudiesSection = () => {
       <p>Superior Windows & Doors needed a better way to convert web traffic into booked consultations. We rebuilt their site structure and added dynamic CTAs and AI chat agents for instant responses.</p>
       <ul className="list-disc list-inside">
         <li>🚀 +87% conversion rate</li>
-        <li>📈 150+ leads/month sustained</li>
+        <li>📈 25+ leads/month sustained</li>
         <li>🧰 Integrated lead pipeline and appointment booking</li>
       </ul>
     </>
@@ -35,7 +35,7 @@ const CaseStudiesSection = () => {
     <>
       <p>Precision Plumbing wanted to offer 24/7 service without overextending staff. We implemented an AI agent that handles chat, SMS, and after-hours bookings across channels.</p>
       <ul className="list-disc list-inside">
-        <li>📅 +215% after-hours bookings</li>
+        <li>📅 +115% after-hours bookings</li>
         <li>🤝 98% customer satisfaction</li>
         <li>🛠️ Cut call overflow by 60%</li>
       </ul>
@@ -74,7 +74,7 @@ const CaseStudiesSection = () => {
             image="https://images.unsplash.com/photo-1503174971373-b1f69850bded"
             results={[
               { label: 'Conversion Rate', value: '+87%' },
-              { label: 'Monthly Leads', value: '150+' }
+              { label: 'Monthly Leads', value: '25+' }
             ]}
             onClick={() => setOpenModal('superior')}
             delay={100}
@@ -85,7 +85,7 @@ const CaseStudiesSection = () => {
             description="How AI agents helped a plumbing company provide 24/7 service without hiring additional staff."
             image="https://images.unsplash.com/photo-1581578731548-c64695cc6952"
             results={[
-              { label: 'After-Hours Bookings', value: '+215%' },
+              { label: 'After-Hours Bookings', value: '+115%' },
               { label: 'Customer Satisfaction', value: '98%' }
             ]}
             onClick={() => setOpenModal('precision')}

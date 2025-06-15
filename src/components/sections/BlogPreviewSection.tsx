@@ -11,7 +11,7 @@ const blogPosts = [
     readTime: '5 min read',
     description:
       'Discover the essential elements that every remodeling website needs to convert visitors into qualified leads.',
-    imageSeed: 1,
+    image: '/images/website-must-haves.png',
   },
   {
     slug: 'ai-revolution',
@@ -20,7 +20,7 @@ const blogPosts = [
     readTime: '5 min read',
     description:
       'Learn how artificial intelligence is changing how home service businesses handle customer interactions.',
-    imageSeed: 2,
+    image: '/images/ai-revolution.png',
   },
   {
     slug: 'seo-strategies',
@@ -29,7 +29,7 @@ const blogPosts = [
     readTime: '5 min read',
     description:
       'A complete guide to dominating local search results and attracting more customers in your service area.',
-    imageSeed: 3,
+    image: '/images/seo-strategies.png',
   },
 ];
 
@@ -53,7 +53,7 @@ const BlogPreviewSection = () => {
               <div className="h-full flex flex-col justify-between rounded-lg overflow-hidden border transition-all duration-300 hover:shadow-lg hover:-translate-y-1">
                 <div className="h-48 overflow-hidden">
                   <img
-                    src={`https://picsum.photos/seed/${post.imageSeed}/600/400`}
+                    src={post.image}
                     alt={post.title}
                     className="w-full h-full object-cover transition-transform duration-500 hover:scale-105"
                   />

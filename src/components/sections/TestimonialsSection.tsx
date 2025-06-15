@@ -21,18 +21,19 @@ const TestimonialsSection = () => {
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <TestimonialCard 
-            quote="Our website leads have doubled since working with RenoMeta. Their understanding of the remodeling industry made all the difference." 
-            author="Michael Rodriguez" 
+            quote="RenoMeta built us a beautiful and incredibly user-friendly website! We're so impressed with their professionalism and the outstanding results. Highly recommend them!" 
+            author="mark rosenberg" 
             position="Owner" 
-            company="Rodriguez Remodeling" 
+            company="IsraelSteel.com" 
             delay={0} 
           />
           
           <TestimonialCard 
-            quote="The AI agents have transformed our business. We're booking jobs 24/7 and our team can focus on the work instead of answering basic questions." 
-            author="Sarah Johnson" 
+            quote="Exceptional Service and Results!
+Working with RenoMeta has been a game-changer for our business. Their team is knowledgeable, responsive, and truly understands what it takes to drive growth. From strategy to execution, everything was handled with precision and care. We've seen a noticeable increase in leads and conversions since partnering with them. Highly recommended for anyone serious about scaling their business!" 
+            author="Nazar Nesteruk" 
             position="Operations Manager" 
-            company="Johnson Home Services" 
+            company="FreshCleaners.org" 
             delay={100} 
           />
           

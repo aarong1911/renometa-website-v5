@@ -30,11 +30,7 @@ const CaseStudyModal: React.FC<CaseStudyModalProps> = ({
   className="fixed z-50 bg-white text-black w-[90%] max-w-[420px] max-h-[90vh] overflow-y-auto rounded-xl shadow-lg p-6 animate-fade-in-up"
 >
 
-
-
-
-
-        <DialogTitle className="text-2xl font-bold mb-4">{title}</DialogTitle>
+      <DialogTitle className="text-2xl font-bold mb-4">{title}</DialogTitle>
         <DialogDescription className="sr-only">Case Study Details</DialogDescription>
 
         <Button
