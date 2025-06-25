@@ -51,7 +51,7 @@ const Navbar = () => {
     ...navLinks,
     {
       name: 'Login',
-      path: 'http://localhost:8888/login',
+      path: 'http://connect.renometa.com/login',
       external: true,
     },
   ];
