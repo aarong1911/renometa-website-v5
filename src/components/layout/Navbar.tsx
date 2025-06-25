@@ -113,7 +113,7 @@ const Navbar = () => {
           {/* Login Button */}
         <a
             className="hidden md:inline-block px-5 py-2 text-sm font-semibold rounded-md bg-[#3a4150] text-white hover:bg-[#3a4150]/90 transition"
-            href="http://renometa.com/login"
+            href="http://connect.renometa.com/login"
           >
             Login
           </a>
