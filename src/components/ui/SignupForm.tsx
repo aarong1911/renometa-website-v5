@@ -33,7 +33,7 @@ const SignupForm = () => {
   });
 
   const onSubmit = async (data: FormData) => {
-    const redirect = `${window.location.origin}/trial-success`;   // 👈 dynamic!
+    const redirect = "https://renometa.com/trial-success";   // 👈 dynamic!
   
     const { error } = await supabase.auth.signUp({
       email: data.email,
