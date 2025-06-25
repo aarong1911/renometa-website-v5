@@ -51,7 +51,7 @@ const Navbar = () => {
     ...navLinks,
     {
       name: 'Login',
-      path: 'http://connect.renometa.com/login',
+      path: 'http://connect.renometa.com',
       external: true,
     },
   ];
