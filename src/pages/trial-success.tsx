@@ -200,7 +200,7 @@ export default function TrialSuccess() {
         open={showModal}
         onOpenChange={(open) => {
           setShowModal(open);
-          if (!open) nav("/dashboard"); // close → dashboard
+          if (!open) window.location.href = "https://connect.renometa.com/dashboard";
         }}
       >
         <DialogContent className="text-center space-y-4 max-w-md bg-white">
