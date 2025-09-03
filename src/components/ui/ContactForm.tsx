@@ -1,4 +1,3 @@
-
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
@@ -77,44 +76,41 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
         </div>
         
         <div className="relative">
-  <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
-    Service of Interest
-  </label>
-  <select
-    id="service"
-    name="service"
-    value={formData.service}
-    onChange={handleChange}
-    className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 pl-3 pr-12 text-sm"
-  >
-    <option value="general">General Inquiry</option>
-    <option value="website-development">Smart Website Development</option>
-    <option value="advanced-seo">Advanced SEO</option>
-    <option value="ai-agents">AI-Powered Agents</option>
-    <option value="automation">Intelligent Automation</option>
-    <option value="integration">Seamless Integration</option>
-  </select>
+          <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
+            Service of Interest
+          </label>
+          <select
+            id="service"
+            name="service"
+            value={formData.service}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 pl-3 pr-12 text-sm"
+          >
+            <option value="general">General Inquiry</option>
+            <option value="website-development">Smart Website Development</option>
+            <option value="advanced-seo">Advanced SEO</option>
+            <option value="ai-agents">AI-Powered Agents</option>
+            <option value="automation">Intelligent Automation</option>
+            <option value="integration">Seamless Integration</option>
+          </select>
 
-  {/* Centered, larger arrow */}
-  <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
-  <svg
-    className="w-7 h-7 text-gray-500" // Keep the larger size, e.g., w-7 h-7
-    viewBox="0 0 20 20"
-    fill="currentColor"
-  >
-    <path
-      fillRule="evenodd"
-      d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
-      clipRule="evenodd"
-    />
-  </svg>
-</div>
-</div>
+          {/* Centered, larger arrow */}
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
+            <svg
+              className="w-7 h-7 text-gray-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
 
-
-
-
-          <div>
+        <div>
           <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
             Message *
           </label>
@@ -127,6 +123,27 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             required
             className="w-full min-h-[150px]"
           />
+        </div>
+
+        {/* ✅ Consent Checkbox */}
+        <div className="flex items-start space-x-2">
+          <input
+            type="checkbox"
+            id="consent"
+            name="consent"
+            required
+            onChange={handleChange}
+            className="mt-1"
+          />
+          <label
+            htmlFor="consent"
+            className="text-xs text-gray-600 leading-snug"
+          >
+            I Consent to Receive SMS Notifications, Alerts & Occasional Marketing
+            Communication from RenoMeta. Message frequency varies. Message & data
+            rates may apply. Text HELP to +1(954) 871-8466 for assistance. You can
+            reply STOP to unsubscribe at any time.
+          </label>
         </div>
         
         <div>
