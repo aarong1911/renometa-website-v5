@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/lib/supabaseClient';
@@ -17,6 +16,7 @@ interface FormData {
   company: string;
   service: string;
   message: string;
+  consent: boolean; // ✅ added
 }
 
 export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }: ContactFormProps) {
@@ -26,17 +26,28 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
     phone: '',
     company: '',
     service: '',
-    message: ''
+    message: '',
+    consent: false, // ✅ default unchecked
   });
   const { toast } = useToast();
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    const { name, value, type, checked } = e.target;
+    setFormData(prev => ({ ...prev, [name]: type === 'checkbox' ? checked : value }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.consent) {
+      toast({
+        title: "Consent required",
+        description: "You must agree to SMS notifications before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     setIsSubmitting(true);
 
     try {
@@ -50,7 +61,8 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
             phone: formData.phone || null,
             company: formData.company || null,
             service: formData.service || null,
-            message: formData.message
+            message: formData.message,
+            consent: formData.consent, // ✅ store consent in DB
           },
         ]);
 
@@ -61,14 +73,15 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
         description: "We'll be in touch with you shortly.",
       });
 
-      // Reset form and notify parent component after successful submission
+      // Reset form
       setFormData({
         name: '',
         email: '',
         phone: '',
         company: '',
         service: '',
-        message: ''
+        message: '',
+        consent: false,
       });
       onSuccess();
     } catch (error) {
@@ -183,6 +196,25 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
           value={formData.message}
           onChange={handleChange}
         />
+      </div>
+
+      {/* ✅ Consent Checkbox */}
+      <div className="md:col-span-2 flex items-start space-x-2">
+        <input
+          type="checkbox"
+          id="contact-consent"
+          name="consent"
+          required
+          checked={formData.consent}
+          onChange={handleChange}
+          className="mt-1"
+        />
+        <label htmlFor="contact-consent" className="text-xs text-gray-700 leading-snug">
+          I Consent to Receive SMS Notifications, Alerts & Occasional Marketing
+          Communication from RenoMeta. Message frequency varies. Message & data
+          rates may apply. Text HELP to +1(954) 871-8466 for assistance. You can
+          reply STOP to unsubscribe at any time.
+        </label>
       </div>
 
       <div className="md:col-span-2">
