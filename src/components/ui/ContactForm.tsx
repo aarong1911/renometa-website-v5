@@ -139,10 +139,12 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             htmlFor="consent"
             className="text-xs text-gray-600 leading-snug"
           >
-            I Consent to Receive SMS Notifications, Alerts & Occasional Marketing
-            Communication from RenoMeta. Message frequency varies. Message & data
-            rates may apply. Text HELP to +1-888-792-1166 for assistance. You can
-            reply STOP to unsubscribe at any time.
+            <p className="text-xs text-gray-600 mt-2">
+  I consent to receive SMS notifications and service alerts from RenoMeta related to my appointments and service requests. 
+  Message frequency varies. Message &amp; data rates may apply. Text HELP to +1-888-792-1166 for assistance. 
+  Reply STOP to unsubscribe at any time.
+</p>
+
           </label>
         </div>
         
