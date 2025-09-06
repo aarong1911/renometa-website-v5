@@ -210,10 +210,9 @@ export default function ContactForm({ onSuccess, isSubmitting, setIsSubmitting }
           className="mt-1"
         />
         <label htmlFor="contact-consent" className="text-xs text-gray-300 leading-snug">
-          I Consent to Receive SMS Notifications, Alerts & Occasional Marketing
-          Communication from RenoMeta. Message frequency varies. Message & data
-          rates may apply. Text HELP to +1-888-792-1166 for assistance. You can
-          reply STOP to unsubscribe at any time.
+          I consent to receive SMS notifications and service alerts from RenoMeta related to my appointments and service requests. 
+          Message frequency varies. Message & data rates may apply. Text HELP to +1-888-792-1166 for assistance. 
+          Reply STOP to unsubscribe at any time.
         </label>
       </div>
 
