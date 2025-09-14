@@ -28,8 +28,8 @@ export default function ScheduleAppointmentModal({
     name: '',
     email: '',
     phone: '',
-    date: new Date(),
-    time: '',
+    appointment_date: new Date(),
+    appointment_time: '',
     timezone: '',
   });
 
