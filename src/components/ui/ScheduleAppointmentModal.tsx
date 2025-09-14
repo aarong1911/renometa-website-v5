@@ -49,17 +49,18 @@ export default function ScheduleAppointmentModal({
     setIsSubmitting(true);
 
     const { error } = await supabase.from('appointments').insert([
-      {
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        appointment_date: formData.appointment_date
-          ? formData.appointment_date.toISOString().split('T')[0]
-          : null,
-        appointment_time: formData.appointment_time,
-        timezone: formData.timezone,
-      },
-    ]);
+  {
+    name: formData.name,
+    email: formData.email,
+    phone: formData.phone || null, // optional
+    appointment_date: formData.date
+      ? formData.date.toISOString().split('T')[0] // use `date` state
+      : null,
+    appointment_time: formData.time, // use `time` state
+    timezone: formData.timezone,     // must not be empty
+  },
+]);
+
 
     if (error) {
       toast({
