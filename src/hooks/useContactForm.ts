@@ -10,6 +10,7 @@ interface ContactFormData {
   company: string;
   message: string;
   service: string;
+  consent?: boolean;
 }
 
 interface UseContactFormProps {
