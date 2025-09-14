@@ -130,7 +130,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     <option value="integration">Seamless Integration</option>
   </select>
 
-  {/* ✅ Custom centered arrow only */}
+  {/* ✅ Custom arrow, centered */}
   <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
     <svg
       className="w-5 h-5 text-gray-500"
