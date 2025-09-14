@@ -64,7 +64,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               onChange={handleChange}
               placeholder="Your full name"
               required
-              className="w-full bg-[#1d2939] text-white placeholder-gray-400 border border-gray-600"
+              className="w-full bg-white text-gray-900 placeholder-gray-500"
             />
           </div>
           <div>
@@ -79,7 +79,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               onChange={handleChange}
               placeholder="your@email.com"
               required
-              className="w-full bg-[#1d2939] text-white placeholder-gray-400 border border-gray-600"
+              className="w-full bg-white text-gray-900 placeholder-gray-500"
             />
           </div>
           <div>
@@ -93,7 +93,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="(123) 456-7890"
-              className="w-full bg-[#1d2939] text-white placeholder-gray-400 border border-gray-600"
+              className="w-full bg-white text-gray-900 placeholder-gray-500"
             />
           </div>
           <div>
@@ -106,7 +106,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               value={formData.company}
               onChange={handleChange}
               placeholder="Your company name"
-              className="w-full bg-[#1d2939] text-white placeholder-gray-400 border border-gray-600"
+              className="w-full bg-white text-gray-900 placeholder-gray-500"
             />
           </div>
         </div>
@@ -120,7 +120,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             name="service"
             value={formData.service}
             onChange={handleChange}
-            className="w-full border border-gray-600 rounded-md bg-[#1d2939] text-white appearance-none h-11 pl-3 pr-10 text-sm"
+            className="w-full border border-gray-300 rounded-md bg-white text-gray-900 h-11 pl-3 pr-10 text-sm"
           >
             <option value="general">General Inquiry</option>
             <option value="website-development">Smart Website Development</option>
@@ -130,10 +130,10 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             <option value="integration">Seamless Integration</option>
           </select>
 
-          {/* Centered arrow */}
+          {/* ✅ Centered arrow */}
           <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
             <svg
-              className="w-5 h-5 text-gray-300"
+              className="w-5 h-5 text-gray-500"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -157,7 +157,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             onChange={handleChange}
             placeholder="Tell us about your project or inquiry"
             required
-            className="w-full min-h-[150px] bg-[#1d2939] text-white placeholder-gray-400 border border-gray-600"
+            className="w-full min-h-[150px] bg-white text-gray-900 placeholder-gray-500"
           />
         </div>
 
