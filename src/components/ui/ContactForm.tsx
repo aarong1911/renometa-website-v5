@@ -9,16 +9,39 @@ interface ContactFormProps {
 }
 
 const ContactForm = ({ onSuccess }: ContactFormProps) => {
-  const { formData, isSubmitting, handleChange, handleSubmit } = useContactForm({
+  const { formData, isSubmitting, handleChange, setIsSubmitting } = useContactForm({
     onSuccess
   });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    try {
+      // 🔹 Send to Make webhook (triggers Supabase + Emails)
+      await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...formData,
+          source: 'contact_form',
+        }),
+      });
+
+      if (onSuccess) onSuccess();
+    } catch (error) {
+      console.error('Webhook error:', error);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
   return (
     <ScrollReveal>
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
           <div>
-            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="name" className="block text-sm font-medium text-gray-900 mb-1">
               Full Name *
             </label>
             <Input
@@ -28,11 +51,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               onChange={handleChange}
               placeholder="Your full name"
               required
-              className="w-full"
+              className="w-full bg-white text-gray-800 placeholder-gray-500"
             />
           </div>
           <div>
-            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="email" className="block text-sm font-medium text-gray-900 mb-1">
               Email Address *
             </label>
             <Input
@@ -43,11 +66,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               onChange={handleChange}
               placeholder="your@email.com"
               required
-              className="w-full"
+              className="w-full bg-white text-gray-800 placeholder-gray-500"
             />
           </div>
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-900 mb-1">
               Phone Number
             </label>
             <Input
@@ -57,11 +80,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="(123) 456-7890"
-              className="w-full"
+              className="w-full bg-white text-gray-800 placeholder-gray-500"
             />
           </div>
           <div>
-            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
+            <label htmlFor="company" className="block text-sm font-medium text-gray-900 mb-1">
               Company
             </label>
             <Input
@@ -70,13 +93,13 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               value={formData.company}
               onChange={handleChange}
               placeholder="Your company name"
-              className="w-full"
+              className="w-full bg-white text-gray-800 placeholder-gray-500"
             />
           </div>
         </div>
         
         <div className="relative">
-          <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="service" className="block text-sm font-medium text-gray-900 mb-1">
             Service of Interest
           </label>
           <select
@@ -84,7 +107,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             name="service"
             value={formData.service}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 pl-3 pr-12 text-sm"
+            className="w-full border border-gray-300 rounded-md bg-white text-gray-800 appearance-none h-11 pl-3 pr-12 text-sm"
           >
             <option value="general">General Inquiry</option>
             <option value="website-development">Smart Website Development</option>
@@ -94,10 +117,9 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             <option value="integration">Seamless Integration</option>
           </select>
 
-          {/* Centered, larger arrow */}
-          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2">
             <svg
-              className="w-7 h-7 text-gray-500"
+              className="w-6 h-6 text-gray-600"
               viewBox="0 0 20 20"
               fill="currentColor"
             >
@@ -111,7 +133,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
         </div>
 
         <div>
-          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+          <label htmlFor="message" className="block text-sm font-medium text-gray-900 mb-1">
             Message *
           </label>
           <Textarea
@@ -121,11 +143,10 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             onChange={handleChange}
             placeholder="Tell us about your project or inquiry"
             required
-            className="w-full min-h-[150px]"
+            className="w-full min-h-[150px] bg-white text-gray-800 placeholder-gray-500"
           />
         </div>
 
-        {/* ✅ Consent Checkbox */}
         <div className="flex items-start space-x-2">
           <input
             type="checkbox"
@@ -135,16 +156,10 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             onChange={handleChange}
             className="mt-1"
           />
-          <label
-            htmlFor="consent"
-            className="text-xs text-gray-600 leading-snug"
-          >
-            <p className="text-xs text-gray-600 mt-2">
-  I consent to receive SMS notifications and service alerts from RenoMeta related to my appointments and service requests. 
-  Message frequency varies. Message &amp; data rates may apply. Text HELP to +1-888-792-1166 for assistance. 
-  Reply STOP to unsubscribe at any time.
-</p>
-
+          <label htmlFor="consent" className="text-xs text-gray-900 leading-snug">
+            I consent to receive SMS notifications and service alerts from RenoMeta related to my appointments and service requests. 
+            Message frequency varies. Message &amp; data rates may apply. Text HELP to +1-888-792-1166 for assistance. 
+            Reply STOP to unsubscribe at any time.
           </label>
         </div>
         
