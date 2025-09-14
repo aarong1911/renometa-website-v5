@@ -1,16 +1,16 @@
-import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/lib/supabaseClient';
+import React, { useState } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogOverlay,
-} from '@/components/ui/dialog';
-import DatePicker from 'react-datepicker';
-import 'react-datepicker/dist/react-datepicker.css';
+} from "@/components/ui/dialog";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
 interface ScheduleAppointmentModalProps {
   open: boolean;
@@ -25,12 +25,12 @@ export default function ScheduleAppointmentModal({
   const { toast } = useToast();
 
   const [formData, setFormData] = useState({
-    name: '',
-    email: '',
-    phone: '',
-    appointment_date: new Date(), // ✅ matches DB schema
-    appointment_time: '',         // ✅ matches DB schema
-    timezone: '',
+    name: "",
+    email: "",
+    phone: "",
+    appointment_date: new Date(),
+    appointment_time: "",
+    timezone: "",
   });
 
   const handleChange = (
@@ -48,66 +48,80 @@ export default function ScheduleAppointmentModal({
     e.preventDefault();
     setIsSubmitting(true);
 
-    const { error } = await supabase.from('appointments').insert([
-  {
-    name: formData.name,
-    email: formData.email,
-    phone: formData.phone || null, // optional
-    appointment_date: formData.date
-      ? formData.date.toISOString().split('T')[0] // use `date` state
-      : null,
-    appointment_time: formData.time, // use `time` state
-    timezone: formData.timezone,     // must not be empty
-  },
-]);
-
-
-    if (error) {
+    // ✅ Validate required fields
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.appointment_date ||
+      !formData.appointment_time ||
+      !formData.timezone
+    ) {
       toast({
-        title: 'Error',
-        description: error.message,
-        variant: 'destructive',
+        title: "Missing required fields",
+        description: "Please fill in all required fields before submitting.",
+        variant: "destructive",
       });
       setIsSubmitting(false);
       return;
     }
 
-    // Trigger Make.com Webhook
+    // ✅ Build clean payload
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone?.trim() || null,
+      appointment_date: formData.appointment_date
+        ? formData.appointment_date.toISOString().split("T")[0]
+        : null,
+      appointment_time: formData.appointment_time,
+      timezone: formData.timezone,
+    };
+
+    console.log("Submitting payload:", payload);
+
+    // ✅ Insert into Supabase
+    const { error } = await supabase.from("appointments").insert([payload]);
+
+    if (error) {
+      toast({
+        title: "Error",
+        description: error.message,
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // ✅ Trigger Make.com Webhook
     await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        name: formData.name,
-        email: formData.email,
-        phone: formData.phone,
-        appointment_date: formData.appointment_date?.toDateString(),
-        appointment_time: formData.appointment_time,
-        timezone: formData.timezone,
-        source: 'form',
-      }),
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ ...payload, source: "form" }),
     });
 
     toast({
-      title: 'Appointment Scheduled',
-      description: `See you on ${formData.appointment_date.toDateString()} at ${formData.appointment_time}`,
+      title: "Appointment Scheduled",
+      description: `See you on ${payload.appointment_date} at ${payload.appointment_time}`,
     });
 
     setIsSubmitting(false);
     onOpenChange(false);
+
+    // ✅ Reset form
     setFormData({
-      name: '',
-      email: '',
-      phone: '',
+      name: "",
+      email: "",
+      phone: "",
       appointment_date: new Date(),
-      appointment_time: '',
-      timezone: '',
+      appointment_time: "",
+      timezone: "",
     });
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/50" />
-      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto overflow-x-hidden rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
+      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
         <DialogDescription className="sr-only">
           Pick a date and time to book your strategy call.
         </DialogDescription>
@@ -146,7 +160,6 @@ export default function ScheduleAppointmentModal({
                 onChange={handleChange}
                 placeholder="Your full name"
                 required
-                autoComplete="off"
                 className="w-full text-gray-900"
               />
             </div>
@@ -163,7 +176,6 @@ export default function ScheduleAppointmentModal({
                 onChange={handleChange}
                 placeholder="you@example.com"
                 required
-                autoComplete="off"
                 className="w-full text-gray-900"
               />
             </div>
@@ -179,19 +191,18 @@ export default function ScheduleAppointmentModal({
                 value={formData.phone}
                 onChange={handleChange}
                 placeholder="(123) 456-7890"
-                autoComplete="off"
                 className="w-full text-gray-900"
               />
             </div>
 
             <div className="relative">
               <label htmlFor="appointment_date" className="block text-sm font-medium text-gray-300 mb-1">
-                Select Date
+                Select Date *
               </label>
               <DatePicker
                 selected={formData.appointment_date}
                 onChange={handleDateChange}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 px-3 pr-12 text-sm"
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
                 minDate={new Date()}
                 dateFormat="MMMM d, yyyy"
                 id="appointment_date"
@@ -203,15 +214,15 @@ export default function ScheduleAppointmentModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label htmlFor="appointment_time" className="block text-sm font-medium text-gray-300 mb-1">
-                Select Time
+                Select Time *
               </label>
               <select
                 id="appointment_time"
                 name="appointment_time"
                 value={formData.appointment_time}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 px-3 text-sm"
                 required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">Choose a time</option>
                 <option value="09:00">9:00 AM</option>
@@ -225,14 +236,15 @@ export default function ScheduleAppointmentModal({
 
             <div>
               <label htmlFor="timezone" className="block text-sm font-medium text-gray-300 mb-1">
-                Time Zone
+                Time Zone *
               </label>
               <select
                 id="timezone"
                 name="timezone"
                 value={formData.timezone}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 px-3 text-sm"
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">Choose a time zone</option>
                 <option value="America/New_York">Eastern Time (EST)</option>
@@ -252,16 +264,20 @@ export default function ScheduleAppointmentModal({
               className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] transition-colors rounded-md px-8 py-3 text-base font-semibold flex items-center justify-center shadow-md mt-8 mb-8"
               disabled={isSubmitting}
             >
-              {isSubmitting ? 'Scheduling...' : 'Schedule Appointment'}
+              {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
             </Button>
           </div>
 
           {/* Legal Text */}
           <p className="text-xs text-gray-400 mt-10">
-            By submitting, you agree to receive text messages at the provided number from RenoMeta Inc. Message frequency varies, and standard message and data rates may apply. You have the right to OPT-OUT receiving messages at any time. To OPT-OUT, reply "STOP" to any text message you receive from us. Reply HELP for assistance. Also by submitting this form you agree with{' '}
+            By submitting, you agree to receive text messages at the provided number from RenoMeta
+            Inc. Message frequency varies, and standard message and data rates may apply. You have
+            the right to OPT-OUT receiving messages at any time. To OPT-OUT, reply "STOP" to any text
+            message you receive from us. Reply HELP for assistance. Also by submitting this form you
+            agree with{" "}
             <a href="/privacy-policy" className="text-blue-400 hover:underline">
               Privacy Policy
-            </a>{' '}
+            </a>{" "}
             Terms.
           </p>
         </form>
