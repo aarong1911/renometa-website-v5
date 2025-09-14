@@ -28,74 +28,80 @@ export default function ScheduleAppointmentModal({
     name: '',
     email: '',
     phone: '',
-    appointment_date: new Date(),
+    appointment_date: new Date(), // ✅ match DB column
     appointment_time: '',
     timezone: '',
   });
 
-
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
   const handleDateChange = (date: Date) => {
-    setFormData((prev) => ({ ...prev, date }));
+    setFormData((prev) => ({ ...prev, appointment_date: date }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setIsSubmitting(true);
+    e.preventDefault();
+    setIsSubmitting(true);
 
-  // Insert into Supabase
-  const { error } = await supabase.from('appointments').insert([
-    {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      appointment_date: formData.date.toISOString().split('T')[0], // format YYYY-MM-DD
-      appointment_time: formData.time,
-      timezone: formData.timezone, // include this if your form includes timezone
-    },
-  ]);
+    // Insert into Supabase
+    const { error } = await supabase.from('appointments').insert([
+      {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        appointment_date: formData.appointment_date
+          ? formData.appointment_date.toISOString().split('T')[0]
+          : null,
+        appointment_time: formData.appointment_time,
+        timezone: formData.timezone,
+      },
+    ]);
 
-  if (error) {
-    toast({
-      title: 'Error',
-      description: error.message,
-      variant: 'destructive',
+    if (error) {
+      toast({
+        title: 'Error',
+        description: error.message,
+        variant: 'destructive',
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Trigger Make.com Webhook
+    await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        appointment_date: formData.appointment_date?.toDateString(),
+        appointment_time: formData.appointment_time,
+        timezone: formData.timezone,
+        source: 'form',
+      }),
     });
+
+    toast({
+      title: 'Appointment Scheduled',
+      description: `See you on ${formData.appointment_date.toDateString()} at ${formData.appointment_time}`,
+    });
+
     setIsSubmitting(false);
-    return;
-  }
-
-  // Trigger Make.com Webhook
-  await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
-      appointment_date: formData.date.toDateString(),
-      appointment_time: formData.time,
-      timezone: formData.timezone,
-      source: 'form'
-    }),
-  });
-
-  toast({
-    title: 'Appointment Scheduled',
-    description: `See you on ${formData.date.toDateString()} at ${formData.time}`,
-  });
-
-  setIsSubmitting(false);
-  onOpenChange(false);
-  setFormData({ name: '', email: '', phone: '', appointment_date: new Date(), appointment_time: '', timezone: '' });
-};
-    const handleClose = () => {
-        onOpenChange(false);
-        setFormData({ name: '', email: '', phone: '', appointment_date: new Date(), appointment_time: '', timezone: '' });
+    onOpenChange(false);
+    setFormData({
+      name: '',
+      email: '',
+      phone: '',
+      appointment_date: new Date(),
+      appointment_time: '',
+      timezone: '',
+    });
   };
 
   return (
@@ -179,40 +185,19 @@ export default function ScheduleAppointmentModal({
             </div>
 
             <div className="relative">
-              <label htmlFor="date" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="appointment_date" className="block text-sm font-medium text-gray-300 mb-1">
                 Select Date
               </label>
               <DatePicker
-                selected={formData.date}
+                selected={formData.appointment_date}
                 onChange={handleDateChange}
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 px-3 pr-12 text-sm"
                 minDate={new Date()}
                 dateFormat="MMMM d, yyyy"
-                id="date"
-                popperPlacement="bottom"
-                popperModifiers={
-                  [
-                    {
-                      name: 'preventOverflow',
-                      options: {
-                        boundary: 'viewport',
-                      },
-                    },
-                    {
-                      name: 'offset',
-                      options: {
-                        offset: [0, 8],
-                      },
-                    },
-                  ] as any
-                }
+                id="appointment_date"
               />
               <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
-                <svg
-                  className="w-7 h-7 text-gray-500"
-                  viewBox="0 0 20 20"
-                  fill="currentColor"
-                >
+                <svg className="w-7 h-7 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
                   <path
                     fillRule="evenodd"
                     d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
@@ -226,13 +211,13 @@ export default function ScheduleAppointmentModal({
           {/* Second Row: Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="time" className="block text-sm font-medium text-gray-300 mb-1">
+              <label htmlFor="appointment_time" className="block text-sm font-medium text-gray-300 mb-1">
                 Select Time
               </label>
               <select
-                id="time"
-                name="time"
-                value={formData.time}
+                id="appointment_time"
+                name="appointment_time"
+                value={formData.appointment_time}
                 onChange={handleChange}
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 appearance-none h-11 px-3 text-sm"
                 required
@@ -279,19 +264,8 @@ export default function ScheduleAppointmentModal({
               {isSubmitting ? 'Scheduling...' : 'Schedule Appointment'}
             </Button>
           </div>
-
-          {/* Legal Text */}
-          <p className="text-xs text-gray-400 mt-10">
-            By submitting, you agree to receive text messages at the provided number from RenoMeta Inc. Message frequency varies, and standard message and data rates may apply. You have the right to OPT-OUT receiving messages at any time. To OPT-OUT, reply "STOP" to any text message you receive from us. Reply HELP for assistance. Also by submitting this form you agree with{' '}
-            <a href="/privacy-policy" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>{' '}
-            Terms.
-          </p>
         </form>
       </DialogContent>
     </Dialog>
   );
 }
-// This component allows users to schedule an appointment with a form that collects their name, email, phone number, date, time, and timezone.
-// It uses a modal dialog for the form, and includes a date picker for selecting the appointment date.
