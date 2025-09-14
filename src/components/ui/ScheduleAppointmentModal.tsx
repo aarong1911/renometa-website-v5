@@ -28,8 +28,8 @@ export default function ScheduleAppointmentModal({
     name: '',
     email: '',
     phone: '',
-    appointment_date: new Date(), // ✅ match DB column
-    appointment_time: '',
+    appointment_date: new Date(), // ✅ matches DB schema
+    appointment_time: '',         // ✅ matches DB schema
     timezone: '',
   });
 
@@ -48,7 +48,6 @@ export default function ScheduleAppointmentModal({
     e.preventDefault();
     setIsSubmitting(true);
 
-    // Insert into Supabase
     const { error } = await supabase.from('appointments').insert([
       {
         name: formData.name,
@@ -196,15 +195,6 @@ export default function ScheduleAppointmentModal({
                 dateFormat="MMMM d, yyyy"
                 id="appointment_date"
               />
-              <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
-                <svg className="w-7 h-7 text-gray-500" viewBox="0 0 20 20" fill="currentColor">
-                  <path
-                    fillRule="evenodd"
-                    d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
-                    clipRule="evenodd"
-                  />
-                </svg>
-              </div>
             </div>
           </div>
 
@@ -264,6 +254,15 @@ export default function ScheduleAppointmentModal({
               {isSubmitting ? 'Scheduling...' : 'Schedule Appointment'}
             </Button>
           </div>
+
+          {/* Legal Text */}
+          <p className="text-xs text-gray-400 mt-10">
+            By submitting, you agree to receive text messages at the provided number from RenoMeta Inc. Message frequency varies, and standard message and data rates may apply. You have the right to OPT-OUT receiving messages at any time. To OPT-OUT, reply "STOP" to any text message you receive from us. Reply HELP for assistance. Also by submitting this form you agree with{' '}
+            <a href="/privacy-policy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>{' '}
+            Terms.
+          </p>
         </form>
       </DialogContent>
     </Dialog>
