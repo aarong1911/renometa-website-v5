@@ -91,11 +91,11 @@ export default function ScheduleAppointmentModal({
 
   setIsSubmitting(false);
   onOpenChange(false);
-  setFormData({ name: '', email: '', phone: '', date: new Date(), time: '', timezone: '' });
+  setFormData({ name: '', email: '', phone: '', appointment_date: new Date(), appointment_time: '', timezone: '' });
 };
     const handleClose = () => {
         onOpenChange(false);
-        setFormData({ name: '', email: '', phone: '', date: new Date(), time: '', timezone: '' });
+        setFormData({ name: '', email: '', phone: '', appointment_date: new Date(), appointment_time: '', timezone: '' });
   };
 
   return (
