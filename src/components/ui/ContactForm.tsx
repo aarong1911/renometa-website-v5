@@ -116,12 +116,14 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
     Service of Interest
   </label>
   <select
-    id="service"
-    name="service"
-    value={formData.service}
-    onChange={handleChange}
-    className="w-full border border-gray-300 rounded-md bg-white text-gray-900 h-11 pl-3 pr-10 text-sm appearance-none"
-  >
+  id="service"
+  name="service"
+  value={formData.service}
+  onChange={handleChange}
+  className="w-full border border-gray-300 rounded-md bg-white text-gray-900 h-11 pl-3 pr-10 text-sm 
+             appearance-none [appearance:none] [-moz-appearance:none] [-webkit-appearance:none]"
+>
+
     <option value="general">General Inquiry</option>
     <option value="website-development">Smart Website Development</option>
     <option value="advanced-seo">Advanced SEO</option>
