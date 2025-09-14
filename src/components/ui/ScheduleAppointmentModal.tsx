@@ -53,8 +53,8 @@ export default function ScheduleAppointmentModal({
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      date: formData.date.toISOString().split('T')[0], // format YYYY-MM-DD
-      time: formData.time,
+      appointment_date: formData.date.toISOString().split('T')[0], // format YYYY-MM-DD
+      appointment_time: formData.time,
       timezone: formData.timezone, // include this if your form includes timezone
     },
   ]);
@@ -77,8 +77,8 @@ export default function ScheduleAppointmentModal({
       name: formData.name,
       email: formData.email,
       phone: formData.phone,
-      date: formData.date.toDateString(),
-      time: formData.time,
+      appointment_date: formData.date.toDateString(),
+      appointment_time: formData.time,
       timezone: formData.timezone,
       source: 'form'
     }),
