@@ -6,12 +6,14 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { findRelevantContent } from '@/utils/contentSearch';
 
+// ✅ Add 'timezone_select' to the ChatbotStep type
 export type ChatbotStep =
   | 'initial'
   | 'info'
   | 'schedule'
   | 'date'
   | 'time'
+  | 'timezone_select'
   | 'user_info'
   | 'confirmation'
   | 'post_confirmation';
@@ -93,6 +95,15 @@ export const useChatbotState = () => {
   const handleTimeSelect = (time: string) => {
     setSelectedTime(time);
     addUserMessage(`I'd like the ${time} slot`);
+    // ✅ Change step to the new time zone picker
+    addBotMessage('Got it. Now, please select your time zone.');
+    setStep('timezone_select');
+  };
+
+  // ✅ New handler for time zone selection
+  const handleTimezoneSelect = (timezone: string) => {
+    updateUserInfo('timezone', timezone);
+    addUserMessage(`My time zone is ${timezone}`);
     addBotMessage(
       'Perfect! Now I need some basic information to schedule your appointment. What is your name?'
     );
@@ -131,6 +142,7 @@ export const useChatbotState = () => {
         
 Date: ${format(selectedDate!, 'MMMM d, yyyy')}
 Time: ${selectedTime} EST
+Timezone: ${userInfo.timezone}
 Name: ${userInfo.name}
 Email: ${userInfo.email}
 Phone: ${userInput}
@@ -154,8 +166,8 @@ Would you like to confirm this appointment?`);
           ? format(selectedDate, 'yyyy-MM-dd')
           : null,
         appointment_time: selectedTime,
-        timezone: 'America/New_York', // adjust if needed
-        source: 'chatbot', // ✅ distinguish chatbot vs form
+        timezone: userInfo.timezone, // ✅ Use the user's selected timezone
+        source: 'chatbot',
       };
 
       console.log('Sending chatbot payload:', payload);
@@ -301,6 +313,7 @@ Would you like to confirm this appointment?`);
     handlePostConfirmation,
     handleReset,
     processUserQuery,
+    handleTimezoneSelect, // ✅ Export the new handler
   };
 };
 
