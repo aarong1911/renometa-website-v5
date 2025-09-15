@@ -23,12 +23,8 @@ export const useChatbotState = () => {
   const [autoCloseTimer, setAutoCloseTimer] = useState<number | null>(null);
   const { toast } = useToast();
 
-  const {
-    messages,
-    addUserMessage,
-    addBotMessage,
-    resetMessages,
-  } = useChatMessages();
+  const { messages, addUserMessage, addBotMessage, resetMessages } =
+    useChatMessages();
 
   const {
     selectedDate,
@@ -127,7 +123,7 @@ export const useChatbotState = () => {
       }
 
       updateUserInfo('email', userInput);
-      addBotMessage("Great! And what's the best phone number to reach you?");
+      addBotMessage('Great! And what\'s the best phone number to reach you?');
       setCurrentInfoField('phone');
     } else if (currentInfoField === 'phone') {
       updateUserInfo('phone', userInput);
@@ -160,16 +156,16 @@ Would you like to confirm this appointment?`);
           : null,
         appointment_time: selectedTime,
         timezone: 'America/New_York',
-        source: 'chatbot', // ✅ Important for router
+        source: 'chatbot',
       };
 
-      console.log('Submitting appointment payload:', payload);
+      console.log('Submitting chatbot appointment:', payload);
 
-      // Insert into Supabase
+      // 1. Insert into Supabase
       const { error } = await supabase.from('appointments').insert([payload]);
       if (error) throw error;
 
-      // Send to Make webhook
+      // 2. Send to Make webhook
       await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -237,7 +233,6 @@ Would you like to confirm this appointment?`);
 
     addUserMessage(query);
 
-    // Handle free trial related questions
     if (
       query.toLowerCase().includes('free trial') ||
       query.toLowerCase().includes('trial') ||
