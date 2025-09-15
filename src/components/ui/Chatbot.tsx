@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { MessageSquare, X } from 'lucide-react';
 import ChatHeader from '@/components/chat/ChatHeader';
@@ -10,6 +9,7 @@ import ChatConfirmation from '@/components/chat/ChatConfirmation';
 import ChatPostConfirmation from '@/components/chat/ChatPostConfirmation';
 import ChatInitialOptions from '@/components/chat/ChatInitialOptions';
 import ChatInput from '@/components/chat/ChatInput';
+import ChatTimezonePicker from '@/components/chat/ChatTimezonePicker';
 import { useChatbotState } from '@/hooks/useChatbotState';
 
 const Chatbot = () => {
@@ -30,7 +30,8 @@ const Chatbot = () => {
     submitAppointment,
     handlePostConfirmation,
     handleReset,
-    processUserQuery
+    processUserQuery,
+    handleTimezoneSelect,
   } = useChatbotState();
 
   return (
@@ -87,6 +88,14 @@ const Chatbot = () => {
               />
             )}
             
+            {/* ✅ New step for timezone selection */}
+            {step === 'timezone_select' && (
+              <ChatTimezonePicker
+                onTimezoneSelect={handleTimezoneSelect}
+                onReset={handleReset}
+              />
+            )}
+
             {step === 'user_info' && (
               <ChatUserInfoForm
                 currentField={currentInfoField}
