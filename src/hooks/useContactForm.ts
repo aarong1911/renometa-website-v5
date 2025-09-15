@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/lib/supabaseClient';
@@ -25,29 +24,50 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
     phone: '',
     company: '',
     message: '',
-    service: 'general', // Default service
+    service: 'general',
+    consent: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const handleChange = (
+    e: React.ChangeEvent<
+      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
+    >
+  ) => {
+    const { name, value, type, checked } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === 'checkbox' ? checked : value,
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     setIsSubmitting(true);
-    
-    // Simulate form submission
-    setTimeout(() => {
-      console.log('Form submitted:', formData);
+
+    const payload = {
+      ...formData,
+      source: 'form', // ✅ Important for Make router
+    };
+
+    try {
+      // 1. Save into Supabase
+      const { error } = await supabase.from('contacts').insert([payload]);
+      if (error) throw error;
+
+      // 2. Send to Make webhook
+      await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+
       toast({
-        title: "Message Sent!",
+        title: 'Message Sent!',
         description: "We'll get back to you as soon as possible.",
       });
-      
-      // Reset form
+
+      // reset form
       setFormData({
         name: '',
         email: '',
@@ -55,20 +75,27 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
         company: '',
         message: '',
         service: 'general',
+        consent: false,
       });
-      
-      if (onSuccess) {
-        onSuccess();
-      }
-      
+
+      if (onSuccess) onSuccess();
+    } catch (err: any) {
+      console.error('Error submitting contact form:', err);
+      toast({
+        title: 'Error',
+        description:
+          'There was a problem sending your message. Please try again later.',
+        variant: 'destructive',
+      });
+    } finally {
       setIsSubmitting(false);
-    }, 1000);
+    }
   };
 
   return {
     formData,
     isSubmitting,
     handleChange,
-    handleSubmit
+    handleSubmit,
   };
 }
