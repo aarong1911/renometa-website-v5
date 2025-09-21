@@ -19,7 +19,7 @@
   port = 8888 # The port Netlify CLI will proxy everything through (you'll access your site on http://localhost:8888)
 # This is the port you will use to access your site locally
 # Make sure your Vite dev server is configured to run on port 8080
-   auttoLaunch = true # Automatically open the browser when starting the dev server
+   autoLaunch = true # Automatically open the browser when starting the dev server
 [[redirects]]
   from = "/*"
   to = "/index.html"
