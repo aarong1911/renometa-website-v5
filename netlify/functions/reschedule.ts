@@ -44,10 +44,11 @@ export const handler: Handler = async (event: HandlerEvent) => {
         timezone: tz,
         start_at: start_iso,
         end_at: end_iso,
-        status,
+        status: "rescheduled",
         updated_at: new Date().toISOString(),
       })
       .eq("id", appt_id);
+    .select("id, status, appointment_date, appointment_time, updated_at");
 
     if (error) throw error;
 
