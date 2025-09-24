@@ -3,26 +3,49 @@ import { useSearchParams } from "react-router-dom";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
+
+  // Query params from email link
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
 
-  const [date, setDate] = useState("");
-  const [time, setTime] = useState("");
+  // Prefill values if passed
+  const [date, setDate] = useState(sp.get("date") ?? "");
+  const [time, setTime] = useState(sp.get("time") ?? "");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    await fetch("/.netlify/functions/reschedule", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appt_id: apptId, date, time, tz }),
-    });
+    if (!apptId) {
+      alert("❌ Appointment ID missing.");
+      return;
+    }
 
-    alert("✅ Appointment rescheduled successfully!");
+    try {
+      const res = await fetch("/.netlify/functions/reschedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appt_id: apptId,
+          date,
+          time,
+          tz,
+          status: "rescheduled",
+        }),
+      });
+
+      if (res.ok) {
+        alert("✅ Appointment rescheduled successfully!");
+      } else {
+        const err = await res.json();
+        alert("❌ Error: " + err.error);
+      }
+    } catch (error) {
+      alert("❌ Network error. Please try again.");
+    }
   };
 
   // Build dropdown options (8:00 → 17:00, every 30 min)
-  const timeOptions = [];
+  const timeOptions: string[] = [];
   for (let h = 8; h <= 17; h++) {
     for (let m of [0, 30]) {
       if (h === 17 && m > 0) continue; // no 5:30
@@ -50,6 +73,7 @@ export default function ReschedulePage() {
         <p className="text-sm text-gray-500 mb-6">Appointment ID: {apptId}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Date */}
           <div>
             <label className="block text-sm font-medium mb-1">New date</label>
             <input
@@ -61,6 +85,7 @@ export default function ReschedulePage() {
             />
           </div>
 
+          {/* Time */}
           <div>
             <label className="block text-sm font-medium mb-1">New time</label>
             <select
@@ -78,6 +103,7 @@ export default function ReschedulePage() {
             </select>
           </div>
 
+          {/* Timezone (read-only) */}
           <div>
             <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
@@ -88,6 +114,7 @@ export default function ReschedulePage() {
             />
           </div>
 
+          {/* Submit */}
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700"
