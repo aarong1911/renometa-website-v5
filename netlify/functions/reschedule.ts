@@ -62,7 +62,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
         timezone: tz,
         start_at: start_iso,
         end_at: end_iso,
-        status,
+        status: "rescheduled",
       }),
     });
 
