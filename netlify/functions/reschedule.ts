@@ -31,16 +31,19 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     // ✅ Send to Make — let Make handle the Supabase update + emails
     await fetch(process.env.MAKE_WEBHOOK_URL, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        appt_id,
-        appointment_date: date,
-        appointment_time: time,
-        timezone: tz,
-        status: "rescheduled",
-      }),
-    });
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({
+    appt_id,                        // ✅ make sure this is included
+    name: body.name || null,
+    email: body.email || null,
+    phone: body.phone || null,
+    appointment_date: date,
+    appointment_time: time,
+    timezone: tz,
+    status: "rescheduled",
+  }),
+});
 
     return {
       statusCode: 200,
