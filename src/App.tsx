@@ -15,6 +15,9 @@ import FreeTrial from "./pages/free-trial";
 import TrialSuccess from './pages/trial-success';
 import Pricing from "./pages/Pricing";
 
+import CalendarAddPage from "@/pages/CalendarAddPage";
+import ReschedulePage from "@/pages/ReschedulePage";
+
 // Solutions pages
 import SolutionsOverview from "./pages/Solutions/SolutionsOverview";
 import CategoryOverview from "./pages/Solutions/CategoryOverview";
@@ -108,7 +111,7 @@ const App = () => (
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
 
-          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/calendar" element={<CalendarAddPage />} />
           <Route path="/reschedule" element={<ReschedulePage />} />
 
         </Routes>
