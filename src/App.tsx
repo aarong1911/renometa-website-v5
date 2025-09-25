@@ -107,6 +107,10 @@ const App = () => (
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="*" element={<NotFound />} />
+
+          <Route path="/calendar" element={<CalendarPage />} />
+          <Route path="/reschedule" element={<ReschedulePage />} />
+
         </Routes>
         <Chatbot />
       </BrowserRouter>
