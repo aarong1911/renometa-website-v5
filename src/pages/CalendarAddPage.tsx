@@ -67,9 +67,13 @@ export default function CalendarAddPage() {
     `&dur=0100` +
     `&desc=${details}&in_loc=${location}`;
 
-  const icsHref = `/calendar/appointment-${encodeURIComponent(
-    email
-  )}-${date}.ics`;
+  const icsHref = `/.netlify/functions/ics?name=${encodeURIComponent(
+  name
+)}&email=${encodeURIComponent(email)}&date=${encodeURIComponent(
+  date
+)}&time=${encodeURIComponent(time)}&tz=${encodeURIComponent(
+  tz
+)}&dur=${dur}&phone=${encodeURIComponent(phone)}`;
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
