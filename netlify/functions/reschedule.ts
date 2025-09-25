@@ -1,4 +1,11 @@
 import type { Handler, HandlerEvent } from "@netlify/functions";
+import { createClient } from "@supabase/supabase-js";
+
+// Supabase client with service role key
+const supabase = createClient(
+  process.env.SUPABASE_URL as string,
+  process.env.SUPABASE_SERVICE_ROLE_KEY as string
+);
 
 export const handler: Handler = async (event: HandlerEvent) => {
   if (event.httpMethod !== "POST") {
@@ -13,47 +20,56 @@ export const handler: Handler = async (event: HandlerEvent) => {
     const { appt_id, date, time, tz = "America/New_York" } = body;
 
     if (!appt_id || !date || !time) {
-      console.error("❌ Missing fields:", { appt_id, date, time });
       return {
         statusCode: 400,
         body: JSON.stringify({ error: "Missing required fields" }),
       };
     }
 
-    console.log("📤 Forwarding reschedule request:", { appt_id, date, time, tz });
+    // 🔎 Fetch the existing row first
+    const { data: existing, error: fetchErr } = await supabase
+      .from("appointments")
+      .select("id, name, email, phone, appointment_date, appointment_time, timezone, status")
+      .eq("id", appt_id)
+      .single();
 
-    if (!process.env.MAKE_WEBHOOK_URL) {
+    if (fetchErr || !existing) {
+      console.error("❌ Appointment not found:", fetchErr?.message);
       return {
-        statusCode: 500,
-        body: JSON.stringify({ error: "MAKE_WEBHOOK_URL not set" }),
+        statusCode: 404,
+        body: JSON.stringify({ error: "Appointment not found" }),
       };
     }
 
-    // ✅ Send to Make — let Make handle the Supabase update + emails
-    await fetch(process.env.MAKE_WEBHOOK_URL, {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    appt_id,                        // ✅ make sure this is included
-    name: body.name || null,
-    email: body.email || null,
-    phone: body.phone || null,
-    appointment_date: date,
-    appointment_time: time,
-    timezone: tz,
-    status: "rescheduled",
-  }),
-});
+    // Build the updated record
+    const updatedPayload = {
+      appt_id: existing.id,
+      name: existing.name,
+      email: existing.email,
+      phone: existing.phone,
+      appointment_date: date,
+      appointment_time: time,
+      timezone: tz,
+      status: "rescheduled",
+    };
+
+    console.log("📤 Sending reschedule payload to Make:", updatedPayload);
+
+    // Send to Make webhook
+    if (process.env.MAKE_WEBHOOK_URL) {
+      await fetch(process.env.MAKE_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(updatedPayload),
+      });
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ ok: true, message: "Reschedule request sent to Make" }),
+      body: JSON.stringify({ ok: true, sent: updatedPayload }),
     };
   } catch (err: any) {
     console.error("❌ Exception:", err.message);
-    return {
-      statusCode: 500,
-      body: JSON.stringify({ error: err.message }),
-    };
+    return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
