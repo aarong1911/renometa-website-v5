@@ -84,7 +84,7 @@ export default function ScheduleAppointmentModal({
       // The Make.com scenario will handle this step.
 
       // ✅ Trigger Make.com Webhook
-      await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
+      await fetch(import.meta.env.VITE_APPOINTMENT_WEBHOOK_URL!, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ ...payload, source: "form" }),
