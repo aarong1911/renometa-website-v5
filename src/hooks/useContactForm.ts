@@ -56,7 +56,7 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
       // if (error) throw error;
 
       // 1. Send to Make webhook (This single action will now handle everything)
-      await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
+      await fetch(import.meta.env.VITE_CONTACT_MAKE_WEBHOOK_URL!, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
