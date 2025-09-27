@@ -26,10 +26,10 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
-    // 🔎 Fetch the existing row first
+    // 1️⃣ Fetch the existing row
     const { data: existing, error: fetchErr } = await supabase
       .from("appointments")
-      .select("id, name, email, phone, appointment_date, appointment_time, timezone, status")
+      .select("id, name, email, phone")
       .eq("id", appt_id)
       .single();
 
@@ -41,9 +41,28 @@ export const handler: Handler = async (event: HandlerEvent) => {
       };
     }
 
-    // Build the updated record
+    // 2️⃣ Update Supabase record
+    const { error: updateErr } = await supabase
+      .from("appointments")
+      .update({
+        appointment_date: date,
+        appointment_time: time,
+        timezone: tz,
+        status: "rescheduled",
+      })
+      .eq("id", appt_id);
+
+    if (updateErr) {
+      console.error("❌ Failed to update Supabase:", updateErr.message);
+      return {
+        statusCode: 500,
+        body: JSON.stringify({ error: "Failed to update appointment" }),
+      };
+    }
+
+    // 3️⃣ Build payload for Make
     const updatedPayload = {
-      appt_id: existing.id,
+      id: existing.id,
       name: existing.name,
       email: existing.email,
       phone: existing.phone,
@@ -55,7 +74,7 @@ export const handler: Handler = async (event: HandlerEvent) => {
 
     console.log("📤 Sending reschedule payload to Make:", updatedPayload);
 
-    // Send to Make webhook
+    // 4️⃣ Send to Make webhook
     if (process.env.MAKE_WEBHOOK_URL) {
       await fetch(process.env.MAKE_WEBHOOK_URL, {
         method: "POST",
