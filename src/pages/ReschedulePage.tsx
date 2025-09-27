@@ -70,7 +70,8 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        <p className="text-sm text-gray-500 mb-6">Appointment ID: {apptId}</p>
+        <p className="text-sm text-gray-500 mb-6">
+        Name: {sp.get("name") ?? "Unknown"} </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date */}
