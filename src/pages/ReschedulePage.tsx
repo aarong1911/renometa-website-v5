@@ -1,6 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useSearchParams } from "react-router-dom";
-import { supabase } from "@/lib/supabaseClient";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
@@ -12,38 +11,6 @@ export default function ReschedulePage() {
   // Prefill values if passed
   const [date, setDate] = useState(sp.get("date") ?? "");
   const [time, setTime] = useState(sp.get("time") ?? "");
-  const [name, setName] = useState("Loading...");
-
-  // 🔎 Lookup appointment name by ID
-  useEffect(() => {
-    if (!apptId) {
-      setName("Unknown");
-      return;
-    }
-
-    const fetchName = async () => {
-      console.log("🔎 Looking up appointment ID:", apptId);
-
-      const { data, error } = await supabase
-        .from("appointments")
-        .select("id, name")
-        .eq("id", apptId)
-        .maybeSingle(); // safer than .single()
-
-      if (error) {
-        console.error("❌ Supabase error:", error.message);
-        setName("Unknown");
-      } else if (!data) {
-        console.warn("⚠️ No appointment found for ID:", apptId);
-        setName("Unknown");
-      } else {
-        console.log("✅ Appointment found:", data);
-        setName(data.name || "Unknown");
-      }
-    };
-
-    fetchName();
-  }, [apptId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -73,7 +40,6 @@ export default function ReschedulePage() {
         alert("❌ Error: " + err.error);
       }
     } catch (error) {
-      console.error("❌ Network error:", error);
       alert("❌ Network error. Please try again.");
     }
   };
@@ -104,7 +70,8 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        <p className="text-sm text-gray-500 mb-6">Name: {name}</p>
+        <p className="text-sm text-gray-500 mb-6">
+        Name: {sp.get("name") ?? "Unknown"} </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date */}
