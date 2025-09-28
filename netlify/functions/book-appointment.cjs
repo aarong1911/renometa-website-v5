@@ -7,13 +7,13 @@ exports.handler = async (event) => {
     const body = JSON.parse(event.body || "{}");
 
     // Forward the appointment to Make webhook
-    if (process.env.MAKE_WEBHOOK_URL) {
-      await fetch(process.env.MAKE_WEBHOOK_URL, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      });
-    }
+    if (process.env.MAKE_APPOINTMENT_WEBHOOK_URL) {
+  await fetch(process.env.MAKE_APPOINTMENT_WEBHOOK_URL, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body),
+  });
+}
 
     return {
       statusCode: 200,
