@@ -84,11 +84,13 @@ export default function ScheduleAppointmentModal({
       // The Make.com scenario will handle this step.
 
       // ✅ Trigger Make.com Webhook
-      await fetch(import.meta.env.VITE_APPOINTMENT_WEBHOOK_URL!, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, source: "form" }),
-      });
+      // ScheduleAppointmentModal.tsx
+await fetch("/.netlify/functions/schedule-appointment", {
+  method: "POST",
+  headers: { "Content-Type": "application/json" },
+  body: JSON.stringify({ ...payload, source: "form" }),
+});
+
 
       toast({
         title: "Appointment Scheduled",
