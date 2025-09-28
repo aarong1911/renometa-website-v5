@@ -1,29 +1,23 @@
-const { createClient } = require('@supabase/supabase-js');
-
-const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, body: 'Method Not Allowed' };
   }
 
   try {
-    const { user_request_id, name, email, phone, preferred_time, notes } = JSON.parse(event.body);
+    const body = JSON.parse(event.body || "{}");
 
-    const { error } = await supabase.from('agent_appointments').insert({
-      user_request_id,
-      name,
-      email,
-      phone,
-      preferred_time,
-      notes,
-    });
-
-    if (error) throw error;
+    // Forward the appointment to Make webhook
+    if (process.env.MAKE_WEBHOOK_URL) {
+      await fetch(process.env.MAKE_WEBHOOK_URL, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(body),
+      });
+    }
 
     return {
       statusCode: 200,
-      body: JSON.stringify({ message: 'Appointment request submitted successfully' }),
+      body: JSON.stringify({ message: 'Appointment request forwarded to Make' }),
     };
   } catch (error) {
     return {
@@ -31,8 +25,4 @@ exports.handler = async (event) => {
       body: JSON.stringify({ error: error.message || 'Booking failed' }),
     };
   }
-};
-
-exports.config = {
-  timeout: 26,
 };
