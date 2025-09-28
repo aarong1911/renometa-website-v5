@@ -1,5 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
@@ -11,6 +12,30 @@ export default function ReschedulePage() {
   // Prefill values if passed
   const [date, setDate] = useState(sp.get("date") ?? "");
   const [time, setTime] = useState(sp.get("time") ?? "");
+  const [name, setName] = useState("Loading...");
+
+  // 🔎 Lookup appointment name by ID
+  useEffect(() => {
+    if (!apptId) {
+      setName("Unknown");
+      return;
+    }
+    const fetchName = async () => {
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("name")
+        .eq("id", apptId)
+        .single();
+
+      if (error || !data) {
+        console.error("❌ Failed to fetch appointment name:", error?.message);
+        setName("Unknown");
+      } else {
+        setName(data.name || "Unknown");
+      }
+    };
+    fetchName();
+  }, [apptId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -70,8 +95,7 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
-        Name: {sp.get("name") ?? "Unknown"} </p>
+        <p className="text-sm text-gray-500 mb-6">Name: {name}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date */}
