@@ -20,20 +20,28 @@ export default function ReschedulePage() {
       setName("Unknown");
       return;
     }
+
     const fetchName = async () => {
+      console.log("🔎 Looking up appointment ID:", apptId);
+
       const { data, error } = await supabase
         .from("appointments")
-        .select("name")
+        .select("id, name")
         .eq("id", apptId)
-        .single();
+        .maybeSingle(); // safer than .single()
 
-      if (error || !data) {
-        console.error("❌ Failed to fetch appointment name:", error?.message);
+      if (error) {
+        console.error("❌ Supabase error:", error.message);
+        setName("Unknown");
+      } else if (!data) {
+        console.warn("⚠️ No appointment found for ID:", apptId);
         setName("Unknown");
       } else {
+        console.log("✅ Appointment found:", data);
         setName(data.name || "Unknown");
       }
     };
+
     fetchName();
   }, [apptId]);
 
@@ -65,6 +73,7 @@ export default function ReschedulePage() {
         alert("❌ Error: " + err.error);
       }
     } catch (error) {
+      console.error("❌ Network error:", error);
       alert("❌ Network error. Please try again.");
     }
   };
