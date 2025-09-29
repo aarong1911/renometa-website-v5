@@ -3,8 +3,10 @@ import { useEffect, useState } from 'react';
 import { supabase } from '@/lib/supabaseClient';
 
 interface TimeSlot {
-  value: string;     // "HH:mm"
-  formatted: string; // "9:00 AM"
+  hour: number;
+  minute: number;
+  period: 'AM' | 'PM';
+  formatted: string;
 }
 
 interface ChatTimePickerProps {
@@ -16,19 +18,27 @@ interface ChatTimePickerProps {
 const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // Generate half-hour slots
+  // Generate all half-hour slots
   const timeSlots: TimeSlot[] = [];
   for (let hour = 8; hour <= 18; hour++) {
-    for (let minute of [0, 30]) {
-      const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayHour = hour > 12 ? hour - 12 : hour;
-      const period = hour >= 12 ? 'PM' : 'AM';
-      const formatted = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
-      timeSlots.push({ value, formatted });
+    const period = hour >= 12 ? 'PM' : 'AM';
+    const displayHour = hour > 12 ? hour - 12 : hour;
+
+    timeSlots.push({ hour, minute: 0, period, formatted: `${displayHour}:00 ${period}` });
+    if (hour < 18) {
+      timeSlots.push({ hour, minute: 30, period, formatted: `${displayHour}:30 ${period}` });
     }
   }
 
-  // Fetch taken slots
+  // Normalize Supabase values into "HH:mm"
+  const normalizeTime = (raw: string): string => {
+    if (!raw) return '';
+    if (raw.includes('T')) return new Date(raw).toISOString().slice(11, 16); // handle timestamp
+    if (raw.length >= 5) return raw.slice(0, 5); // handle "HH:mm" or "HH:mm:ss"
+    return raw;
+  };
+
+  // Fetch taken slots for this date
   useEffect(() => {
     const fetchTaken = async () => {
       if (!selectedDate) return;
@@ -40,7 +50,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
         .eq('appointment_date', dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => row.appointment_time.slice(0, 5))); // Always HH:mm
+        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
       }
     };
     fetchTaken();
@@ -50,7 +60,11 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
     <div className="flex flex-col space-y-3">
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
         {timeSlots.map((slot, i) => {
-          if (takenSlots.includes(slot.value)) {
+          const hh = slot.hour.toString().padStart(2, '0');
+          const mm = slot.minute.toString().padStart(2, '0');
+          const normalized = `${hh}:${mm}`;
+
+          if (takenSlots.includes(normalized)) {
             return (
               <Button
                 key={i}
@@ -66,7 +80,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
           return (
             <Button
               key={i}
-              onClick={() => onTimeSelect(slot.value)}
+              onClick={() => onTimeSelect(normalized)}
               variant="outline"
               className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
             >
