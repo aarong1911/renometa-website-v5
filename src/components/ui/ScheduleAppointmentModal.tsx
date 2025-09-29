@@ -35,23 +35,14 @@ export default function ScheduleAppointmentModal({
 
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // ✅ Normalize any Supabase format into "HH:mm"
-  const normalizeTime = (raw: string): string => {
-    if (!raw) return "";
-    if (raw.includes("T")) {
-      return new Date(raw).toISOString().slice(11, 16);
-    }
-    if (raw.length === 8) {
-      return raw.slice(0, 5);
-    }
-    return raw;
-  };
-
-  // Fetch taken slots
+  // 🔹 Fetch taken slots
   useEffect(() => {
     const fetchTaken = async () => {
       if (!formData.appointment_date) return;
-      const dateString = formData.appointment_date.toISOString().split("T")[0];
+
+      const dateString = formData.appointment_date
+        .toISOString()
+        .split("T")[0];
 
       const { data, error } = await supabase
         .from("appointments")
@@ -59,9 +50,16 @@ export default function ScheduleAppointmentModal({
         .eq("appointment_date", dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
+        // Normalize all to "HH:mm:ss"
+        const normalized = data.map((row) =>
+          row.appointment_time.length === 5
+            ? `${row.appointment_time}:00`
+            : row.appointment_time
+        );
+        setTakenSlots(normalized);
       }
     };
+
     fetchTaken();
   }, [formData.appointment_date]);
 
@@ -120,9 +118,7 @@ export default function ScheduleAppointmentModal({
         description: `See you on ${payload.appointment_date} at ${payload.appointment_time}`,
       });
 
-      setIsSubmitting(false);
       onOpenChange(false);
-
       setFormData({
         name: "",
         email: "",
@@ -143,7 +139,8 @@ export default function ScheduleAppointmentModal({
     }
   };
 
-  const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
+  // Slots now always in "HH:mm:ss"
+  const timeSlots = ["09:00:00", "10:00:00", "11:00:00", "14:00:00", "15:00:00", "16:00:00"];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -153,51 +150,73 @@ export default function ScheduleAppointmentModal({
           Pick a date and time to book your strategy call.
         </DialogDescription>
 
+        {/* Close */}
+        <Button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+          variant="ghost"
+          size="icon"
+          aria-label="Close"
+        >
+          ✕
+        </Button>
+
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name + Email */}
+          {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium">Full Name *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Full Name *
+              </label>
               <Input
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
+                placeholder="Your full name"
                 required
                 className="w-full text-gray-900"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium">Email *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Email Address *
+              </label>
               <Input
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
+                placeholder="you@example.com"
                 required
                 className="w-full text-gray-900"
               />
             </div>
-          </div>
 
-          {/* Phone + Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium">Phone</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Phone Number
+              </label>
               <Input
                 name="phone"
+                type="tel"
                 value={formData.phone}
                 onChange={handleChange}
+                placeholder="(123) 456-7890"
                 className="w-full text-gray-900"
               />
             </div>
+
             <div>
-              <label className="block text-sm font-medium">Date *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Select Date *
+              </label>
               <DatePicker
                 selected={formData.appointment_date}
                 onChange={handleDateChange}
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
                 minDate={new Date()}
                 dateFormat="MMMM d, yyyy"
-                className="w-full border px-3 py-2 rounded text-gray-600"
               />
             </div>
           </div>
@@ -205,32 +224,37 @@ export default function ScheduleAppointmentModal({
           {/* Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium">Time *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Select Time *
+              </label>
               <select
                 name="appointment_time"
                 value={formData.appointment_time}
                 onChange={handleChange}
                 required
-                className="w-full border px-3 py-2 rounded text-gray-600"
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">Choose a time</option>
                 {timeSlots
                   .filter((slot) => !takenSlots.includes(slot))
                   .map((slot) => (
                     <option key={slot} value={slot}>
-                      {slot}
+                      {slot.slice(0, 5)} {/* Show HH:mm */}
                     </option>
                   ))}
               </select>
             </div>
+
             <div>
-              <label className="block text-sm font-medium">Time Zone *</label>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time Zone *
+              </label>
               <select
                 name="timezone"
                 value={formData.timezone}
                 onChange={handleChange}
                 required
-                className="w-full border px-3 py-2 rounded text-gray-600"
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">Choose a time zone</option>
                 <option value="America/New_York">Eastern Time (EST)</option>
@@ -241,13 +265,26 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
+          {/* Submit */}
           <Button
             type="submit"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] transition-colors rounded-md px-8 py-3 text-base font-semibold flex items-center justify-center shadow-md mt-8 mb-8"
             disabled={isSubmitting}
-            className="bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 rounded-md mt-4"
           >
             {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
           </Button>
+
+          {/* Consent */}
+          <p className="text-xs text-gray-400 mt-10">
+            By submitting, you agree to receive text messages at the provided number from RenoMeta.
+            Message frequency varies, and standard message and data rates may apply. 
+            Reply STOP to opt out. 
+            Also by submitting this form you agree to our{" "}
+            <a href="/privacy-policy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>{" "}
+            and Terms.
+          </p>
         </form>
       </DialogContent>
     </Dialog>
