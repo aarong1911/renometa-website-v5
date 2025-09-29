@@ -18,12 +18,11 @@ interface ChatTimePickerProps {
 const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // Generate all slots
+  // Generate slots
   const timeSlots: TimeSlot[] = [];
   for (let hour = 8; hour <= 18; hour++) {
     const period = hour >= 12 ? 'PM' : 'AM';
     const displayHour = hour > 12 ? hour - 12 : hour;
-
     timeSlots.push({ hour, minute: 0, period, formatted: `${displayHour}:00 ${period}` });
     if (hour < 18) {
       timeSlots.push({ hour, minute: 30, period, formatted: `${displayHour}:30 ${period}` });
@@ -31,12 +30,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
   }
 
   // ✅ Normalize
-  const normalizeTime = (raw: string): string => {
-    if (!raw) return '';
-    if (raw.includes('T')) return new Date(raw).toISOString().slice(11, 16);
-    if (raw.length === 8) return raw.slice(0, 5);
-    return raw;
-  };
+  const normalize = (t: string) => (t ? t.trim().slice(0, 5) : "");
 
   useEffect(() => {
     const fetchTaken = async () => {
@@ -49,7 +43,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
         .eq('appointment_date', dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
+        setTakenSlots(data.map((row) => normalize(row.appointment_time)));
       }
     };
     fetchTaken();
@@ -63,7 +57,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
           const mm = slot.minute.toString().padStart(2, '0');
           const normalized = `${hh}:${mm}`;
 
-          if (takenSlots.includes(normalized)) {
+          if (takenSlots.includes(normalize(normalized))) {
             return (
               <Button key={i} disabled variant="outline"
                 className="text-gray-400 border-gray-300 cursor-not-allowed">
