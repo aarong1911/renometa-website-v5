@@ -1,92 +1,286 @@
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
+import React, { useState, useEffect } from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/lib/supabaseClient";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+} from "@/components/ui/dialog";
+import DatePicker from "react-datepicker";
+import "react-datepicker/dist/react-datepicker.css";
 
-interface TimeSlot {
-  hour: number;
-  minute: number;
-  period: 'AM' | 'PM';
-  formatted: string;
+interface ScheduleAppointmentModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
 
-interface ChatTimePickerProps {
-  onTimeSelect: (time: string) => void;
-  onReset: () => void;
-  selectedDate?: Date;
-}
+export default function ScheduleAppointmentModal({
+  open,
+  onOpenChange,
+}: ScheduleAppointmentModalProps) {
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const { toast } = useToast();
 
-const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
+  const [formData, setFormData] = useState({
+    name: "",
+    email: "",
+    phone: "",
+    appointment_date: new Date(),
+    appointment_time: "",
+    timezone: "",
+  });
+
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // Generate all slots
-  const timeSlots: TimeSlot[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour;
+  // ✅ Normalize function
+  const normalize = (t: string) => (t ? t.trim().slice(0, 5) : "");
 
-    timeSlots.push({ hour, minute: 0, period, formatted: `${displayHour}:00 ${period}` });
-    if (hour < 18) {
-      timeSlots.push({ hour, minute: 30, period, formatted: `${displayHour}:30 ${period}` });
-    }
-  }
-
-  // ✅ Normalize
-  const normalizeTime = (raw: string): string => {
-    if (!raw) return '';
-    if (raw.includes('T')) return new Date(raw).toISOString().slice(11, 16);
-    if (raw.length === 8) return raw.slice(0, 5);
-    return raw;
-  };
-
+  // 🔹 Fetch taken slots whenever date changes
   useEffect(() => {
     const fetchTaken = async () => {
-      if (!selectedDate) return;
-      const dateString = selectedDate.toISOString().split('T')[0];
+      if (!formData.appointment_date) return;
 
+      const dateString = formData.appointment_date.toISOString().split("T")[0];
       const { data, error } = await supabase
-        .from('appointments')
-        .select('appointment_time')
-        .eq('appointment_date', dateString);
+        .from("appointments")
+        .select("appointment_time")
+        .eq("appointment_date", dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
+        setTakenSlots(data.map((row) => normalize(row.appointment_time)));
       }
     };
+
     fetchTaken();
-  }, [selectedDate]);
+  }, [formData.appointment_date]);
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
+
+  const handleDateChange = (date: Date) => {
+    setFormData((prev) => ({ ...prev, appointment_date: date }));
+    setTakenSlots([]);
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.appointment_date ||
+      !formData.appointment_time ||
+      !formData.timezone
+    ) {
+      toast({
+        title: "Missing required fields",
+        description: "Please fill in all required fields before submitting.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    const payload = {
+      name: formData.name.trim(),
+      email: formData.email.trim(),
+      phone: formData.phone?.trim() || null,
+      appointment_date: formData.appointment_date
+        ? formData.appointment_date.toISOString().split("T")[0]
+        : null,
+      appointment_time: formData.appointment_time,
+      timezone: formData.timezone,
+    };
+
+    try {
+      await fetch("/.netlify/functions/book-appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ...payload, source: "form" }),
+      });
+
+      toast({
+        title: "Appointment Scheduled",
+        description: `See you on ${payload.appointment_date} at ${payload.appointment_time}`,
+      });
+
+      onOpenChange(false);
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        appointment_date: new Date(),
+        appointment_time: "",
+        timezone: "",
+      });
+    } catch (err: any) {
+      console.error("❌ Error submitting appointment:", err);
+      toast({
+        title: "Error",
+        description: "There was a problem scheduling. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Slots as HH:mm
+  const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
   return (
-    <div className="flex flex-col space-y-3">
-      <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-        {timeSlots.map((slot, i) => {
-          const hh = slot.hour.toString().padStart(2, '0');
-          const mm = slot.minute.toString().padStart(2, '0');
-          const normalized = `${hh}:${mm}`;
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="bg-black/50" />
+      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
+        <DialogDescription className="sr-only">
+          Pick a date and time to book your strategy call.
+        </DialogDescription>
 
-          if (takenSlots.includes(normalized)) {
-            return (
-              <Button key={i} disabled variant="outline"
-                className="text-gray-400 border-gray-300 cursor-not-allowed">
-                {slot.formatted} (Taken)
-              </Button>
-            );
-          }
+        {/* Close */}
+        <Button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+          variant="ghost"
+          size="icon"
+          aria-label="Close"
+        >
+          ✕
+        </Button>
 
-          return (
-            <Button key={i} onClick={() => onTimeSelect(normalized)}
-              variant="outline"
-              className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
-              {slot.formatted}
-            </Button>
-          );
-        })}
-      </div>
-      <Button onClick={onReset} variant="outline"
-        className="text-blue-dark border-blue-dark hover:bg-blue-dark/10">
-        Start Over
-      </Button>
-    </div>
+        <form onSubmit={handleSubmit} className="space-y-3 mt-2">
+          {/* First Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Full Name *
+              </label>
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                placeholder="Your full name"
+                required
+                className="w-full text-gray-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Email Address *
+              </label>
+              <Input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="you@example.com"
+                required
+                className="w-full text-gray-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Phone Number
+              </label>
+              <Input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                placeholder="(123) 456-7890"
+                className="w-full text-gray-900"
+              />
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Select Date *
+              </label>
+              <DatePicker
+                selected={formData.appointment_date}
+                onChange={handleDateChange}
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+                minDate={new Date()}
+                dateFormat="MMMM d, yyyy"
+              />
+            </div>
+          </div>
+
+          {/* Time + Timezone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Select Time *
+              </label>
+              <select
+                name="appointment_time"
+                value={formData.appointment_time}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">Choose a time</option>
+                {timeSlots
+                  .filter((slot) => !takenSlots.includes(normalize(slot)))
+                  .map((slot) => (
+                    <option key={slot} value={slot}>
+                      {slot}
+                    </option>
+                  ))}
+              </select>
+            </div>
+
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time Zone *
+              </label>
+              <select
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">Choose a time zone</option>
+                <option value="America/New_York">Eastern Time (EST)</option>
+                <option value="America/Chicago">Central Time (CST)</option>
+                <option value="America/Denver">Mountain Time (MST)</option>
+                <option value="America/Los_Angeles">Pacific Time (PST)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] transition-colors rounded-md px-8 py-3 text-base font-semibold flex items-center justify-center shadow-md mt-8 mb-8"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
+          </Button>
+
+          {/* Consent */}
+          <p className="text-xs text-gray-400 mt-10">
+            By submitting, you agree to receive text messages at the provided number from RenoMeta.
+            Message frequency varies, and standard message and data rates may apply. 
+            Reply STOP to opt out. 
+            Also by submitting this form you agree to our{" "}
+            <a href="/privacy-policy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>{" "}
+            and Terms.
+          </p>
+        </form>
+      </DialogContent>
+    </Dialog>
   );
-};
-
-export default ChatTimePicker;
+}
