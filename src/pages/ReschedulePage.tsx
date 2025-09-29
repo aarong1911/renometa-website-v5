@@ -1,16 +1,41 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+import { supabase } from "@/lib/supabaseClient";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
-  // Query params from email link
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
 
-  // Prefill values if passed
   const [date, setDate] = useState(sp.get("date") ?? "");
   const [time, setTime] = useState(sp.get("time") ?? "");
+  const [name, setName] = useState(sp.get("name") ?? "Unknown");
+
+  // 🔹 Keep track of taken slots
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+
+  // Fetch taken slots for this date
+  useEffect(() => {
+    const fetchTaken = async () => {
+      if (!date) return;
+
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("appointment_time,id")
+        .eq("appointment_date", date);
+
+      if (!error && data) {
+        // exclude this appointment’s current slot (so user can keep it)
+        const filtered = data
+          .filter((row) => row.id !== apptId)
+          .map((row) => row.appointment_time);
+        setTakenSlots(filtered);
+      }
+    };
+
+    fetchTaken();
+  }, [date, apptId]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -44,16 +69,8 @@ export default function ReschedulePage() {
     }
   };
 
-  // Build dropdown options (8:00 → 17:00, every 30 min)
-  const timeOptions: string[] = [];
-  for (let h = 8; h <= 17; h++) {
-    for (let m of [0, 30]) {
-      if (h === 17 && m > 0) continue; // no 5:30
-      const hh = h.toString().padStart(2, "0");
-      const mm = m.toString().padStart(2, "0");
-      timeOptions.push(`${hh}:${mm}`);
-    }
-  }
+  // Same slot list as booking
+  const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -70,8 +87,7 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        <p className="text-sm text-gray-500 mb-6">
-        Name: {sp.get("name") ?? "Unknown"} </p>
+        <p className="text-sm text-gray-500 mb-6">Name: {name}</p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date */}
@@ -96,11 +112,13 @@ export default function ReschedulePage() {
               required
             >
               <option value="">Select a time</option>
-              {timeOptions.map((t) => (
-                <option key={t} value={t}>
-                  {t}
-                </option>
-              ))}
+              {timeSlots
+                .filter((slot) => !takenSlots.includes(slot)) // 🔹 filter taken slots
+                .map((t) => (
+                  <option key={t} value={t}>
+                    {t}
+                  </option>
+                ))}
             </select>
           </div>
 
