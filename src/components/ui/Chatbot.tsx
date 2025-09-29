@@ -82,11 +82,13 @@ const Chatbot = () => {
             )}
 
             {step === 'time' && (
-              <ChatTimePicker 
-                onTimeSelect={handleTimeSelect}
-                onReset={handleReset}
-              />
-            )}
+  <ChatTimePicker 
+    onTimeSelect={handleTimeSelect}
+    onReset={handleReset}
+    selectedDate={selectedDate}  // 🔹 Pass the chosen date down
+  />
+)}
+
             
             {/* ✅ New step for timezone selection */}
             {step === 'timezone_select' && (
