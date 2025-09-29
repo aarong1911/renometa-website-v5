@@ -56,32 +56,36 @@ export default function ScheduleAppointmentModal({
     return slots;
   }, []);
 
-  // Filter slots (remove past, buffer, and booked)
-  const filterSlots = useCallback(
-    (slots: string[], booked: string[], selectedDate: string): string[] => {
-      const now = new Date();
-      const dateObj = new Date(selectedDate);
+// Filter slots (remove past, buffer, and booked)
+const filterSlots = useCallback(
+  (slots: string[], booked: string[], selectedDate: string): string[] => {
+    const now = new Date();
+    const dateObj = new Date(selectedDate);
 
-      return slots.filter((slot) => {
-        if (booked.includes(slot)) return false;
+    return slots.filter((slot) => {
+      if (booked.includes(slot)) return false;
 
-        const [h, m] = slot.split(":").map(Number);
-        const slotDate = new Date(dateObj);
-        slotDate.setHours(h, m, 0, 0);
+      const [h, m] = slot.split(":").map(Number);
+      const slotDate = new Date(dateObj);
+      slotDate.setHours(h, m, 0, 0);
 
-        // If booking today, apply buffer
-        if (dateObj.toDateString() === now.toDateString()) {
-          const minAllowed = new Date(
-            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
-          );
-          if (slotDate <= minAllowed) return false;
-        }
+      // ❌ Block if slot is in the past (for today or any earlier date)
+      if (slotDate <= now) return false;
 
-        return true;
-      });
-    },
-    []
-  );
+      // ⛔ Extra buffer: 2 hours ahead if same day
+      if (dateObj.toDateString() === now.toDateString()) {
+        const minAllowed = new Date(
+          now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
+        );
+        if (slotDate <= minAllowed) return false;
+      }
+
+      return true;
+    });
+  },
+  []
+);
+
 
   // Fetch slots whenever date changes
   useEffect(() => {
