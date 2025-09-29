@@ -35,22 +35,29 @@ export default function ScheduleAppointmentModal({
 
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // ✅ Normalize function
-  const normalize = (t: string) => (t ? t.trim().slice(0, 5) : "");
+  // Generate slots in HH:mm format
+  const timeSlots: string[] = [];
+  for (let hour = 8; hour <= 18; hour++) {
+    timeSlots.push(`${hour.toString().padStart(2, "0")}:00`);
+    if (hour < 18) timeSlots.push(`${hour.toString().padStart(2, "0")}:30`);
+  }
 
-  // 🔹 Fetch taken slots whenever date changes
+  // Fetch taken slots from Supabase
   useEffect(() => {
     const fetchTaken = async () => {
       if (!formData.appointment_date) return;
 
-      const dateString = formData.appointment_date.toISOString().split("T")[0];
+      const dateString = formData.appointment_date
+        .toISOString()
+        .split("T")[0];
+
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time")
         .eq("appointment_date", dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => normalize(row.appointment_time)));
+        setTakenSlots(data.map((row) => row.appointment_time.slice(0, 5))); // Normalize to HH:mm
       }
     };
 
@@ -66,7 +73,7 @@ export default function ScheduleAppointmentModal({
 
   const handleDateChange = (date: Date) => {
     setFormData((prev) => ({ ...prev, appointment_date: date }));
-    setTakenSlots([]);
+    setTakenSlots([]); // reset until fetch reloads
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -96,7 +103,7 @@ export default function ScheduleAppointmentModal({
       appointment_date: formData.appointment_date
         ? formData.appointment_date.toISOString().split("T")[0]
         : null,
-      appointment_time: formData.appointment_time,
+      appointment_time: formData.appointment_time, // Always "HH:mm"
       timezone: formData.timezone,
     };
 
@@ -132,9 +139,6 @@ export default function ScheduleAppointmentModal({
       setIsSubmitting(false);
     }
   };
-
-  // Slots as HH:mm
-  const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -230,7 +234,7 @@ export default function ScheduleAppointmentModal({
               >
                 <option value="">Choose a time</option>
                 {timeSlots
-                  .filter((slot) => !takenSlots.includes(normalize(slot)))
+                  .filter((slot) => !takenSlots.includes(slot)) // 🚫 filter booked
                   .map((slot) => (
                     <option key={slot} value={slot}>
                       {slot}
