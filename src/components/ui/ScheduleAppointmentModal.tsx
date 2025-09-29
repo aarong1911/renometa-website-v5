@@ -69,10 +69,7 @@ const filterSlots = useCallback(
       const slotDate = new Date(dateObj);
       slotDate.setHours(h, m, 0, 0);
 
-      // ❌ Block if slot is in the past (for today or any earlier date)
-      if (slotDate <= now) return false;
-
-      // ⛔ Extra buffer: 2 hours ahead if same day
+      // 📅 If today → enforce 2-hour buffer
       if (dateObj.toDateString() === now.toDateString()) {
         const minAllowed = new Date(
           now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
@@ -80,12 +77,14 @@ const filterSlots = useCallback(
         if (slotDate <= minAllowed) return false;
       }
 
+      // 📅 If future date → allow all (just exclude booked)
+      // no extra restriction needed
+
       return true;
     });
   },
   []
 );
-
 
   // Fetch slots whenever date changes
   useEffect(() => {
