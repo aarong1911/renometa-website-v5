@@ -75,7 +75,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
             .filter((slot) => {
               const hh = slot.hour.toString().padStart(2, '0');
               const mm = slot.minute.toString().padStart(2, '0');
-              const normalized = `${hh}:${mm}:00`;
+              const normalized = `${hh}:${mm}`;
               return !takenSlots.includes(normalized); // ✅ hide taken slots
             })
             .map((slot, i) => {
