@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -9,13 +9,15 @@ import {
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 
 interface ScheduleAppointmentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
+const APPOINTMENTS_TABLE = "appointments";
+const SLOT_DURATION_MINUTES = 30;
+const WORK_HOURS = { start: 9, end: 17 }; // 9–5 workday
 
 export default function ScheduleAppointmentModal({
   open,
@@ -24,56 +26,78 @@ export default function ScheduleAppointmentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
+  const todayDateString = new Date().toISOString().split("T")[0];
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
     phone: "",
-    appointment_date: new Date(),
+    appointment_date: todayDateString,
     appointment_time: "",
     timezone: "",
   });
 
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Generate slots in HH:mm format
-  const timeSlots: string[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    timeSlots.push(`${hour.toString().padStart(2, "0")}:00`);
-    if (hour < 18) timeSlots.push(`${hour.toString().padStart(2, "0")}:30`);
-  }
+  // Generate all half-hour slots
+  const generateAllSlots = useCallback((): string[] => {
+    const slots: string[] = [];
+    for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
+      for (let minute = 0; minute < 60; minute += SLOT_DURATION_MINUTES) {
+        slots.push(
+          `${hour.toString().padStart(2, "0")}:${minute
+            .toString()
+            .padStart(2, "0")}`
+        );
+      }
+    }
+    return slots;
+  }, []);
 
-  // Fetch taken slots from Supabase
+  // Fetch taken slots for selected date
   useEffect(() => {
-    const fetchTaken = async () => {
+    const fetchSlots = async () => {
       if (!formData.appointment_date) return;
+      setIsLoadingSlots(true);
 
-      const dateString = formData.appointment_date
-        .toISOString()
-        .split("T")[0];
+      try {
+        const { data, error } = await supabase
+          .from(APPOINTMENTS_TABLE)
+          .select("appointment_time")
+          .eq("appointment_date", formData.appointment_date);
 
-      const { data, error } = await supabase
-        .from("appointments")
-        .select("appointment_time")
-        .eq("appointment_date", dateString);
+        if (error) throw error;
 
-      if (!error && data) {
-        setTakenSlots(data.map((row) => row.appointment_time.slice(0, 5))); // Normalize to HH:mm
+        const bookedTimes = (data || []).map((row: any) =>
+          row.appointment_time.slice(0, 5) // normalize to HH:mm
+        );
+
+        const freeSlots = generateAllSlots().filter(
+          (slot) => !bookedTimes.includes(slot)
+        );
+
+        setAvailableSlots(freeSlots);
+      } catch (err: any) {
+        console.error("Error fetching slots:", err);
+        toast({
+          title: "Error",
+          description: "Could not load available slots.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsLoadingSlots(false);
       }
     };
 
-    fetchTaken();
-  }, [formData.appointment_date]);
+    fetchSlots();
+  }, [formData.appointment_date, generateAllSlots, toast]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
-  };
-
-  const handleDateChange = (date: Date) => {
-    setFormData((prev) => ({ ...prev, appointment_date: date }));
-    setTakenSlots([]); // reset until fetch reloads
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,8 +112,8 @@ export default function ScheduleAppointmentModal({
       !formData.timezone
     ) {
       toast({
-        title: "Missing required fields",
-        description: "Please fill in all required fields before submitting.",
+        title: "Missing fields",
+        description: "Fill in all required fields.",
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -97,14 +121,8 @@ export default function ScheduleAppointmentModal({
     }
 
     const payload = {
-      name: formData.name.trim(),
-      email: formData.email.trim(),
+      ...formData,
       phone: formData.phone?.trim() || null,
-      appointment_date: formData.appointment_date
-        ? formData.appointment_date.toISOString().split("T")[0]
-        : null,
-      appointment_time: formData.appointment_time, // Always "HH:mm"
-      timezone: formData.timezone,
     };
 
     try {
@@ -124,15 +142,15 @@ export default function ScheduleAppointmentModal({
         name: "",
         email: "",
         phone: "",
-        appointment_date: new Date(),
+        appointment_date: todayDateString,
         appointment_time: "",
         timezone: "",
       });
     } catch (err: any) {
-      console.error("❌ Error submitting appointment:", err);
+      console.error("Error scheduling:", err);
       toast({
         title: "Error",
-        description: "There was a problem scheduling. Please try again later.",
+        description: "Problem scheduling. Please try again later.",
         variant: "destructive",
       });
     } finally {
@@ -145,22 +163,21 @@ export default function ScheduleAppointmentModal({
       <DialogOverlay className="bg-black/50" />
       <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
         <DialogDescription className="sr-only">
-          Pick a date and time to book your strategy call.
+          Book your strategy call.
         </DialogDescription>
 
-        {/* Close */}
+        {/* Close Button */}
         <Button
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
           variant="ghost"
           size="icon"
-          aria-label="Close"
         >
           ✕
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* First Row */}
+          {/* Name / Email / Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -170,51 +187,47 @@ export default function ScheduleAppointmentModal({
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Your full name"
                 required
                 className="w-full text-gray-900"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Email Address *
+                Email *
               </label>
               <Input
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="you@example.com"
                 required
                 className="w-full text-gray-900"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Phone Number
+                Phone
               </label>
               <Input
                 name="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
-                placeholder="(123) 456-7890"
                 className="w-full text-gray-900"
               />
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Select Date *
+                Date *
               </label>
-              <DatePicker
-                selected={formData.appointment_date}
-                onChange={handleDateChange}
+              <input
+                type="date"
+                name="appointment_date"
+                value={formData.appointment_date}
+                onChange={handleChange}
+                min={todayDateString}
+                required
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-                minDate={new Date()}
-                dateFormat="MMMM d, yyyy"
               />
             </div>
           </div>
@@ -223,26 +236,26 @@ export default function ScheduleAppointmentModal({
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Select Time *
+                Time *
               </label>
               <select
                 name="appointment_time"
                 value={formData.appointment_time}
                 onChange={handleChange}
                 required
+                disabled={isLoadingSlots}
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
-                <option value="">Choose a time</option>
-                {timeSlots
-                  .filter((slot) => !takenSlots.includes(slot)) // 🚫 filter booked
-                  .map((slot) => (
-                    <option key={slot} value={slot}>
-                      {slot}
-                    </option>
-                  ))}
+                <option value="">
+                  {isLoadingSlots ? "Loading slots…" : "Choose a time"}
+                </option>
+                {availableSlots.map((slot) => (
+                  <option key={slot} value={slot}>
+                    {slot}
+                  </option>
+                ))}
               </select>
             </div>
-
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Time Zone *
@@ -255,10 +268,10 @@ export default function ScheduleAppointmentModal({
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">Choose a time zone</option>
-                <option value="America/New_York">Eastern Time (EST)</option>
-                <option value="America/Chicago">Central Time (CST)</option>
-                <option value="America/Denver">Mountain Time (MST)</option>
-                <option value="America/Los_Angeles">Pacific Time (PST)</option>
+                <option value="America/New_York">Eastern (EST)</option>
+                <option value="America/Chicago">Central (CST)</option>
+                <option value="America/Denver">Mountain (MST)</option>
+                <option value="America/Los_Angeles">Pacific (PST)</option>
               </select>
             </div>
           </div>
@@ -266,18 +279,16 @@ export default function ScheduleAppointmentModal({
           {/* Submit */}
           <Button
             type="submit"
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] transition-colors rounded-md px-8 py-3 text-base font-semibold flex items-center justify-center shadow-md mt-8 mb-8"
-            disabled={isSubmitting}
+            disabled={isSubmitting || availableSlots.length === 0}
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8 mb-8"
           >
-            {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
+            {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
 
           {/* Consent */}
           <p className="text-xs text-gray-400 mt-10">
-            By submitting, you agree to receive text messages at the provided number from RenoMeta.
-            Message frequency varies, and standard message and data rates may apply. 
-            Reply STOP to opt out. 
-            Also by submitting this form you agree to our{" "}
+            By submitting, you agree to receive text messages from RenoMeta. Msg
+            & data rates may apply. Reply STOP to opt out. View our{" "}
             <a href="/privacy-policy" className="text-blue-400 hover:underline">
               Privacy Policy
             </a>{" "}
