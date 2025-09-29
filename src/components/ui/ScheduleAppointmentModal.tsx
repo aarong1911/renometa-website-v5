@@ -51,7 +51,14 @@ export default function ScheduleAppointmentModal({
         .eq("appointment_date", dateString);
 
       if (!error && data) {
-        setTakenSlots(data.map((row) => row.appointment_time));
+        // 🔹 Normalize "09:00:00" → "09:00"
+        setTakenSlots(
+          data
+            .map((row) =>
+              row.appointment_time ? row.appointment_time.slice(0, 5) : ""
+            )
+            .filter(Boolean)
+        );
       }
     };
 
@@ -116,6 +123,7 @@ export default function ScheduleAppointmentModal({
       setIsSubmitting(false);
       onOpenChange(false);
 
+      // Reset form
       setFormData({
         name: "",
         email: "",
