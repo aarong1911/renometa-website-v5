@@ -33,17 +33,25 @@ export default function ScheduleAppointmentModal({
     timezone: "",
   });
 
-  // 🔹 Store taken slots from Supabase
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // Fetch taken slots whenever appointment_date changes
+  // ✅ Normalize any Supabase format into "HH:mm"
+  const normalizeTime = (raw: string): string => {
+    if (!raw) return "";
+    if (raw.includes("T")) {
+      return new Date(raw).toISOString().slice(11, 16);
+    }
+    if (raw.length === 8) {
+      return raw.slice(0, 5);
+    }
+    return raw;
+  };
+
+  // Fetch taken slots
   useEffect(() => {
     const fetchTaken = async () => {
       if (!formData.appointment_date) return;
-
-      const dateString = formData.appointment_date
-        .toISOString()
-        .split("T")[0];
+      const dateString = formData.appointment_date.toISOString().split("T")[0];
 
       const { data, error } = await supabase
         .from("appointments")
@@ -51,13 +59,9 @@ export default function ScheduleAppointmentModal({
         .eq("appointment_date", dateString);
 
       if (!error && data) {
-        // Normalize from "HH:mm:ss" → "HH:mm"
-        setTakenSlots(
-          data.map((row) => row.appointment_time.slice(0, 5))
-        );
+        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
       }
     };
-
     fetchTaken();
   }, [formData.appointment_date]);
 
@@ -70,7 +74,7 @@ export default function ScheduleAppointmentModal({
 
   const handleDateChange = (date: Date) => {
     setFormData((prev) => ({ ...prev, appointment_date: date }));
-    setTakenSlots([]); // reset until fetch reloads
+    setTakenSlots([]);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -139,7 +143,6 @@ export default function ScheduleAppointmentModal({
     }
   };
 
-  // Predefined slots
   const timeSlots = ["09:00", "10:00", "11:00", "14:00", "15:00", "16:00"];
 
   return (
@@ -150,107 +153,69 @@ export default function ScheduleAppointmentModal({
           Pick a date and time to book your strategy call.
         </DialogDescription>
 
-        {/* Close Button */}
-        <Button
-          onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
-          variant="ghost"
-          size="icon"
-          aria-label="Close"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            className="h-6 w-6"
-            fill="none"
-            viewBox="0 0 24 24"
-            stroke="currentColor"
-            strokeWidth={2}
-          >
-            <path strokeLinecap="round" strokeLinejoin="round" d="M6 18L18 6M6 6l12 12" />
-          </svg>
-        </Button>
-
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* First Row */}
+          {/* Name + Email */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="name" className="block text-sm font-medium text-gray-300 mb-1">
-                Full Name *
-              </label>
+              <label className="block text-sm font-medium">Full Name *</label>
               <Input
-                id="name"
                 name="name"
                 value={formData.name}
                 onChange={handleChange}
-                placeholder="Your full name"
                 required
                 className="w-full text-gray-900"
               />
             </div>
-
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-gray-300 mb-1">
-                Email Address *
-              </label>
+              <label className="block text-sm font-medium">Email *</label>
               <Input
-                id="email"
                 name="email"
                 type="email"
                 value={formData.email}
                 onChange={handleChange}
-                placeholder="you@example.com"
                 required
                 className="w-full text-gray-900"
-              />
-            </div>
-
-            <div>
-              <label htmlFor="phone" className="block text-sm font-medium text-gray-300 mb-1">
-                Phone Number
-              </label>
-              <Input
-                id="phone"
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                placeholder="(123) 456-7890"
-                className="w-full text-gray-900"
-              />
-            </div>
-
-            <div className="relative">
-              <label htmlFor="appointment_date" className="block text-sm font-medium text-gray-300 mb-1">
-                Select Date *
-              </label>
-              <DatePicker
-                selected={formData.appointment_date}
-                onChange={handleDateChange}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-                minDate={new Date()}
-                dateFormat="MMMM d, yyyy"
-                id="appointment_date"
               />
             </div>
           </div>
 
-          {/* Second Row: Time + Timezone */}
+          {/* Phone + Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label htmlFor="appointment_time" className="block text-sm font-medium text-gray-300 mb-1">
-                Select Time *
-              </label>
+              <label className="block text-sm font-medium">Phone</label>
+              <Input
+                name="phone"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium">Date *</label>
+              <DatePicker
+                selected={formData.appointment_date}
+                onChange={handleDateChange}
+                minDate={new Date()}
+                dateFormat="MMMM d, yyyy"
+                className="w-full border px-3 py-2 rounded text-gray-600"
+              />
+            </div>
+          </div>
+
+          {/* Time + Timezone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium">Time *</label>
               <select
-                id="appointment_time"
                 name="appointment_time"
                 value={formData.appointment_time}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+                className="w-full border px-3 py-2 rounded text-gray-600"
               >
                 <option value="">Choose a time</option>
                 {timeSlots
-                  .filter((slot) => !takenSlots.includes(slot)) // 🔹 filter booked slots
+                  .filter((slot) => !takenSlots.includes(slot))
                   .map((slot) => (
                     <option key={slot} value={slot}>
                       {slot}
@@ -258,53 +223,31 @@ export default function ScheduleAppointmentModal({
                   ))}
               </select>
             </div>
-
             <div>
-              <label htmlFor="timezone" className="block text-sm font-medium text-gray-300 mb-1">
-                Time Zone *
-              </label>
+              <label className="block text-sm font-medium">Time Zone *</label>
               <select
-                id="timezone"
                 name="timezone"
                 value={formData.timezone}
                 onChange={handleChange}
                 required
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+                className="w-full border px-3 py-2 rounded text-gray-600"
               >
                 <option value="">Choose a time zone</option>
                 <option value="America/New_York">Eastern Time (EST)</option>
                 <option value="America/Chicago">Central Time (CST)</option>
                 <option value="America/Denver">Mountain Time (MST)</option>
                 <option value="America/Los_Angeles">Pacific Time (PST)</option>
-                <option value="America/Anchorage">Alaska Time (AKST)</option>
-                <option value="Pacific/Honolulu">Hawaii-Aleutian Time (HST)</option>
               </select>
             </div>
           </div>
 
-          {/* Submit button */}
-          <div className="mb-8">
-            <Button
-              type="submit"
-              className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] transition-colors rounded-md px-8 py-3 text-base font-semibold flex items-center justify-center shadow-md mt-8 mb-8"
-              disabled={isSubmitting}
-            >
-              {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
-            </Button>
-          </div>
-
-          {/* Legal Text */}
-          <p className="text-xs text-gray-400 mt-10">
-            By submitting, you agree to receive text messages at the provided number from RenoMeta
-            Inc. Message frequency varies, and standard message and data rates may apply. You have
-            the right to OPT-OUT receiving messages at any time. To OPT-OUT, reply "STOP" to any text
-            message you receive from us. Reply HELP for assistance. Also by submitting this form you
-            agree with{" "}
-            <a href="/privacy-policy" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>{" "}
-            Terms.
-          </p>
+          <Button
+            type="submit"
+            disabled={isSubmitting}
+            className="bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 rounded-md mt-4"
+          >
+            {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
+          </Button>
         </form>
       </DialogContent>
     </Dialog>
