@@ -17,7 +17,8 @@ interface ScheduleAppointmentModalProps {
 
 const APPOINTMENTS_TABLE = "appointments";
 const SLOT_DURATION_MINUTES = 30;
-const WORK_HOURS = { start: 9, end: 17 }; // 9–5 workday
+const WORK_HOURS = { start: 8, end: 18 }; // 8 AM – 6 PM
+const BUFFER_HOURS = 2; // block past slots and enforce 2-hour buffer
 
 export default function ScheduleAppointmentModal({
   open,
@@ -40,7 +41,7 @@ export default function ScheduleAppointmentModal({
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Generate all half-hour slots
+  // Generate slots between 08:00–18:00 in 30 min steps
   const generateAllSlots = useCallback((): string[] => {
     const slots: string[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
@@ -55,7 +56,34 @@ export default function ScheduleAppointmentModal({
     return slots;
   }, []);
 
-  // Fetch taken slots for selected date
+  // Filter slots (remove past, buffer, and booked)
+  const filterSlots = useCallback(
+    (slots: string[], booked: string[], selectedDate: string): string[] => {
+      const now = new Date();
+      const dateObj = new Date(selectedDate);
+
+      return slots.filter((slot) => {
+        if (booked.includes(slot)) return false;
+
+        const [h, m] = slot.split(":").map(Number);
+        const slotDate = new Date(dateObj);
+        slotDate.setHours(h, m, 0, 0);
+
+        // If booking today, apply buffer
+        if (dateObj.toDateString() === now.toDateString()) {
+          const minAllowed = new Date(
+            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
+          );
+          if (slotDate <= minAllowed) return false;
+        }
+
+        return true;
+      });
+    },
+    []
+  );
+
+  // Fetch slots whenever date changes
   useEffect(() => {
     const fetchSlots = async () => {
       if (!formData.appointment_date) return;
@@ -73,8 +101,11 @@ export default function ScheduleAppointmentModal({
           row.appointment_time.slice(0, 5) // normalize to HH:mm
         );
 
-        const freeSlots = generateAllSlots().filter(
-          (slot) => !bookedTimes.includes(slot)
+        const allSlots = generateAllSlots();
+        const freeSlots = filterSlots(
+          allSlots,
+          bookedTimes,
+          formData.appointment_date
         );
 
         setAvailableSlots(freeSlots);
@@ -91,7 +122,7 @@ export default function ScheduleAppointmentModal({
     };
 
     fetchSlots();
-  }, [formData.appointment_date, generateAllSlots, toast]);
+  }, [formData.appointment_date, generateAllSlots, filterSlots, toast]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -177,7 +208,7 @@ export default function ScheduleAppointmentModal({
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone */}
+          {/* Name / Email / Phone / Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
