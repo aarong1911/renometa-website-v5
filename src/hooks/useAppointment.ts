@@ -10,15 +10,13 @@ const SLOT_DURATION_MINUTES = 30;
 const WORK_HOURS = { start: 8, end: 18 }; // 8:00 → 18:00
 const BUFFER_HOURS = 2; // The required 2-hour buffer
 
-// 🔹 Simplified and focused normalizeTime (Only handles HH:mm and trims excess)
-const normalizeTime = (raw: string): string => {
-  if (!raw) return "";
-  // Assume DB stores it as "12:00:00" and we want "12:00"
-  const hhmm = raw.slice(0, 5); 
-  
-  // Ensure leading zero padding (e.g. "9:00" → "09:00"). This handles DB results like "9:00:00"
-  const [h, m] = hhmm.split(":").map((n) => parseInt(n, 10));
-  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
+// 1. 🛑 NEW: Helper function to safely get YYYY-MM-DD based on the local time components
+const getLocalDateString = (date: Date): string => {
+  const year = date.getFullYear();
+  // Month is 0-indexed, so we add 1
+  const month = (date.getMonth() + 1).toString().padStart(2, '0'); 
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
 };
 
 export const useAppointment = () => {
@@ -27,9 +25,8 @@ export const useAppointment = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
 
-  // Generate all 30-min slots in 24h format
+  // Generate all 30-min slots in 24h format (slot.value is guaranteed "HH:mm")
   const timeSlots: TimeSlot[] = useMemo(() => {
-    // ... (no change here)
     const slots: TimeSlot[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
       for (let minute = 0; minute < 60; minute += SLOT_DURATION_MINUTES) {
@@ -51,15 +48,14 @@ export const useAppointment = () => {
         return;
       }
 
-      // Get the date string for the database query (e.g., "2025-09-30")
-      // This relies on the new `createLocalDate` helper in the modal to prevent rollback
-      const isoDate = selectedDate.toISOString().split("T")[0]; 
+      // 2. 🛑 USE THE SAFE LOCAL DATE STRING FOR THE QUERY
+      const isoDate = getLocalDateString(selectedDate);
 
       // 1. FETCH TAKEN SLOTS
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time")
-        .eq("appointment_date", isoDate);
+        .eq("appointment_date", isoDate); // This query now uses the correct local date string
 
       if (error) {
         console.error("❌ Error fetching taken slots:", error.message);
@@ -67,32 +63,31 @@ export const useAppointment = () => {
         return;
       }
 
-      // 🛑 FIX: Use a Set for reliable and fast lookup of booked times
+      // 3. 🛑 ROBUST TIME COMPARISON: Ensure booked times are exactly "HH:mm"
       const bookedTimesSet: Set<string> = new Set(
-        data?.map((row) => normalizeTime(row.appointment_time)) || []
+        data
+          ?.map((row) => row.appointment_time)
+          // Trim any whitespace, then slice to "HH:mm" (e.g., "16:00:00" -> "16:00")
+          ?.map((timeStr) => timeStr.trim().slice(0, 5)) || []
       );
 
       const now = new Date();
       const isToday = selectedDate.toDateString() === now.toDateString();
 
       const free = timeSlots.filter((slot) => {
-        // 2. FILTER: Check if slot is already taken
+        // 4. FILTER: Check if slot is already taken
         if (bookedTimesSet.has(slot.value)) {
           return false; // This slot is booked!
         }
 
-        // 3. FILTER: Apply 2-hour buffer for today
+        // 5. FILTER: Apply 2-hour buffer for today 
         if (isToday) {
           const [h, m] = slot.value.split(":").map(Number);
-
-          // Create a Date object for the current slot time on the selected date (in client's local TZ)
           const slotDateTime = new Date(selectedDate);
           slotDateTime.setHours(h, m, 0, 0);
 
-          // Calculate the minimum allowed timestamp (Current time + 2 hours in ms)
           const minAllowedTimestamp = now.getTime() + BUFFER_HOURS * 60 * 60 * 1000;
 
-          // If the slot time is less than or equal to the minimum allowed time, filter it out.
           if (slotDateTime.getTime() <= minAllowedTimestamp) {
             return false;
           }
