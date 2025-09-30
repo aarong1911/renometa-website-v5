@@ -3,11 +3,11 @@ import { supabase } from "@/lib/supabaseClient";
 
 export type TimeSlot = {
   value: string;     // "HH:mm"
-  formatted: string; // "h:mm AM/PM"
+  formatted: string; // also "HH:mm" for display
 };
 
 const SLOT_DURATION_MINUTES = 30;
-const WORK_HOURS = { start: 8, end: 18 };
+const WORK_HOURS = { start: 8, end: 18 }; // 8:00 → 18:00
 const BUFFER_HOURS = 2;
 
 const normalizeTime = (raw: string): string => {
@@ -22,7 +22,7 @@ export const useAppointment = () => {
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // Generate all 30-min slots
+  // Generate all 30-min slots in 24h format
   const timeSlots: TimeSlot[] = useMemo(() => {
     const slots: TimeSlot[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
@@ -30,12 +30,7 @@ export const useAppointment = () => {
         const hh = hour.toString().padStart(2, "0");
         const mm = minute.toString().padStart(2, "0");
         const value = `${hh}:${mm}`;
-
-        const period = hour >= 12 ? "PM" : "AM";
-        const displayHour = hour > 12 ? hour - 12 : hour;
-        const formatted = `${displayHour}:${mm} ${period}`;
-
-        slots.push({ value, formatted });
+        slots.push({ value, formatted: value }); // ✅ same for display
       }
     }
     return slots;
@@ -73,7 +68,7 @@ export const useAppointment = () => {
         const slotDate = new Date(selectedDate);
         slotDate.setHours(h, m, 0, 0);
 
-        // Today → apply 2-hour buffer
+        // Today → apply 2h buffer
         if (selectedDate.toDateString() === now.toDateString()) {
           const minAllowed = new Date(now.getTime() + BUFFER_HOURS * 60 * 60 * 1000);
           if (slotDate <= minAllowed) return false;
@@ -102,7 +97,7 @@ export const useAppointment = () => {
     isSubmitting,
     setIsSubmitting,
     timeSlots,
-    availableSlots, // { value: "HH:mm", formatted: "h:mm AM/PM" }
+    availableSlots, // ✅ always "HH:mm"
     resetAppointment,
   };
 };
