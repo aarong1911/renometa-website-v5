@@ -27,7 +27,7 @@ export default function ScheduleAppointmentModal({
     setSelectedTime,
     isSubmitting,
     setIsSubmitting,
-    availableSlots,
+    availableSlots, // ✅ already 30-min increments & buffer filtering
     resetAppointment,
   } = useAppointment();
 
@@ -215,7 +215,7 @@ export default function ScheduleAppointmentModal({
                 </option>
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
-                    {slot.formatted}
+                    {slot.value} {/* ✅ 24-hour style, e.g. 09:00 */}
                   </option>
                 ))}
               </select>
@@ -248,6 +248,19 @@ export default function ScheduleAppointmentModal({
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
+
+          {/* ✅ Consent text restored */}
+          <p className="text-xs text-gray-400 mt-10">
+            By submitting, you agree to receive text messages from RenoMeta. Msg
+            & data rates may apply. Reply STOP to opt out. View our{" "}
+            <a
+              href="/privacy-policy"
+              className="text-blue-400 hover:underline"
+            >
+              Privacy Policy
+            </a>{" "}
+            and Terms.
+          </p>
         </form>
       </DialogContent>
     </Dialog>
