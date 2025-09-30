@@ -10,11 +10,24 @@ const SLOT_DURATION_MINUTES = 30;
 const WORK_HOURS = { start: 8, end: 18 }; // 8:00 → 18:00
 const BUFFER_HOURS = 2;
 
+// 🔹 Normalize everything to "HH:mm"
 const normalizeTime = (raw: string): string => {
   if (!raw) return "";
-  if (raw.includes("T")) return new Date(raw).toISOString().slice(11, 16);
-  if (raw.length >= 5) return raw.slice(0, 5); // HH:mm or HH:mm:ss
-  return raw;
+  let hhmm = "";
+
+  if (raw.includes("T")) {
+    // If it’s an ISO timestamp
+    hhmm = new Date(raw).toISOString().slice(11, 16);
+  } else if (raw.length >= 5) {
+    // "HH:mm" or "HH:mm:ss"
+    hhmm = raw.slice(0, 5);
+  } else {
+    hhmm = raw;
+  }
+
+  // Ensure leading zero padding (e.g. "9:00" → "09:00")
+  const [h, m] = hhmm.split(":").map((n) => parseInt(n, 10));
+  return `${h.toString().padStart(2, "0")}:${m.toString().padStart(2, "0")}`;
 };
 
 export const useAppointment = () => {
@@ -30,7 +43,7 @@ export const useAppointment = () => {
         const hh = hour.toString().padStart(2, "0");
         const mm = minute.toString().padStart(2, "0");
         const value = `${hh}:${mm}`;
-        slots.push({ value, formatted: value }); // ✅ same for display
+        slots.push({ value, formatted: value });
       }
     }
     return slots;
@@ -58,7 +71,10 @@ export const useAppointment = () => {
         return;
       }
 
-      const taken = data?.map((row) => normalizeTime(row.appointment_time)) || [];
+      // 🔹 Normalize every DB value to strict HH:mm
+      const taken: string[] =
+        data?.map((row) => normalizeTime(row.appointment_time)) || [];
+
       const now = new Date();
 
       const free = timeSlots.filter((slot) => {
@@ -70,7 +86,9 @@ export const useAppointment = () => {
 
         // Today → apply 2h buffer
         if (selectedDate.toDateString() === now.toDateString()) {
-          const minAllowed = new Date(now.getTime() + BUFFER_HOURS * 60 * 60 * 1000);
+          const minAllowed = new Date(
+            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
+          );
           if (slotDate <= minAllowed) return false;
         }
 
