@@ -1,33 +1,79 @@
-import { Button } from "@/components/ui/button";
-import { useAppointment } from "@/hooks/useAppointment";
+import { Button } from '@/components/ui/button';
+import { useEffect, useState } from 'react';
+import { supabase } from '@/lib/supabaseClient';
 
-interface ChatTimePickerProps {
-  onTimeSelect: (time: string) => void; // always "HH:mm" for DB/Make
-  onReset: () => void;
+interface TimeSlot {
+  value: string;     // "HH:mm"
+  formatted: string; // "9:00 AM"
 }
 
-const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
-  const { availableSlots } = useAppointment();
+interface ChatTimePickerProps {
+  onTimeSelect: (time: string) => void;
+  onReset: () => void;
+  selectedDate?: Date;
+}
+
+const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+
+  // Generate half-hour slots
+  const timeSlots: TimeSlot[] = [];
+  for (let hour = 8; hour <= 18; hour++) {
+    for (let minute of [0, 30]) {
+      const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
+      const displayHour = hour > 12 ? hour - 12 : hour;
+      const period = hour >= 12 ? 'PM' : 'AM';
+      const formatted = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
+      timeSlots.push({ value, formatted });
+    }
+  }
+
+  // Fetch taken slots
+  useEffect(() => {
+    const fetchTaken = async () => {
+      if (!selectedDate) return;
+      const dateString = selectedDate.toISOString().split('T')[0];
+
+      const { data, error } = await supabase
+        .from('appointments')
+        .select('appointment_time')
+        .eq('appointment_date', dateString);
+
+      if (!error && data) {
+        setTakenSlots(data.map((row) => row.appointment_time.slice(0, 5))); // Always HH:mm
+      }
+    };
+    fetchTaken();
+  }, [selectedDate]);
 
   return (
     <div className="flex flex-col space-y-3">
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-        {availableSlots.length > 0 ? (
-          availableSlots.map((slot) => (
+        {timeSlots.map((slot, i) => {
+          if (takenSlots.includes(slot.value)) {
+            return (
+              <Button
+                key={i}
+                disabled
+                variant="outline"
+                className="text-gray-400 border-gray-300 cursor-not-allowed"
+              >
+                {slot.formatted} (Taken)
+              </Button>
+            );
+          }
+
+          return (
             <Button
-              key={slot.value}
-              onClick={() => onTimeSelect(slot.value)} // Pass "HH:mm" to submit
+              key={i}
+              onClick={() => onTimeSelect(slot.value)}
               variant="outline"
               className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
             >
-              {slot.formatted} {/* Show user-friendly "11:30 AM" */}
+              {slot.formatted}
             </Button>
-          ))
-        ) : (
-          <p className="text-sm text-gray-500 col-span-2">
-            No available slots
-          </p>
-        )}
+          );
+        })}
       </div>
 
       <Button
@@ -42,3 +88,4 @@ const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
 };
 
 export default ChatTimePicker;
+
