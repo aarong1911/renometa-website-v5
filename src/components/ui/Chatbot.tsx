@@ -86,7 +86,6 @@ const Chatbot = () => {
     onTimeSelect={handleTimeSelect}
     onReset={handleReset}
     selectedDate={selectedDate}  // 🔹 Pass the chosen date down
-    availableSlots={availableSlots}  // ✅ pass slots
   />
 )}
 
