@@ -10,7 +10,8 @@ const SLOT_DURATION_MINUTES = 30;
 const WORK_HOURS = { start: 8, end: 18 }; // 8:00 → 18:00
 const BUFFER_HOURS = 2; // The required 2-hour buffer
 
-// 1. 🛑 NEW: Helper function to safely get YYYY-MM-DD based on the local time components
+// 🛑 CRITICAL FIX: Helper function to safely get YYYY-MM-DD based on the date's LOCAL time
+// This prevents timezone rollbacks that cause the Supabase query to miss the day.
 const getLocalDateString = (date: Date): string => {
   const year = date.getFullYear();
   // Month is 0-indexed, so we add 1
@@ -19,13 +20,14 @@ const getLocalDateString = (date: Date): string => {
   return `${year}-${month}-${day}`;
 };
 
+
 export const useAppointment = () => {
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | undefined>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [refreshKey, setRefreshKey] = useState(0); 
 
-  // Generate all 30-min slots in 24h format (slot.value is guaranteed "HH:mm")
+  // Generate all 30-min slots in 24h format
   const timeSlots: TimeSlot[] = useMemo(() => {
     const slots: TimeSlot[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
@@ -48,14 +50,14 @@ export const useAppointment = () => {
         return;
       }
 
-      // 2. 🛑 USE THE SAFE LOCAL DATE STRING FOR THE QUERY
+      // 1. Use the safe local date string for the Supabase query (e.g., "2025-09-30")
       const isoDate = getLocalDateString(selectedDate);
 
-      // 1. FETCH TAKEN SLOTS
+      // 2. FETCH TAKEN SLOTS
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time")
-        .eq("appointment_date", isoDate); // This query now uses the correct local date string
+        .eq("appointment_date", isoDate); // This ensures we query the correct date
 
       if (error) {
         console.error("❌ Error fetching taken slots:", error.message);
@@ -63,11 +65,11 @@ export const useAppointment = () => {
         return;
       }
 
-      // 3. 🛑 ROBUST TIME COMPARISON: Ensure booked times are exactly "HH:mm"
+      // 3. ROBUST TIME COMPARISON: Ensure booked times are exactly "HH:mm"
       const bookedTimesSet: Set<string> = new Set(
         data
           ?.map((row) => row.appointment_time)
-          // Trim any whitespace, then slice to "HH:mm" (e.g., "16:00:00" -> "16:00")
+          // Trim any whitespace, then slice to "HH:mm" 
           ?.map((timeStr) => timeStr.trim().slice(0, 5)) || []
       );
 
@@ -83,9 +85,12 @@ export const useAppointment = () => {
         // 5. FILTER: Apply 2-hour buffer for today 
         if (isToday) {
           const [h, m] = slot.value.split(":").map(Number);
+          
+          // Create a Date object for the current slot time
           const slotDateTime = new Date(selectedDate);
           slotDateTime.setHours(h, m, 0, 0);
 
+          // Calculate the minimum allowed timestamp (Current time + 2 hours in ms)
           const minAllowedTimestamp = now.getTime() + BUFFER_HOURS * 60 * 60 * 1000;
 
           if (slotDateTime.getTime() <= minAllowedTimestamp) {
