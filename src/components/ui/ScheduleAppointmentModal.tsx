@@ -27,7 +27,7 @@ export default function ScheduleAppointmentModal({
     setSelectedTime,
     isSubmitting,
     setIsSubmitting,
-    availableSlots, // ✅ already 30-min increments & buffer filtering
+    availableSlots,
     resetAppointment,
   } = useAppointment();
 
@@ -76,6 +76,7 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
+    // Ensure slot is still available before submitting
     if (!availableSlots.find((s) => s.value === formData.appointment_time)) {
       toast({
         title: "Time Slot Unavailable",
@@ -215,7 +216,7 @@ export default function ScheduleAppointmentModal({
                 </option>
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
-                    {slot.value} {/* ✅ 24-hour style, e.g. 09:00 */}
+                    {slot.value} {/* Always 24h format */}
                   </option>
                 ))}
               </select>
@@ -244,19 +245,16 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8 mb-8"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
 
-          {/* ✅ Consent text restored */}
-          <p className="text-xs text-gray-400 mt-10">
+          {/* Consent */}
+          <p className="text-xs text-gray-400 mt-4">
             By submitting, you agree to receive text messages from RenoMeta. Msg
             & data rates may apply. Reply STOP to opt out. View our{" "}
-            <a
-              href="/privacy-policy"
-              className="text-blue-400 hover:underline"
-            >
+            <a href="/privacy-policy" className="text-blue-400 hover:underline">
               Privacy Policy
             </a>{" "}
             and Terms.
