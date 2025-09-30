@@ -17,8 +17,16 @@ interface ScheduleAppointmentModalProps {
 
 const APPOINTMENTS_TABLE = "appointments";
 const SLOT_DURATION_MINUTES = 30;
-const WORK_HOURS = { start: 8, end: 18 }; // 8 AM – 6 PM
-const BUFFER_HOURS = 2; // block past slots and enforce 2-hour buffer
+const WORK_HOURS = { start: 8, end: 18 };
+const BUFFER_HOURS = 2;
+
+// Normalize Supabase appointment_time values
+const normalizeTime = (raw: string): string => {
+  if (!raw) return "";
+  if (raw.includes("T")) return new Date(raw).toISOString().slice(11, 16);
+  if (raw.length >= 5) return raw.slice(0, 5); // HH:mm or HH:mm:ss
+  return raw;
+};
 
 export default function ScheduleAppointmentModal({
   open,
@@ -41,7 +49,7 @@ export default function ScheduleAppointmentModal({
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Generate slots between 08:00–18:00 in 30 min steps
+  // Generate all 30-min slots
   const generateAllSlots = useCallback((): string[] => {
     const slots: string[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
@@ -56,36 +64,35 @@ export default function ScheduleAppointmentModal({
     return slots;
   }, []);
 
-// Filter slots (remove past, buffer, and booked)
-const filterSlots = useCallback(
-  (slots: string[], booked: string[], selectedDate: string): string[] => {
-    const now = new Date();
-    const dateObj = new Date(selectedDate);
+  // Filter logic
+  const filterSlots = useCallback(
+    (slots: string[], booked: string[], selectedDate: string): string[] => {
+      const now = new Date();
+      const dateObj = new Date(selectedDate);
 
-    return slots.filter((slot) => {
-      if (booked.includes(slot)) return false;
+      return slots.filter((slot) => {
+        if (booked.includes(slot)) return false;
 
-      const [h, m] = slot.split(":").map(Number);
-      const slotDate = new Date(dateObj);
-      slotDate.setHours(h, m, 0, 0);
+        const [h, m] = slot.split(":").map(Number);
+        const slotDate = new Date(dateObj);
+        slotDate.setHours(h, m, 0, 0);
 
-      // 📅 If today → enforce 2-hour buffer
-      if (dateObj.toDateString() === now.toDateString()) {
-        const minAllowed = new Date(
-          now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
-        );
-        if (slotDate <= minAllowed) return false;
-      }
+        // Today → enforce 2-hour buffer
+        if (dateObj.toDateString() === now.toDateString()) {
+          const minAllowed = new Date(
+            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
+          );
+          if (slotDate <= minAllowed) return false;
+        }
 
-      // 📅 If tomorrow or later → no buffer, just booked filtering
-      return true;
-    });
-  },
-  []
-);
+        // Tomorrow/future → allow all (except booked)
+        return true;
+      });
+    },
+    []
+  );
 
-
-  // Fetch slots whenever date changes
+  // Fetch slots
   useEffect(() => {
     const fetchSlots = async () => {
       if (!formData.appointment_date) return;
@@ -100,7 +107,7 @@ const filterSlots = useCallback(
         if (error) throw error;
 
         const bookedTimes = (data || []).map((row: any) =>
-          row.appointment_time.slice(0, 5) // normalize to HH:mm
+          normalizeTime(row.appointment_time)
         );
 
         const allSlots = generateAllSlots();
