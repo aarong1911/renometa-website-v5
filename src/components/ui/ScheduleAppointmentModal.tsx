@@ -11,6 +11,23 @@ import {
 // Assuming useAppointment.ts has been updated with forceRefresh
 import { useAppointment } from "@/hooks/useAppointment"; 
 
+// --- DATE FIX: Helper function to create a date object in local time ---
+/**
+ * Takes a YYYY-MM-DD string and creates a new Date object representing 
+ * midnight of that day in the user's local timezone. This prevents the
+ * common bug where new Date('YYYY-MM-DD') defaults to UTC and rolls back
+ * the date in timezones ahead of GMT.
+ */
+const createLocalDate = (dateString: string): Date => {
+  // YYYY-MM-DD -> [YYYY, MM, DD]
+  const parts = dateString.split("-").map(Number);
+  // Date constructor (year, monthIndex, day) uses LOCAL time
+  // Note: month is 0-indexed in JS Date (0=Jan, 11=Dec)
+  return new Date(parts[0], parts[1] - 1, parts[2]); 
+};
+// -----------------------------------------------------------------------
+
+
 // Normalize to HH:mm always
 const normalizeTime = (raw: string | null | undefined): string => {
   if (!raw) return "";
@@ -36,7 +53,7 @@ export default function ScheduleAppointmentModal({
     setIsSubmitting,
     availableSlots,
     resetAppointment,
-    forceRefresh, // Must be available for post-booking refresh
+    forceRefresh, // Required for the stale availability fix
   } = useAppointment();
 
   // Current date for initialization and minimum date constraint
@@ -57,8 +74,8 @@ export default function ScheduleAppointmentModal({
     if (open) { 
       // If the form date is set, update the hook's selectedDate
       if (formData.appointment_date) {
-        // Use a Date object based on the YYYY-MM-DD string
-        setSelectedDate(new Date(formData.appointment_date));
+        // ✅ FIX APPLIED: Use the local date creation helper
+        setSelectedDate(createLocalDate(formData.appointment_date));
       }
     } else {
       // Reset selectedDate when the modal closes
@@ -75,7 +92,8 @@ export default function ScheduleAppointmentModal({
 
     if (name === "appointment_date") {
       // When the user changes the date input, this line triggers the useAppointment useEffect
-      setSelectedDate(new Date(value));
+      // ✅ FIX APPLIED: Use the local date creation helper
+      setSelectedDate(createLocalDate(value));
     }
     if (name === "appointment_time") {
       setSelectedTime(normalizeTime(value));
@@ -102,7 +120,7 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
-    // Ensure slot is still available
+    // Ensure slot is still available (quick check to prevent double-booking race conditions)
     if (
       !availableSlots.find(
         (s) => s.value === normalizeTime(formData.appointment_time)
@@ -137,7 +155,7 @@ export default function ScheduleAppointmentModal({
 
       onOpenChange(false);
       resetAppointment();
-      forceRefresh(); // ✅ Added in previous fix: ensures slot disappears after successful booking
+      forceRefresh(); // Ensures slot disappears after successful booking
       setFormData({
         name: "",
         email: "",
@@ -251,7 +269,7 @@ export default function ScheduleAppointmentModal({
                     ? "Choose a time"
                     : "No times available"}
                 </option>
-                {/* ✅ FIX: Ensure we are mapping over the filtered availableSlots */}
+                {/* This ensures we only map over the filtered list */}
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
                     {slot.value} 
