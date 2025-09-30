@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect, useCallback, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -17,8 +17,8 @@ interface ScheduleAppointmentModalProps {
 
 const APPOINTMENTS_TABLE = "appointments";
 const SLOT_DURATION_MINUTES = 30;
-const WORK_HOURS = { start: 8, end: 18 };
-const BUFFER_HOURS = 2;
+const WORK_HOURS = { start: 8, end: 18 }; // 08:00–18:00
+const BUFFER_HOURS = 2; // enforce 2-hour buffer today
 
 // Normalize Supabase appointment_time values
 const normalizeTime = (raw: string): string => {
@@ -35,7 +35,10 @@ export default function ScheduleAppointmentModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
-  const todayDateString = new Date().toISOString().split("T")[0];
+  const todayDateString = useMemo(
+    () => new Date().toISOString().split("T")[0],
+    []
+  );
 
   const [formData, setFormData] = useState({
     name: "",
@@ -49,7 +52,7 @@ export default function ScheduleAppointmentModal({
   const [availableSlots, setAvailableSlots] = useState<string[]>([]);
   const [isLoadingSlots, setIsLoadingSlots] = useState(false);
 
-  // Generate all 30-min slots
+  // Generate all 30-min slots between WORK_HOURS
   const generateAllSlots = useCallback((): string[] => {
     const slots: string[] = [];
     for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
@@ -64,7 +67,7 @@ export default function ScheduleAppointmentModal({
     return slots;
   }, []);
 
-  // Filter logic
+  // Filter slots by booked times and buffer rules
   const filterSlots = useCallback(
     (slots: string[], booked: string[], selectedDate: string): string[] => {
       const now = new Date();
@@ -77,7 +80,7 @@ export default function ScheduleAppointmentModal({
         const slotDate = new Date(dateObj);
         slotDate.setHours(h, m, 0, 0);
 
-        // Today → enforce 2-hour buffer
+        // Today → enforce buffer (≥ now + 2h)
         if (dateObj.toDateString() === now.toDateString()) {
           const minAllowed = new Date(
             now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
@@ -85,14 +88,14 @@ export default function ScheduleAppointmentModal({
           if (slotDate <= minAllowed) return false;
         }
 
-        // Tomorrow/future → allow all (except booked)
+        // Tomorrow/future → all except booked
         return true;
       });
     },
     []
   );
 
-  // Fetch slots
+  // Fetch available slots when date changes
   useEffect(() => {
     const fetchSlots = async () => {
       if (!formData.appointment_date) return;
@@ -117,6 +120,14 @@ export default function ScheduleAppointmentModal({
           formData.appointment_date
         );
 
+        // Clear selection if no longer available
+        if (
+          formData.appointment_time &&
+          !freeSlots.includes(formData.appointment_time)
+        ) {
+          setFormData((prev) => ({ ...prev, appointment_time: "" }));
+        }
+
         setAvailableSlots(freeSlots);
       } catch (err: any) {
         console.error("Error fetching slots:", err);
@@ -131,7 +142,13 @@ export default function ScheduleAppointmentModal({
     };
 
     fetchSlots();
-  }, [formData.appointment_date, generateAllSlots, filterSlots, toast]);
+  }, [
+    formData.appointment_date,
+    formData.appointment_time,
+    generateAllSlots,
+    filterSlots,
+    toast,
+  ]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -156,6 +173,19 @@ export default function ScheduleAppointmentModal({
         description: "Fill in all required fields.",
         variant: "destructive",
       });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Validate against current free slots
+    if (!availableSlots.includes(formData.appointment_time)) {
+      toast({
+        title: "Time Slot Unavailable",
+        description:
+          "The selected time is either booked or has already passed. Please choose a different time.",
+        variant: "destructive",
+      });
+      setFormData((prev) => ({ ...prev, appointment_time: "" }));
       setIsSubmitting(false);
       return;
     }
@@ -283,15 +313,22 @@ export default function ScheduleAppointmentModal({
                 value={formData.appointment_time}
                 onChange={handleChange}
                 required
-                disabled={isLoadingSlots}
+                disabled={isLoadingSlots || availableSlots.length === 0}
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">
-                  {isLoadingSlots ? "Loading slots…" : "Choose a time"}
+                  {isLoadingSlots
+                    ? "Loading slots…"
+                    : availableSlots.length > 0
+                    ? "Choose a time"
+                    : "No times available"}
                 </option>
                 {availableSlots.map((slot) => (
                   <option key={slot} value={slot}>
-                    {slot}
+                    {new Date(`2000/01/01 ${slot}`).toLocaleTimeString(
+                      "en-US",
+                      { hour: "numeric", minute: "2-digit", hour12: true }
+                    )}
                   </option>
                 ))}
               </select>
