@@ -2,7 +2,7 @@ import { Button } from "@/components/ui/button";
 import { useAppointment } from "@/hooks/useAppointment";
 
 interface ChatTimePickerProps {
-  onTimeSelect: (time: string) => void;
+  onTimeSelect: (time: string) => void; // returns "HH:mm"
   onReset: () => void;
 }
 
@@ -16,15 +16,17 @@ const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
           availableSlots.map((slot) => (
             <Button
               key={slot.value}
-              onClick={() => onTimeSelect(slot.value)}
+              onClick={() => onTimeSelect(slot.value)} // Pass "HH:mm"
               variant="outline"
               className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
             >
-              {slot.formatted}
+              {slot.formatted} {/* Show "11:30 AM" */}
             </Button>
           ))
         ) : (
-          <p className="text-sm text-gray-500 col-span-2">No available slots</p>
+          <p className="text-sm text-gray-500 col-span-2">
+            No available slots
+          </p>
         )}
       </div>
 
