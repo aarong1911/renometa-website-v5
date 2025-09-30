@@ -8,7 +8,8 @@ import {
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
-import { useAppointment } from "@/hooks/useAppointment";
+// Assuming useAppointment.ts has been updated with forceRefresh
+import { useAppointment } from "@/hooks/useAppointment"; 
 
 // Normalize to HH:mm always
 const normalizeTime = (raw: string | null | undefined): string => {
@@ -35,19 +36,36 @@ export default function ScheduleAppointmentModal({
     setIsSubmitting,
     availableSlots,
     resetAppointment,
-    forceRefresh, // ✨ NEW: Destructure the forceRefresh function
+    forceRefresh, // Must be available for post-booking refresh
   } = useAppointment();
 
+  // Current date for initialization and minimum date constraint
   const todayDateString = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
     phone: "",
-    appointment_date: todayDateString,
+    appointment_date: todayDateString, // Defaulted to today
     appointment_time: "",
     timezone: "",
   });
+
+  // ✨ FIX FOR 2-HOUR BUFFER IN MODAL: Synchronize form date with hook state
+  React.useEffect(() => {
+    // Only set the date if the modal is open, to trigger the availability fetch
+    if (open) { 
+      // If the form date is set, update the hook's selectedDate
+      if (formData.appointment_date) {
+        // Use a Date object based on the YYYY-MM-DD string
+        setSelectedDate(new Date(formData.appointment_date));
+      }
+    } else {
+      // Reset selectedDate when the modal closes
+      setSelectedDate(undefined); 
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, formData.appointment_date]); // Dependency on open and date ensures it runs when modal shows or date input changes
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -56,6 +74,7 @@ export default function ScheduleAppointmentModal({
     setFormData((prev) => ({ ...prev, [name]: value }));
 
     if (name === "appointment_date") {
+      // When the user changes the date input, this line triggers the useAppointment useEffect
       setSelectedDate(new Date(value));
     }
     if (name === "appointment_time") {
@@ -83,7 +102,7 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
-    // Ensure slot is still available (re-check before submitting)
+    // Ensure slot is still available
     if (
       !availableSlots.find(
         (s) => s.value === normalizeTime(formData.appointment_time)
@@ -118,7 +137,7 @@ export default function ScheduleAppointmentModal({
 
       onOpenChange(false);
       resetAppointment();
-      forceRefresh(); // ✨ CRITICAL FIX: Trigger a refetch of slots!
+      forceRefresh(); // ✅ Added in previous fix: ensures slot disappears after successful booking
       setFormData({
         name: "",
         email: "",
@@ -232,9 +251,10 @@ export default function ScheduleAppointmentModal({
                     ? "Choose a time"
                     : "No times available"}
                 </option>
+                {/* ✅ FIX: Ensure we are mapping over the filtered availableSlots */}
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
-                    {slot.value}
+                    {slot.value} 
                   </option>
                 ))}
               </select>
