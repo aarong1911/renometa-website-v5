@@ -1,46 +1,39 @@
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { supabase } from "@/lib/supabaseClient";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
+import { useAppointment } from "@/hooks/useAppointment";
 
 interface ScheduleAppointmentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
 
-const APPOINTMENTS_TABLE = "appointments";
-const SLOT_DURATION_MINUTES = 30;
-const WORK_HOURS = { start: 8, end: 18 }; // 08:00–18:00
-const BUFFER_HOURS = 2; // enforce 2-hour buffer today
-
-// Normalize Supabase appointment_time values
-const normalizeTime = (raw: string): string => {
-  if (!raw) return "";
-  if (raw.includes("T")) return new Date(raw).toISOString().slice(11, 16);
-  if (raw.length >= 5) return raw.slice(0, 5); // HH:mm or HH:mm:ss
-  return raw;
-};
-
 export default function ScheduleAppointmentModal({
   open,
   onOpenChange,
 }: ScheduleAppointmentModalProps) {
-  const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
+  const {
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    isSubmitting,
+    setIsSubmitting,
+    availableSlots,
+    resetAppointment,
+  } = useAppointment();
 
-  const todayDateString = useMemo(
-    () => new Date().toISOString().split("T")[0],
-    []
-  );
+  const todayDateString = new Date().toISOString().split("T")[0];
 
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = React.useState({
     name: "",
     email: "",
     phone: "",
@@ -49,112 +42,18 @@ export default function ScheduleAppointmentModal({
     timezone: "",
   });
 
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
-  const [isLoadingSlots, setIsLoadingSlots] = useState(false);
-
-  // Generate all 30-min slots between WORK_HOURS
-  const generateAllSlots = useCallback((): string[] => {
-    const slots: string[] = [];
-    for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
-      for (let minute = 0; minute < 60; minute += SLOT_DURATION_MINUTES) {
-        slots.push(
-          `${hour.toString().padStart(2, "0")}:${minute
-            .toString()
-            .padStart(2, "0")}`
-        );
-      }
-    }
-    return slots;
-  }, []);
-
-  // Filter slots by booked times and buffer rules
-  const filterSlots = useCallback(
-    (slots: string[], booked: string[], selectedDate: string): string[] => {
-      const now = new Date();
-      const dateObj = new Date(selectedDate);
-
-      return slots.filter((slot) => {
-        if (booked.includes(slot)) return false;
-
-        const [h, m] = slot.split(":").map(Number);
-        const slotDate = new Date(dateObj);
-        slotDate.setHours(h, m, 0, 0);
-
-        // Today → enforce buffer (≥ now + 2h)
-        if (dateObj.toDateString() === now.toDateString()) {
-          const minAllowed = new Date(
-            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
-          );
-          if (slotDate <= minAllowed) return false;
-        }
-
-        // Tomorrow/future → all except booked
-        return true;
-      });
-    },
-    []
-  );
-
-  // Fetch available slots when date changes
-  useEffect(() => {
-    const fetchSlots = async () => {
-      if (!formData.appointment_date) return;
-      setIsLoadingSlots(true);
-
-      try {
-        const { data, error } = await supabase
-          .from(APPOINTMENTS_TABLE)
-          .select("appointment_time")
-          .eq("appointment_date", formData.appointment_date);
-
-        if (error) throw error;
-
-        const bookedTimes = (data || []).map((row: any) =>
-          normalizeTime(row.appointment_time)
-        );
-
-        const allSlots = generateAllSlots();
-        const freeSlots = filterSlots(
-          allSlots,
-          bookedTimes,
-          formData.appointment_date
-        );
-
-        // Clear selection if no longer available
-        if (
-          formData.appointment_time &&
-          !freeSlots.includes(formData.appointment_time)
-        ) {
-          setFormData((prev) => ({ ...prev, appointment_time: "" }));
-        }
-
-        setAvailableSlots(freeSlots);
-      } catch (err: any) {
-        console.error("Error fetching slots:", err);
-        toast({
-          title: "Error",
-          description: "Could not load available slots.",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoadingSlots(false);
-      }
-    };
-
-    fetchSlots();
-  }, [
-    formData.appointment_date,
-    formData.appointment_time,
-    generateAllSlots,
-    filterSlots,
-    toast,
-  ]);
-
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "appointment_date") {
+      setSelectedDate(new Date(value));
+    }
+    if (name === "appointment_time") {
+      setSelectedTime(value);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -177,37 +76,30 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
-    // Validate against current free slots
-    if (!availableSlots.includes(formData.appointment_time)) {
+    if (!availableSlots.find((s) => s.value === formData.appointment_time)) {
       toast({
         title: "Time Slot Unavailable",
-        description:
-          "The selected time is either booked or has already passed. Please choose a different time.",
+        description: "The selected time was just booked. Please try again.",
         variant: "destructive",
       });
-      setFormData((prev) => ({ ...prev, appointment_time: "" }));
       setIsSubmitting(false);
       return;
     }
-
-    const payload = {
-      ...formData,
-      phone: formData.phone?.trim() || null,
-    };
 
     try {
       await fetch("/.netlify/functions/book-appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...payload, source: "form" }),
+        body: JSON.stringify({ ...formData, source: "form" }),
       });
 
       toast({
         title: "Appointment Scheduled",
-        description: `See you on ${payload.appointment_date} at ${payload.appointment_time}`,
+        description: `See you on ${formData.appointment_date} at ${formData.appointment_time}`,
       });
 
       onOpenChange(false);
+      resetAppointment();
       setFormData({
         name: "",
         email: "",
@@ -313,22 +205,17 @@ export default function ScheduleAppointmentModal({
                 value={formData.appointment_time}
                 onChange={handleChange}
                 required
-                disabled={isLoadingSlots || availableSlots.length === 0}
+                disabled={availableSlots.length === 0}
                 className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
               >
                 <option value="">
-                  {isLoadingSlots
-                    ? "Loading slots…"
-                    : availableSlots.length > 0
+                  {availableSlots.length > 0
                     ? "Choose a time"
                     : "No times available"}
                 </option>
                 {availableSlots.map((slot) => (
-                  <option key={slot} value={slot}>
-                    {new Date(`2000/01/01 ${slot}`).toLocaleTimeString(
-                      "en-US",
-                      { hour: "numeric", minute: "2-digit", hour12: true }
-                    )}
+                  <option key={slot.value} value={slot.value}>
+                    {slot.formatted}
                   </option>
                 ))}
               </select>
@@ -361,16 +248,6 @@ export default function ScheduleAppointmentModal({
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
-
-          {/* Consent */}
-          <p className="text-xs text-gray-400 mt-10">
-            By submitting, you agree to receive text messages from RenoMeta. Msg
-            & data rates may apply. Reply STOP to opt out. View our{" "}
-            <a href="/privacy-policy" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>{" "}
-            and Terms.
-          </p>
         </form>
       </DialogContent>
     </Dialog>
