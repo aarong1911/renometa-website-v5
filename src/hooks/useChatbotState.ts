@@ -172,7 +172,7 @@ Would you like to confirm this appointment?`);
 
       console.log('Sending chatbot payload:', payload);
 
-      const webhookUrl = import.meta.env.VITE_MAKE_WEBHOOK_URL;
+      const webhookUrl = import.meta.env.VITE_APPOINTMENT_WEBHOOK_URL;
       if (!webhookUrl) {
         throw new Error('Webhook URL missing in environment variables');
       }
