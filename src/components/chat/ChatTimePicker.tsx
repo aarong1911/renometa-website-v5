@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabaseClient';
 
 interface TimeSlot {
   value: string;     // "HH:mm"
-  formatted: string; // "9:00 AM"
+  formatted: string; // also "HH:mm"
 }
 
 interface ChatTimePickerProps {
@@ -13,67 +13,92 @@ interface ChatTimePickerProps {
   selectedDate?: Date;
 }
 
+// ✅ normalize DB values so "10:00", "10:00:00", or "2025-09-30T10:00:00" → "10:00"
+const normalizeTime = (raw: string): string => {
+  if (!raw) return "";
+  if (raw.includes("T")) return new Date(raw).toISOString().slice(11, 16);
+  if (raw.length >= 5) return raw.slice(0, 5);
+  return raw;
+};
+
 const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
 
-  // Generate half-hour slots
-  const timeSlots: TimeSlot[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    for (let minute of [0, 30]) {
-      const value = `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-      const displayHour = hour > 12 ? hour - 12 : hour;
-      const period = hour >= 12 ? 'PM' : 'AM';
-      const formatted = `${displayHour}:${minute.toString().padStart(2, '0')} ${period}`;
-      timeSlots.push({ value, formatted });
+  // Generate 30-min slots (08:00 → 17:30) in 24h format
+  const generateSlots = (): TimeSlot[] => {
+    const slots: TimeSlot[] = [];
+    for (let hour = 8; hour < 18; hour++) {
+      for (let minute of [0, 30]) {
+        const hh = hour.toString().padStart(2, "0");
+        const mm = minute.toString().padStart(2, "0");
+        const value = `${hh}:${mm}`;
+        slots.push({ value, formatted: value });
+      }
     }
-  }
+    return slots;
+  };
 
-  // Fetch taken slots
   useEffect(() => {
-    const fetchTaken = async () => {
-      if (!selectedDate) return;
-      const dateString = selectedDate.toISOString().split('T')[0];
+    const fetchSlots = async () => {
+      const baseSlots = generateSlots();
+
+      if (!selectedDate) {
+        setAvailableSlots(baseSlots);
+        return;
+      }
+
+      const isoDate = selectedDate.toISOString().split("T")[0];
 
       const { data, error } = await supabase
-        .from('appointments')
-        .select('appointment_time')
-        .eq('appointment_date', dateString);
+        .from("appointments")
+        .select("appointment_time")
+        .eq("appointment_date", isoDate);
 
-      if (!error && data) {
-        setTakenSlots(data.map((row) => row.appointment_time.slice(0, 5))); // Always HH:mm
+      if (error) {
+        console.error("❌ Error fetching slots:", error.message);
+        setAvailableSlots(baseSlots);
+        return;
       }
+
+      const taken = data?.map((row) => normalizeTime(row.appointment_time)) || [];
+      const now = new Date();
+
+      const free = baseSlots.filter((slot) => {
+        // remove taken
+        if (taken.includes(slot.value)) return false;
+
+        // apply 2h buffer for today
+        const [h, m] = slot.value.split(":").map(Number);
+        const slotDate = new Date(selectedDate);
+        slotDate.setHours(h, m, 0, 0);
+
+        if (selectedDate.toDateString() === now.toDateString()) {
+          const minAllowed = new Date(now.getTime() + 2 * 60 * 60 * 1000);
+          if (slotDate <= minAllowed) return false;
+        }
+
+        return true;
+      });
+
+      setAvailableSlots(free);
     };
-    fetchTaken();
+
+    fetchSlots();
   }, [selectedDate]);
 
   return (
     <div className="flex flex-col space-y-3">
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-        {timeSlots.map((slot, i) => {
-          if (takenSlots.includes(slot.value)) {
-            return (
-              <Button
-                key={i}
-                disabled
-                variant="outline"
-                className="text-gray-400 border-gray-300 cursor-not-allowed"
-              >
-                {slot.formatted} (Taken)
-              </Button>
-            );
-          }
-
-          return (
-            <Button
-              key={i}
-              onClick={() => onTimeSelect(slot.value)}
-              variant="outline"
-              className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
-            >
-              {slot.formatted}
-            </Button>
-          );
-        })}
+        {availableSlots.map((slot, i) => (
+          <Button
+            key={i}
+            onClick={() => onTimeSelect(slot.value)}
+            variant="outline"
+            className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
+          >
+            {slot.formatted}
+          </Button>
+        ))}
       </div>
 
       <Button
@@ -88,4 +113,3 @@ const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerP
 };
 
 export default ChatTimePicker;
-
