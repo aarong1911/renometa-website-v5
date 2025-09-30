@@ -1,11 +1,20 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { supabase } from "@/lib/supabaseClient";
 
 export type TimeSlot = {
-  hour: number;
-  minute: number;
-  period: "AM" | "PM";
-  formatted: string;
+  value: string;     // HH:mm (for storage/DB)
+  formatted: string; // 12-hour display
+};
+
+const SLOT_DURATION_MINUTES = 30;
+const WORK_HOURS = { start: 8, end: 18 };
+const BUFFER_HOURS = 2;
+
+const normalizeTime = (raw: string): string => {
+  if (!raw) return "";
+  if (raw.includes("T")) return new Date(raw).toISOString().slice(11, 16);
+  if (raw.length >= 5) return raw.slice(0, 5); // HH:mm or HH:mm:ss
+  return raw;
 };
 
 export const useAppointment = () => {
@@ -14,35 +23,31 @@ export const useAppointment = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // All possible slots
-  const timeSlots: TimeSlot[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    const period = hour >= 12 ? "PM" : "AM";
-    const displayHour = hour > 12 ? hour - 12 : hour;
+  const timeSlots: TimeSlot[] = useMemo(() => {
+    const slots: TimeSlot[] = [];
+    for (let hour = WORK_HOURS.start; hour < WORK_HOURS.end; hour++) {
+      for (let minute = 0; minute < 60; minute += SLOT_DURATION_MINUTES) {
+        const hh = hour.toString().padStart(2, "0");
+        const mm = minute.toString().padStart(2, "0");
+        const value = `${hh}:${mm}`;
 
-    timeSlots.push({
-      hour,
-      minute: 0,
-      period,
-      formatted: `${displayHour}:00 ${period}`,
-    });
+        const period = hour >= 12 ? "PM" : "AM";
+        const displayHour = hour > 12 ? hour - 12 : hour;
+        const formatted = `${displayHour}:${mm} ${period}`;
 
-    if (hour < 18) {
-      timeSlots.push({
-        hour,
-        minute: 30,
-        period,
-        formatted: `${displayHour}:30 ${period}`,
-      });
+        slots.push({ value, formatted });
+      }
     }
-  }
+    return slots;
+  }, []);
 
-  // 🔹 Available slots after filtering Supabase
-  const [availableSlots, setAvailableSlots] = useState<string[]>([]);
+  // Available slots after filtering Supabase
+  const [availableSlots, setAvailableSlots] = useState<TimeSlot[]>([]);
 
   useEffect(() => {
     const fetchTakenSlots = async () => {
       if (!selectedDate) {
-        setAvailableSlots(timeSlots.map((t) => t.formatted));
+        setAvailableSlots(timeSlots);
         return;
       }
 
@@ -55,20 +60,37 @@ export const useAppointment = () => {
 
       if (error) {
         console.error("❌ Error fetching taken slots:", error.message);
-        setAvailableSlots(timeSlots.map((t) => t.formatted));
+        setAvailableSlots(timeSlots);
         return;
       }
 
-      const taken = data?.map((row) => row.appointment_time) || [];
-      const free = timeSlots
-        .map((t) => t.formatted)
-        .filter((slot) => !taken.includes(slot));
+      const taken = data?.map((row) => normalizeTime(row.appointment_time)) || [];
+
+      const now = new Date();
+
+      const free = timeSlots.filter((slot) => {
+        if (taken.includes(slot.value)) return false;
+
+        const [h, m] = slot.value.split(":").map(Number);
+        const slotDate = new Date(selectedDate);
+        slotDate.setHours(h, m, 0, 0);
+
+        // Today → enforce 2-hour buffer
+        if (selectedDate.toDateString() === now.toDateString()) {
+          const minAllowed = new Date(
+            now.getTime() + BUFFER_HOURS * 60 * 60 * 1000
+          );
+          if (slotDate <= minAllowed) return false;
+        }
+
+        return true;
+      });
 
       setAvailableSlots(free);
     };
 
     fetchTakenSlots();
-  }, [selectedDate]);
+  }, [selectedDate, timeSlots]);
 
   const resetAppointment = () => {
     setSelectedDate(undefined);
@@ -84,7 +106,7 @@ export const useAppointment = () => {
     isSubmitting,
     setIsSubmitting,
     timeSlots,
-    availableSlots, // ✅ now you can use this in your dropdown
+    availableSlots, // each slot has { value: "HH:mm", formatted: "h:mm AM/PM" }
     resetAppointment,
   };
 };
