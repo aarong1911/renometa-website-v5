@@ -10,6 +10,12 @@ import {
 } from "@/components/ui/dialog";
 import { useAppointment } from "@/hooks/useAppointment";
 
+// Normalize to HH:mm always
+const normalizeTime = (raw: string | null | undefined): string => {
+  if (!raw) return "";
+  return raw.trim().slice(0, 5);
+};
+
 interface ScheduleAppointmentModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -52,7 +58,7 @@ export default function ScheduleAppointmentModal({
       setSelectedDate(new Date(value));
     }
     if (name === "appointment_time") {
-      setSelectedTime(value);
+      setSelectedTime(normalizeTime(value));
     }
   };
 
@@ -76,8 +82,12 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
-    // Ensure slot is still available before submitting
-    if (!availableSlots.find((s) => s.value === formData.appointment_time)) {
+    // Ensure slot is still available
+    if (
+      !availableSlots.find(
+        (s) => s.value === normalizeTime(formData.appointment_time)
+      )
+    ) {
       toast({
         title: "Time Slot Unavailable",
         description: "The selected time was just booked. Please try again.",
@@ -91,12 +101,18 @@ export default function ScheduleAppointmentModal({
       await fetch("/.netlify/functions/book-appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, source: "form" }),
+        body: JSON.stringify({
+          ...formData,
+          appointment_time: normalizeTime(formData.appointment_time), // ✅ normalized
+          source: "form",
+        }),
       });
 
       toast({
         title: "Appointment Scheduled",
-        description: `See you on ${formData.appointment_date} at ${formData.appointment_time}`,
+        description: `See you on ${formData.appointment_date} at ${normalizeTime(
+          formData.appointment_time
+        )}`,
       });
 
       onOpenChange(false);
@@ -216,7 +232,7 @@ export default function ScheduleAppointmentModal({
                 </option>
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
-                    {slot.value} {/* Always 24h format */}
+                    {slot.value} {/* 24h format */}
                   </option>
                 ))}
               </select>
