@@ -1,93 +1,31 @@
-import { Button } from '@/components/ui/button';
-import { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabaseClient';
-
-interface TimeSlot {
-  hour: number;
-  minute: number;
-  period: 'AM' | 'PM';
-  formatted: string;
-}
+import { Button } from "@/components/ui/button";
+import { useAppointment } from "@/hooks/useAppointment";
 
 interface ChatTimePickerProps {
   onTimeSelect: (time: string) => void;
   onReset: () => void;
-  selectedDate?: Date;
 }
 
-const ChatTimePicker = ({ onTimeSelect, onReset, selectedDate }: ChatTimePickerProps) => {
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
-
-  // Generate all half-hour slots
-  const timeSlots: TimeSlot[] = [];
-  for (let hour = 8; hour <= 18; hour++) {
-    const period = hour >= 12 ? 'PM' : 'AM';
-    const displayHour = hour > 12 ? hour - 12 : hour;
-
-    timeSlots.push({ hour, minute: 0, period, formatted: `${displayHour}:00 ${period}` });
-    if (hour < 18) {
-      timeSlots.push({ hour, minute: 30, period, formatted: `${displayHour}:30 ${period}` });
-    }
-  }
-
-  // Normalize Supabase values into "HH:mm"
-  const normalizeTime = (raw: string): string => {
-    if (!raw) return '';
-    if (raw.includes('T')) return new Date(raw).toISOString().slice(11, 16); // handle timestamp
-    if (raw.length >= 5) return raw.slice(0, 5); // handle "HH:mm" or "HH:mm:ss"
-    return raw;
-  };
-
-  // Fetch taken slots for this date
-  useEffect(() => {
-    const fetchTaken = async () => {
-      if (!selectedDate) return;
-      const dateString = selectedDate.toISOString().split('T')[0];
-
-      const { data, error } = await supabase
-        .from('appointments')
-        .select('appointment_time')
-        .eq('appointment_date', dateString);
-
-      if (!error && data) {
-        setTakenSlots(data.map((row) => normalizeTime(row.appointment_time)));
-      }
-    };
-    fetchTaken();
-  }, [selectedDate]);
+const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
+  const { availableSlots } = useAppointment();
 
   return (
     <div className="flex flex-col space-y-3">
       <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto">
-        {timeSlots.map((slot, i) => {
-          const hh = slot.hour.toString().padStart(2, '0');
-          const mm = slot.minute.toString().padStart(2, '0');
-          const normalized = `${hh}:${mm}`;
-
-          if (takenSlots.includes(normalized)) {
-            return (
-              <Button
-                key={i}
-                disabled
-                variant="outline"
-                className="text-gray-400 border-gray-300 cursor-not-allowed"
-              >
-                {slot.formatted} (Taken)
-              </Button>
-            );
-          }
-
-          return (
+        {availableSlots.length > 0 ? (
+          availableSlots.map((slot) => (
             <Button
-              key={i}
-              onClick={() => onTimeSelect(normalized)}
+              key={slot.value}
+              onClick={() => onTimeSelect(slot.value)}
               variant="outline"
               className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
             >
               {slot.formatted}
             </Button>
-          );
-        })}
+          ))
+        ) : (
+          <p className="text-sm text-gray-500 col-span-2">No available slots</p>
+        )}
       </div>
 
       <Button
