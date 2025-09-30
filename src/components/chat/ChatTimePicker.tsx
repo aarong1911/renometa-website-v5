@@ -1,14 +1,19 @@
 import { Button } from "@/components/ui/button";
-import { useAppointment } from "@/hooks/useAppointment";
+import { TimeSlot } from "@/hooks/useAppointment";
 
 interface ChatTimePickerProps {
   onTimeSelect: (time: string) => void;
   onReset: () => void;
+  selectedDate?: Date;
+  availableSlots: TimeSlot[];
 }
 
-const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
-  const { availableSlots, selectedDate } = useAppointment();
-
+const ChatTimePicker = ({
+  onTimeSelect,
+  onReset,
+  selectedDate,
+  availableSlots,
+}: ChatTimePickerProps) => {
   if (!selectedDate) {
     return (
       <div className="flex flex-col space-y-3">
@@ -40,7 +45,7 @@ const ChatTimePicker = ({ onTimeSelect, onReset }: ChatTimePickerProps) => {
             variant="outline"
             className="text-blue-dark border-blue-dark hover:bg-blue-dark/10"
           >
-            {slot.value} {/* Always 24h format */}
+            {slot.value} {/* 24h format */}
           </Button>
         ))}
       </div>
