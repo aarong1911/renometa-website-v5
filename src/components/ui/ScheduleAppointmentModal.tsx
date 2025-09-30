@@ -77,14 +77,13 @@ const filterSlots = useCallback(
         if (slotDate <= minAllowed) return false;
       }
 
-      // 📅 If future date → allow all (just exclude booked)
-      // no extra restriction needed
-
+      // 📅 If tomorrow or later → no buffer, just booked filtering
       return true;
     });
   },
   []
 );
+
 
   // Fetch slots whenever date changes
   useEffect(() => {
