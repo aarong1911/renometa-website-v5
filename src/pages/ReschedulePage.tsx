@@ -1,8 +1,6 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Calendar } from "@/components/ui/calendar"; // shadcn/ui Calendar
-import { cn } from "@/lib/utils"; // utility for classNames
 
 // Generate slots between 08:00 and 18:00 with 30-minute increments
 const generateTimeSlots = (startHour: number, endHour: number): string[] => {
@@ -18,6 +16,19 @@ const generateTimeSlots = (startHour: number, endHour: number): string[] => {
 // Round hours helper (for dropdown highlight)
 const isRoundHour = (time: string) => time.endsWith(":00");
 
+// Weekend check
+const isWeekend = (date: Date) => {
+  const d = date.getDay();
+  return d === 0 || d === 6; // Sunday or Saturday
+};
+
+// Past date check
+const isPastDate = (date: Date) => {
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  return date < today;
+};
+
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
@@ -26,25 +37,22 @@ export default function ReschedulePage() {
   const originalTime = sp.get("time") ?? "";
   const originalDate = sp.get("date") ?? "";
 
-  const [date, setDate] = useState<Date | undefined>(
-    originalDate ? new Date(originalDate) : undefined
-  );
+  const [date, setDate] = useState(originalDate);
   const [time, setTime] = useState(originalTime);
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+  const [dateError, setDateError] = useState<string | null>(null);
 
-  // Fetch taken slots for this date (excluding current apptId)
+  // Fetch taken slots for this date (excluding the current user’s appointment)
   useEffect(() => {
     const fetchTaken = async () => {
-      if (!date) return;
-
-      const dateStr = date.toISOString().split("T")[0];
+      if (!date || dateError) return;
 
       const { data, error } = await supabase
         .from("appointments")
         .select("id, appointment_time")
-        .eq("appointment_date", dateStr);
+        .eq("appointment_date", date);
 
       if (error) {
         console.error("❌ Supabase error:", error.message);
@@ -52,29 +60,54 @@ export default function ReschedulePage() {
       }
 
       const filtered = (data ?? [])
-        .filter((row) => row.id !== apptId)
+        .filter((row) => row.id !== apptId) // exclude current user’s appointment
         .map((row) => row.appointment_time);
 
       setTakenSlots(filtered);
     };
 
     fetchTaken();
-  }, [date, apptId]);
+  }, [date, apptId, dateError]);
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    const d = new Date(newDate);
+
+    if (isWeekend(d)) {
+      setDateError("❌ Weekends are not available. Please choose a weekday.");
+      setDate(newDate);
+      setTime("");
+      setTakenSlots([]);
+      return;
+    }
+
+    if (isPastDate(d)) {
+      setDateError("❌ Past dates cannot be selected.");
+      setDate(newDate);
+      setTime("");
+      setTakenSlots([]);
+      return;
+    }
+
+    setDateError(null);
+    setDate(newDate);
+    setTime("");
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date) {
-      setMessage({ type: "error", text: "Please pick a date." });
+    if (dateError) {
+      setMessage({ type: "error", text: dateError });
       return;
     }
+
     if (!time) {
       setMessage({ type: "error", text: "Please select a new time." });
       return;
     }
 
-    const newDateStr = date.toISOString().split("T")[0];
-    if (newDateStr === originalDate && time === originalTime) {
+    if (date === originalDate && time === originalTime) {
       setMessage({ type: "error", text: "Please choose a different time or date." });
       return;
     }
@@ -83,12 +116,9 @@ export default function ReschedulePage() {
     setMessage(null);
 
     try {
-      // TODO: Replace with real update API call
+      // TODO: Replace with actual update API call
       await new Promise((resolve) => setTimeout(resolve, 1200));
-      setMessage({
-        type: "success",
-        text: `✅ Appointment rescheduled to ${newDateStr} at ${time}`,
-      });
+      setMessage({ type: "success", text: `✅ Appointment rescheduled to ${date} at ${time}` });
     } catch {
       setMessage({ type: "error", text: "❌ Could not update. Try again." });
     } finally {
@@ -96,10 +126,14 @@ export default function ReschedulePage() {
     }
   };
 
+  // All slots (08:00 → 18:00, every 30m)
   const allSlots = generateTimeSlots(8, 18);
-  const newDateStr = date ? date.toISOString().split("T")[0] : "";
-  const isViewingOriginalDate = newDateStr === originalDate;
 
+  const isViewingOriginalDate = date === originalDate;
+
+  // Remove slots:
+  // 1. Taken by others
+  // 2. The user’s original slot (if still on the same date)
   const availableSlots = allSlots
     .filter((slot) => !takenSlots.includes(slot))
     .filter((slot) => !(isViewingOriginalDate && slot === originalTime));
@@ -136,20 +170,19 @@ export default function ReschedulePage() {
         )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Calendar Date Picker */}
+          {/* Date */}
           <div>
             <label className="block text-sm font-medium mb-1 text-gray-700">New date</label>
-            <Calendar
-              mode="single"
-              selected={date}
-              onSelect={setDate}
-              className="rounded-md border shadow-sm"
-              disabled={(day) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return day < today || day.getDay() === 0 || day.getDay() === 6;
-              }}
+            <input
+              type="date"
+              value={date}
+              onChange={handleDateChange}
+              className={`w-full border rounded-lg px-3 py-2 text-gray-800 focus:ring-blue-500 focus:border-blue-500 ${
+                dateError ? "border-red-500" : "border-gray-300"
+              }`}
+              required
             />
+            {dateError && <p className="text-xs text-red-500 mt-1">{dateError}</p>}
           </div>
 
           {/* Time */}
@@ -158,7 +191,7 @@ export default function ReschedulePage() {
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              disabled={availableSlots.length === 0 || !date}
+              disabled={availableSlots.length === 0 || !!dateError}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 disabled:bg-gray-50 disabled:text-gray-500"
               required
             >
@@ -201,7 +234,8 @@ export default function ReschedulePage() {
               isSubmitting ||
               availableSlots.length === 0 ||
               !time ||
-              (newDateStr === originalDate && time === originalTime)
+              (date === originalDate && time === originalTime) ||
+              !!dateError
             }
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
