@@ -160,17 +160,17 @@ background-size: 30px 30px;
 background-image: linear-gradient(to right, rgba(255,255,255,.1) 1px, transparent 1px),
 linear-gradient(to bottom, rgba(255,255,255,.1) 1px, transparent 1px);
 }
-} /* Closing @layer utilities */
+}
 
 /* ------------------------------------------- /
-/ 🛑 NEW: Custom Calendar Styles /
+/ 🛑 Custom Calendar Styles (Ensure proper structural termination) /
 / ------------------------------------------- */
 
 /* Custom highlight for today's date, applied via modifiersClassNames in ChatDatePicker.tsx /
 .day-today-custom-highlight:not(.day-selected) {
 / Bold Border and Background (using the same colors as your 'primary' blue) /
 border: 2px solid hsl(var(--primary)) !important;
-/ Fixed to use a compliant, absolute HSL value for a light blue tint */
+/ Using a compliant, absolute HSL value for a light blue tint */
 background-color: hsl(212 59% 90%) !important;
 
 /* Text Style */
