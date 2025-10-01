@@ -5,181 +5,181 @@
 @tailwind utilities;
 
 @layer base {
-:root {
---background: 210 33% 99%;
---foreground: 215 25% 10%;
+  :root {
+    --background: 210 33% 99%;
+    --foreground: 215 25% 10%;
 
---card: 0 0% 100%;
---card-foreground: 215 25% 10%;
+    --card: 0 0% 100%;
+    --card-foreground: 215 25% 10%;
 
---popover: 0 0% 100%;
---popover-foreground: 215 25% 10%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 215 25% 10%;
 
---primary: 212 59% 26%;
---primary-foreground: 210 33% 99%;
+    --primary: 212 59% 26%;
+    --primary-foreground: 210 33% 99%;
 
---secondary: 39 60% 60%;
---secondary-foreground: 210 33% 99%;
+    --secondary: 39 60% 60%;
+    --secondary-foreground: 210 33% 99%;
 
---muted: 210 10% 96%;
---muted-foreground: 215 10% 45%;
+    --muted: 210 10% 96%;
+    --muted-foreground: 215 10% 45%;
 
---accent: 39 60% 60%;
---accent-foreground: 210 33% 99%;
+    --accent: 39 60% 60%;
+    --accent-foreground: 210 33% 99%;
 
---destructive: 0 84.2% 60.2%;
---destructive-foreground: 210 33% 99%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 210 33% 99%;
 
---border: 214.3 31.8% 91.4%;
---input: 214.3 31.8% 91.4%;
---ring: 212 59% 26%;
+    --border: 214.3 31.8% 91.4%;
+    --input: 214.3 31.8% 91.4%;
+    --ring: 212 59% 26%;
 
---radius: 0.5rem;
+    --radius: 0.5rem;
 
---sidebar-background: 0 0% 98%;
---sidebar-foreground: 240 5.3% 26.1%;
---sidebar-primary: 240 5.9% 10%;
---sidebar-primary-foreground: 0 0% 98%;
---sidebar-accent: 240 4.8% 95.9%;
---sidebar-accent-foreground: 240 5.9% 10%;
---sidebar-border: 220 13% 91%;
---sidebar-ring: 217.2 91.2% 59.8%;
+    --sidebar-background: 0 0% 98%;
+    --sidebar-foreground: 240 5.3% 26.1%;
+    --sidebar-primary: 240 5.9% 10%;
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-accent: 240 4.8% 95.9%;
+    --sidebar-accent-foreground: 240 5.9% 10%;
+    --sidebar-border: 220 13% 91%;
+    --sidebar-ring: 217.2 91.2% 59.8%;
+  }
 
-}
+  body {
+    @apply bg-background text-foreground font-sans;
+  }
 
-body {
-@apply bg-background text-foreground font-sans;
-}
-
-h1, h2, h3, h4, h5, h6 {
-@apply font-heading font-semibold tracking-tight;
-}
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-heading font-semibold tracking-tight;
+  }
 }
 
 @layer components {
-.hero-section {
-@apply relative min-h-[calc(100vh-80px)] flex flex-col justify-center items-start;
-}
+  .hero-section {
+    @apply relative min-h-[calc(100vh-80px)] flex flex-col justify-center items-start;
+  }
 
-.section {
-@apply py-20 px-6 md:px-8 lg:px-12;
-}
+  .section {
+    @apply py-20 px-6 md:px-8 lg:px-12;
+  }
 
-.container-custom {
-@apply w-full max-w-6xl mx-auto px-4 md:px-6;
-}
+  .container-custom {
+    @apply w-full max-w-6xl mx-auto px-4 md:px-6;
+  }
 
-.fade-in-section {
-@apply opacity-0 translate-y-8 transition-all duration-700;
-}
+  .fade-in-section {
+    @apply opacity-0 translate-y-8 transition-all duration-700;
+  }
 
-.fade-in-section.is-visible {
-@apply opacity-100 translate-y-0;
-}
+  .fade-in-section.is-visible {
+    @apply opacity-100 translate-y-0;
+  }
 
-.gradient-text {
-@apply bg-gradient-to-r from-blue-dark to-gold bg-clip-text text-transparent;
-}
+  .gradient-text {
+    @apply bg-gradient-to-r from-blue-dark to-gold bg-clip-text text-transparent;
+  }
 
-.btn-primary {
-@apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-blue-dark text-white hover:bg-blue-light transition-colors duration-200;
-}
+  .btn-primary {
+    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-blue-dark text-white hover:bg-blue-light transition-colors duration-200;
+  }
 
-.btn-secondary {
-@apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-gold text-white hover:bg-gold-light transition-colors duration-200;
-}
+  .btn-secondary {
+    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium bg-gold text-white hover:bg-gold-light transition-colors duration-200;
+  }
 
-.btn-outline {
-@apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium border-2 border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white transition-colors duration-200;
-}
+  .btn-outline {
+    @apply inline-flex items-center justify-center rounded-md px-6 py-3 text-base font-medium border-2 border-blue-dark text-blue-dark hover:bg-blue-dark hover:text-white transition-colors duration-200;
+  }
 
-.service-card {
-@apply p-6 rounded-lg transition-all duration-300 bg-white hover:shadow-lg;
-}
+  .service-card {
+    @apply p-6 rounded-lg transition-all duration-300 bg-white hover:shadow-lg;
+  }
 
-.animated-border {
-@apply relative;
-}
+  .animated-border {
+    @apply relative;
+  }
 
-.animated-border::after {
-content: '';
-@apply absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-gold to-blue-dark transition-all duration-300;
-}
+  .animated-border::after {
+    content: '';
+    @apply absolute bottom-0 left-0 h-0.5 w-0 bg-gradient-to-r from-gold to-blue-dark transition-all duration-300;
+  }
 
-.animated-border:hover::after {
-@apply w-full;
-}
+  .animated-border:hover::after {
+    @apply w-full;
+  }
 
-/* Add modal specific animations */
-.modal-overlay {
-@apply fixed inset-0 bg-black/50 z-50;
-opacity: 0;
-transition: opacity 600ms ease-in-out;
-}
+  /* Add modal specific animations */
+  .modal-overlay {
+    @apply fixed inset-0 bg-black/50 z-50;
+    opacity: 0;
+    transition: opacity 600ms ease-in-out;
+  }
 
-.modal-overlay[data-state="open"] {
-opacity: 0.5;
-}
+  .modal-overlay[data-state="open"] {
+    opacity: 0.5;
+  }
 
-.modal-content {
-@apply fixed inset-0 flex items-center justify-center p-4 overflow-auto z-[9999];
-opacity: 0;
-transform: scale(0.95);
-transition: opacity 600ms ease-in-out, transform 600ms ease-in-out;
-}
+  .modal-content {
+    @apply fixed inset-0 flex items-center justify-center p-4 overflow-auto z-[9999];
+    opacity: 0;
+    transform: scale(0.95);
+    transition: opacity 600ms ease-in-out, transform 600ms ease-in-out;
+  }
 
-.modal-content[data-state="open"] {
-opacity: 1;
-transform: scale(1);
-}
+  .modal-content[data-state="open"] {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @layer utilities {
-.text-balance {
-text-wrap: balance;
+  .text-balance {
+    text-wrap: balance;
+  }
+
+  .text-shadow-sm {
+    text-shadow: 0 1px 2px rgba(0,0,0,0.1);
+  }
+
+  .text-shadow {
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  }
+
+  .text-shadow-md {
+    text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
+  }
+
+  .text-shadow-lg {
+    text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
+  }
+
+  .bg-grid-pattern {
+    background-size: 30px 30px;
+    background-image:
+      linear-gradient(to right, rgba(255,255,255,.1) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,.1) 1px, transparent 1px);
+  }
 }
 
-.text-shadow-sm {
-text-shadow: 0 1px 2px rgba(0,0,0,0.1);
-}
+/* -------------------------------------------
+   🛑 Custom Calendar Styles (Ensure proper structural termination)
+   ------------------------------------------- */
 
-.text-shadow {
-text-shadow: 0 2px 4px rgba(0,0,0,0.1);
-}
-
-.text-shadow-md {
-text-shadow: 0 4px 8px rgba(0,0,0,0.12), 0 2px 4px rgba(0,0,0,0.08);
-}
-
-.text-shadow-lg {
-text-shadow: 0 15px 30px rgba(0,0,0,0.11), 0 5px 15px rgba(0,0,0,0.08);
-}
-
-.bg-grid-pattern {
-background-size: 30px 30px;
-background-image: linear-gradient(to right, rgba(255,255,255,.1) 1px, transparent 1px),
-linear-gradient(to bottom, rgba(255,255,255,.1) 1px, transparent 1px);
-}
-}
-
-/* ------------------------------------------- /
-/ 🛑 Custom Calendar Styles (Ensure proper structural termination) /
-/ ------------------------------------------- */
-
-/* Custom highlight for today's date, applied via modifiersClassNames in ChatDatePicker.tsx /
+/* Custom highlight for today's date, applied via modifiersClassNames in ChatDatePicker.tsx */
 .day-today-custom-highlight:not(.day-selected) {
-/ Bold Border and Background (using the same colors as your 'primary' blue) /
-border: 2px solid hsl(var(--primary)) !important;
-/ Using a compliant, absolute HSL value for a light blue tint */
-background-color: hsl(212 59% 90%) !important;
+  /* Bold Border and Background (using the same colors as your 'primary' blue) */
+  border: 2px solid hsl(var(--primary)) !important;
+  /* Using a compliant, absolute HSL value for a light blue tint */
+  background-color: hsl(212 59% 90%) !important;
 
-/* Text Style */
-font-weight: 900 !important;
-color: hsl(var(--foreground)) !important;
+  /* Text Style */
+  font-weight: 900 !important;
+  color: hsl(var(--foreground)) !important;
 }
 
 /* Ensure disabled dates are faded (especially days from the next month that are weekends/past) */
 .day-disabled {
-pointer-events: none !important;
-opacity: 0.5 !important;
+  pointer-events: none !important;
+  opacity: 0.5 !important;
 }
