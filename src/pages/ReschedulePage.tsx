@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
+
+// --- Replace with your actual Supabase client import ---
 import { supabase } from "@/lib/supabaseClient";
 
 // Generate slots between 08:00 and 18:00 with 30-minute increments
@@ -42,9 +44,10 @@ export default function ReschedulePage() {
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
+
   const [dateError, setDateError] = useState<string | null>(null);
 
-  // Fetch taken slots for this date (excluding the current user’s appointment)
+  // Fetch taken slots excluding this appointment
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date || dateError) return;
@@ -60,7 +63,7 @@ export default function ReschedulePage() {
       }
 
       const filtered = (data ?? [])
-        .filter((row) => row.id !== apptId) // exclude current user’s appointment
+        .filter((row) => row.id !== apptId)
         .map((row) => row.appointment_time);
 
       setTakenSlots(filtered);
@@ -131,9 +134,7 @@ export default function ReschedulePage() {
 
   const isViewingOriginalDate = date === originalDate;
 
-  // Remove slots:
-  // 1. Taken by others
-  // 2. The user’s original slot (if still on the same date)
+  // Remove unavailable slots + exclude current appointment time if on same date
   const availableSlots = allSlots
     .filter((slot) => !takenSlots.includes(slot))
     .filter((slot) => !(isViewingOriginalDate && slot === originalTime));
