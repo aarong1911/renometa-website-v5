@@ -179,7 +179,7 @@ export default function ScheduleAppointmentModal({
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/50" />
-      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
+      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-16 animate-fade-in-up">
         <DialogDescription className="sr-only">
           Book your strategy call.
         </DialogDescription>
@@ -301,7 +301,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
