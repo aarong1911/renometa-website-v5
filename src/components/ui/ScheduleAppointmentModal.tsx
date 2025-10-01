@@ -34,7 +34,6 @@ const useAppointment = (date: string, tz: string) => {
 
 /**
  * Helper function to check if a time slot is a round hour (e.g., "09:00", "14:00").
- * This is used for styling the dropdown options.
  */
 const isRoundHour = (timeSlot: string): boolean => {
   return timeSlot.endsWith(":00");
@@ -179,7 +178,7 @@ export default function ScheduleAppointmentModal() {
                                     <option 
                                       key={t} 
                                       value={t}
-                                      // Apply styling for round hour: light blue background
+                                      // ✅ Fix: Applying styling for round hour: light blue background
                                       style={isRoundHour(t) ? { backgroundColor: 'rgba(59, 130, 246, 0.1)' } : {}}
                                     >
                                         {t}
@@ -242,4 +241,3 @@ export default function ScheduleAppointmentModal() {
         </div>
     );
 }
-```eof
