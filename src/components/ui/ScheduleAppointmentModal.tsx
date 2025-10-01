@@ -301,15 +301,15 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
 
           {/* Consent */}
           <p className="text-xs text-gray-400 mt-4">
-            By submitting, you agree to receive text messages from RenoMeta. Msg
-            & data rates may apply. Reply STOP to opt out. View our{" "}
+            By scheduling, you consent to receive appointment reminders and updates by text from RenoMeta. 
+  Standard rates may apply. Reply STOP anytime to unsubscribe. Learn more in our{" "}
             <a href="/privacy-policy" className="text-blue-400 hover:underline">
               Privacy Policy
             </a>{" "}
