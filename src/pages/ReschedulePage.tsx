@@ -2,10 +2,10 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 
-// Generate slots from 08:00–18:00, 30 min increments
-const generateTimeSlots = () => {
+// Generate 30-min increments between 08:00 and 18:00
+const generateTimeSlots = (startHour: number, endHour: number): string[] => {
   const slots: string[] = [];
-  for (let h = 8; h < 18; h++) {
+  for (let h = startHour; h < endHour; h++) {
     for (let m = 0; m < 60; m += 30) {
       const hh = String(h).padStart(2, "0");
       const mm = String(m).padStart(2, "0");
@@ -25,15 +25,15 @@ export default function ReschedulePage() {
   const originalTime = sp.get("time") ?? "";
 
   const [date, setDate] = useState(originalDate);
-  const [time, setTime] = useState(originalTime);
-
-  // 🔹 Taken slots for this date (excluding current appt)
+  const [time, setTime] = useState("");
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
 
+  // Fetch taken slots (excluding this appointment)
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date) return;
-
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time,id")
@@ -41,20 +41,28 @@ export default function ReschedulePage() {
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId)
+          .filter((row) => row.id !== apptId) // exclude current appt
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
       }
     };
-
     fetchTaken();
   }, [date, apptId]);
+
+  // All slots from 08:00 → 18:00
+  const timeSlots = generateTimeSlots(8, 18);
+
+  // Filter available slots
+  const availableSlots = timeSlots.filter(
+    (slot) =>
+      slot !== originalTime || date !== originalDate // hide original slot on original date
+  ).filter((slot) => !takenSlots.includes(slot)); // hide others’ slots
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!apptId) {
-      alert("❌ Appointment ID missing.");
+      setMessage("❌ Appointment ID missing.");
       return;
     }
 
@@ -72,28 +80,29 @@ export default function ReschedulePage() {
       });
 
       if (res.ok) {
-        alert("✅ Appointment rescheduled successfully!");
+        setMessage("✅ Appointment rescheduled successfully!");
       } else {
         const err = await res.json();
-        alert("❌ Error: " + err.error);
+        setMessage("❌ Error: " + err.error);
       }
-    } catch (error) {
-      alert("❌ Network error. Please try again.");
+    } catch {
+      setMessage("❌ Network error. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
-  // All slots
-  const timeSlots = generateTimeSlots();
+  // Disable weekends + past dates
+  const today = new Date().toISOString().split("T")[0];
+  const disableDate = (dateString: string) => {
+    const d = new Date(dateString);
+    const todayDate = new Date(today);
 
-  // Only show available slots
-  const availableSlots = timeSlots.filter((slot) => !takenSlots.includes(slot));
+    const isPast = d < todayDate; // allow today, block before today
+    const isWeekend = d.getDay() === 0 || d.getDay() === 6;
 
-  // Helpers
-  const isWeekend = (d: string) => {
-    const day = new Date(d).getDay();
-    return day === 0 || day === 6;
+    return isPast || isWeekend;
   };
-  const isPastDate = (d: string) => new Date(d) < new Date(new Date().toDateString());
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -107,16 +116,19 @@ export default function ReschedulePage() {
           />
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-900 mb-4">
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">
           Reschedule Appointment
         </h1>
         <p className="text-sm text-gray-500 mb-6">
           Current appt:{" "}
           <strong className="text-gray-900">
-            {originalDate || "-"} / {originalTime || "-"}
-          </strong>{" "}
-          ({tz})
+            {originalDate} {originalTime}
+          </strong>
         </p>
+
+        {message && (
+          <div className="mb-4 text-sm text-red-600">{message}</div>
+        )}
 
         <form onSubmit={handleSubmit} className="space-y-4">
           {/* Date */}
@@ -125,16 +137,11 @@ export default function ReschedulePage() {
             <input
               type="date"
               value={date}
+              min={today} // block past dates
               onChange={(e) => setDate(e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
               required
-              min={new Date().toISOString().split("T")[0]} // No past dates
             />
-            {(isWeekend(date) || isPastDate(date)) && (
-              <p className="text-xs text-red-500 mt-1">
-                Weekends and past dates cannot be selected.
-              </p>
-            )}
           </div>
 
           {/* Time */}
@@ -145,19 +152,10 @@ export default function ReschedulePage() {
               onChange={(e) => setTime(e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
               required
-              disabled={!date || isWeekend(date) || isPastDate(date)}
             >
-              <option value="">Select a new time</option>
+              <option value="">Select a time</option>
               {availableSlots.map((t) => (
-                <option
-                  key={t}
-                  value={t}
-                  style={
-                    t.endsWith(":00")
-                      ? { backgroundColor: "rgba(59, 130, 246, 0.1)" }
-                      : {}
-                  }
-                >
+                <option key={t} value={t}>
                   {t}
                 </option>
               ))}
@@ -178,10 +176,10 @@ export default function ReschedulePage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={!date || !time || isWeekend(date) || isPastDate(date)}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300"
+            disabled={isSubmitting}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-300"
           >
-            Update Appointment
+            {isSubmitting ? "Updating..." : "Update Appointment"}
           </button>
         </form>
       </div>
