@@ -162,24 +162,22 @@
 }
 
 /* ------------------------------------------- /
-/ 🛑 NEW: Custom Calendar Styles /
+/ 🛑 NEW: Custom Calendar Styles (FIXED) /
 / ------------------------------------------- */
 
 /* Custom highlight for today's date, applied via modifiersClassNames in ChatDatePicker.tsx /
 .day-today-custom-highlight:not(.day-selected) {
-/ Using !important to ensure these styles override the Tailwind defaults */
-
-/* Bold Border and Background (using the same colors as your 'primary' blue) /
+/ Bold Border and Background (using the same colors as your 'primary' blue) /
 border: 2px solid hsl(var(--primary)) !important;
-background-color: hsl(var(--primary) / 0.1) !important; / Light tint of primary color */
+/ 🛑 FIX: Changed from complex HSL division to a simple HSL value for a light blue tint */
+background-color: hsl(212 59% 90%) !important;
 
-/* Text Style /
-font-weight: 900 !important; / Extra bold text /
-color: hsl(var(--foreground)) !important; / Dark text */
+/* Text Style */
+font-weight: 900 !important;
+color: hsl(var(--foreground)) !important;
 }
 
-/* Ensure disabled dates are faded (especially days from the next month that are weekends/past) /
-/ The 'day-disabled' class is defined in calendar.tsx, but this ensures it is the final rule */
+/* Ensure disabled dates are faded (especially days from the next month that are weekends/past) */
 .day-disabled {
 pointer-events: none !important;
 opacity: 0.5 !important;
