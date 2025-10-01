@@ -1,13 +1,11 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
-import DatePicker from "react-datepicker";
-import "react-datepicker/dist/react-datepicker.css";
 import { supabase } from "@/lib/supabaseClient";
 
-// Generate slots from 08:00 → 18:00, every 30 min
-const generateTimeSlots = (startHour: number, endHour: number): string[] => {
+// Generate slots from 08:00–18:00, 30 min increments
+const generateTimeSlots = () => {
   const slots: string[] = [];
-  for (let h = startHour; h < endHour; h++) {
+  for (let h = 8; h < 18; h++) {
     for (let m = 0; m < 60; m += 30) {
       const hh = String(h).padStart(2, "0");
       const mm = String(m).padStart(2, "0");
@@ -17,81 +15,85 @@ const generateTimeSlots = (startHour: number, endHour: number): string[] => {
   return slots;
 };
 
-// Light blue background for full hours (:00)
-const isRoundHour = (time: string) => time.endsWith(":00");
-
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
-  // Original appt details from URL
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
-  const originalTime = sp.get("time") ?? "";
+
   const originalDate = sp.get("date") ?? "";
+  const originalTime = sp.get("time") ?? "";
 
-  // State
-  const [date, setDate] = useState<Date | null>(
-    originalDate ? new Date(originalDate) : null
-  );
+  const [date, setDate] = useState(originalDate);
   const [time, setTime] = useState(originalTime);
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<{ type: "success" | "error"; text: string } | null>(null);
 
-  // Fetch taken slots for selected date (excluding current apptId)
+  // 🔹 Taken slots for this date (excluding current appt)
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date) return;
 
-      const dateStr = date.toISOString().split("T")[0];
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time,id")
-        .eq("appointment_date", dateStr);
+        .eq("appointment_date", date);
 
       if (!error && data) {
         const filtered = data
           .filter((row) => row.id !== apptId)
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
-      } else {
-        setTakenSlots([]);
       }
     };
+
     fetchTaken();
   }, [date, apptId]);
-
-  const timeSlots = generateTimeSlots(8, 18);
-
-  // Final available slots
-  const availableSlots = timeSlots
-    .filter((slot) => !takenSlots.includes(slot))
-    .filter((slot) => !(originalDate && date?.toISOString().split("T")[0] === originalDate && slot === originalTime));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
-    if (!date || !time) {
-      setMessage({ type: "error", text: "Please select a date and time." });
+    if (!apptId) {
+      alert("❌ Appointment ID missing.");
       return;
     }
 
-    setIsSubmitting(true);
-    setMessage(null);
-
     try {
-      // TODO: Replace with real API call
-      await new Promise((resolve) => setTimeout(resolve, 1500));
-      setMessage({
-        type: "success",
-        text: `✅ Appointment rescheduled to ${date.toISOString().split("T")[0]} at ${time}`,
+      const res = await fetch("/.netlify/functions/reschedule", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          appt_id: apptId,
+          date,
+          time,
+          tz,
+          status: "rescheduled",
+        }),
       });
-    } catch {
-      setMessage({ type: "error", text: "❌ Error updating appointment." });
-    } finally {
-      setIsSubmitting(false);
+
+      if (res.ok) {
+        alert("✅ Appointment rescheduled successfully!");
+      } else {
+        const err = await res.json();
+        alert("❌ Error: " + err.error);
+      }
+    } catch (error) {
+      alert("❌ Network error. Please try again.");
     }
   };
+
+  // All slots
+  const timeSlots = generateTimeSlots();
+
+  // Only show available slots
+  const availableSlots = timeSlots.filter((slot) => !takenSlots.includes(slot));
+
+  // Helpers
+  const isWeekend = (d: string) => {
+    const day = new Date(d).getDay();
+    return day === 0 || day === 6;
+  };
+  const isPastDate = (d: string) => new Date(d) < new Date(new Date().toDateString());
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -99,13 +101,13 @@ export default function ReschedulePage() {
         {/* Logo */}
         <div className="flex justify-center mb-6">
           <img
-            src="/images/renometa-logo.png"
+            src="https://renometa.com/images/renometa-logo.png"
             alt="RenoMeta Logo"
             className="h-12"
           />
         </div>
 
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
         <p className="text-sm text-gray-500 mb-6">
@@ -113,63 +115,48 @@ export default function ReschedulePage() {
           <strong className="text-gray-900">
             {originalDate || "-"} / {originalTime || "-"}
           </strong>{" "}
-          ({tz.replace(/_/g, " ")})
+          ({tz})
         </p>
 
-        {message && (
-          <div
-            className={`p-3 rounded-lg text-sm mb-4 ${
-              message.type === "success"
-                ? "bg-green-100 text-green-700"
-                : "bg-red-100 text-red-700"
-            }`}
-          >
-            {message.text}
-          </div>
-        )}
-
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date Picker */}
+          {/* Date */}
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              New date
-            </label>
-            <DatePicker
-              selected={date}
-              onChange={(d) => {
-                setDate(d);
-                setTime(""); // reset time when changing date
-              }}
-              minDate={new Date()} // No past dates
-              filterDate={(d) => d.getDay() !== 0 && d.getDay() !== 6} // No weekends
-              dateFormat="yyyy-MM-dd"
-              className="w-full border rounded-lg px-3 py-2 text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+            <label className="block text-sm font-medium mb-1">New date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
               required
+              min={new Date().toISOString().split("T")[0]} // No past dates
             />
+            {(isWeekend(date) || isPastDate(date)) && (
+              <p className="text-xs text-red-500 mt-1">
+                Weekends and past dates cannot be selected.
+              </p>
+            )}
           </div>
 
-          {/* Time Picker */}
+          {/* Time */}
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              New time
-            </label>
+            <label className="block text-sm font-medium mb-1">New time</label>
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
+              className="w-full border rounded-lg px-3 py-2"
               required
-              disabled={availableSlots.length === 0}
+              disabled={!date || isWeekend(date) || isPastDate(date)}
             >
-              <option value="">
-                {availableSlots.length === 0
-                  ? "No slots available"
-                  : "Select a new time"}
-              </option>
+              <option value="">Select a new time</option>
               {availableSlots.map((t) => (
                 <option
                   key={t}
                   value={t}
-                  style={isRoundHour(t) ? { backgroundColor: "rgba(59, 130, 246, 0.1)" } : {}}
+                  style={
+                    t.endsWith(":00")
+                      ? { backgroundColor: "rgba(59, 130, 246, 0.1)" }
+                      : {}
+                  }
                 >
                   {t}
                 </option>
@@ -179,24 +166,22 @@ export default function ReschedulePage() {
 
           {/* Timezone */}
           <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">
-              Time zone
-            </label>
+            <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
               type="text"
-              value={tz.replace(/_/g, " ")}
+              value={tz}
               readOnly
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 bg-gray-100 text-gray-600 cursor-not-allowed"
+              className="w-full border rounded-lg px-3 py-2 bg-gray-100"
             />
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            disabled={isSubmitting || !date || !time}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition disabled:bg-blue-300 disabled:cursor-not-allowed"
+            disabled={!date || !time || isWeekend(date) || isPastDate(date)}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300"
           >
-            {isSubmitting ? "Updating..." : "Update Appointment"}
+            Update Appointment
           </button>
         </form>
       </div>
