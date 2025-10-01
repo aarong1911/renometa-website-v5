@@ -60,7 +60,6 @@ export default function ReschedulePage() {
 
   const [date, setDate] = useState(originalDate);
   const [time, setTime] = useState(originalTime); // The currently selected new time
-  const [name] = useState(sp.get("name") ?? "Unknown");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
@@ -160,7 +159,7 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        {/* ✅ Fix: Corrected UI text to display original date and time */}
+        {/* Corrected UI text to display original date and time */}
         <p className="text-sm text-gray-500 mb-6">
           You are currently booked for <strong className="text-gray-900">{originalTime}</strong> on <strong className="text-gray-900">{originalDate}</strong> ({tz.replace(/_/g, ' ')})
         </p>
@@ -211,7 +210,7 @@ export default function ReschedulePage() {
                 <option 
                   key={t} 
                   value={t}
-                  // ✅ Fix: Applying styling for round hour: light blue background
+                  // Applying styling for round hour: light blue background
                   style={isRoundHour(t) ? { backgroundColor: 'rgba(59, 130, 246, 0.1)' } : {}}
                 >
                   {t}
@@ -248,4 +247,3 @@ export default function ReschedulePage() {
     </div>
   );
 }
-```eof
