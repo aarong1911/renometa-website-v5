@@ -1,243 +1,323 @@
-import React, { useState, useEffect } from 'react';
-// Assuming useAppointment is available based on previous context, using relative path
+import React from "react";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { useToast } from "@/hooks/use-toast";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogOverlay,
+} from "@/components/ui/dialog";
+// Assuming useAppointment.ts has been updated with forceRefresh
+import { useAppointment } from "@/hooks/useAppointment"; 
 
-// --- Mock Appointment Hook for Immersive Context (Keep this for demonstration) ---
-// In a real application, this logic would come from the actual useAppointment hook
-const useAppointment = (date: string, tz: string) => {
-    /**
-     * Helper to generate time slots from start to end hour in 30-minute intervals.
-     * Generates 8:00 to 18:00 slots (up to 17:30).
-     */
-    const generateTimeSlots = (startHour: number, endHour: number): string[] => {
-      const slots: string[] = [];
-      for (let h = startHour; h < endHour; h++) {
-        for (let m = 0; m < 60; m += 30) {
-          const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
-          slots.push(time);
-        }
-      }
-      return slots;
-    };
-    
-    // Simulate fetching taken slots (e.g., from an API or Supabase)
-    const mockTakenSlots: string[] = date === '2025-10-15' ? ['10:30', '16:00'] : [];
-
-    // Slots are 8:00 to 18:00, excluding taken slots
-    const availableSlots = generateTimeSlots(8, 18).filter(slot => !mockTakenSlots.includes(slot));
-
-    return { 
-        availableSlots: availableSlots, 
-        isFetching: false, 
-        error: null,
-    };
-};
-
+// --- DATE FIX: Helper function to create a date object in local time ---
 /**
- * Helper function to check if a time slot is a round hour (e.g., "09:00", "14:00").
+ * Takes a YYYY-MM-DD string and creates a new Date object representing 
+ * midnight of that day in the user's local timezone. This prevents the
+ * common bug where new Date('YYYY-MM-DD') defaults to UTC and rolls back
+ * the date in timezones ahead of GMT.
  */
-const isRoundHour = (timeSlot: string): boolean => {
-  return timeSlot.endsWith(":00");
+const createLocalDate = (dateString: string): Date => {
+  // YYYY-MM-DD -> [YYYY, MM, DD]
+  const parts = dateString.split("-").map(Number);
+  // Date constructor (year, monthIndex, day) uses LOCAL time
+  // Note: month is 0-indexed in JS Date (0=Jan, 11=Dec)
+  return new Date(parts[0], parts[1] - 1, parts[2]); 
+};
+// -----------------------------------------------------------------------
+
+
+// Normalize to HH:mm always
+const normalizeTime = (raw: string | null | undefined): string => {
+  if (!raw) return "";
+  return raw.trim().slice(0, 5);
 };
 
-// Mock function to replace alert() with console logging for the canvas environment
-const showMessage = (type: 'success' | 'error', text: string) => {
-    console.log(`[${type.toUpperCase()}] ${text}`);
-    // In a real app, this would update a state for a visible message box.
-};
-
-
-export default function ScheduleAppointmentModal() {
-    const today = new Date().toISOString().split('T')[0];
-
-    const [isOpen, setIsOpen] = useState(true);
-    const [name, setName] = useState('');
-    const [email, setEmail] = useState('');
-    const [phone, setPhone] = useState('');
-    const [date, setDate] = useState(today);
-    const [time, setTime] = useState('');
-    const [timezone, setTimezone] = useState('America/New_York');
-    const [consent, setConsent] = useState(false);
-    const [isSubmitting, setIsSubmitting] = useState(false);
-
-    // Use mock hook (replace with actual hook import/call)
-    const { availableSlots, isFetching } = useAppointment(date, timezone);
-
-    // List of common timezones for the user to pick from
-    const commonTimezones = [
-        "America/New_York",
-        "America/Los_Angeles",
-        "Europe/London",
-        "Europe/Berlin",
-        "Asia/Tokyo",
-        "Asia/Kolkata",
-    ];
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!consent) {
-            showMessage('error', "You must consent to the terms.");
-            return;
-        }
-
-        setIsSubmitting(true);
-
-        // Mock API call to submit the appointment
-        try {
-            // Replace with actual API call (e.g., fetch to your Netlify function)
-            await new Promise(resolve => setTimeout(resolve, 1500)); 
-            
-            showMessage('success', "Appointment scheduled successfully!");
-            // Reset form or close modal
-            setIsOpen(false); 
-        } catch (error) {
-            showMessage('error', "Failed to schedule appointment. Please try again.");
-        } finally {
-            setIsSubmitting(false);
-        }
-    };
-
-    if (!isOpen) return null;
-
-    return (
-        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 overflow-y-auto h-full w-full flex justify-center items-center p-4">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6">
-                
-                <h2 className="text-2xl font-bold text-gray-900 mb-4">Schedule a Consultation</h2>
-                <p className="text-sm text-gray-500 mb-6">Fill out the details to book your 30-minute slot.</p>
-
-                <form onSubmit={handleSubmit} className="space-y-4">
-                    {/* Name */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Full Name</label>
-                        <input
-                            type="text"
-                            value={name}
-                            onChange={(e) => setName(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                            placeholder="John Doe"
-                        />
-                    </div>
-
-                    {/* Email */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
-                        <input
-                            type="email"
-                            value={email}
-                            onChange={(e) => setEmail(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                            placeholder="john.doe@example.com"
-                        />
-                    </div>
-                    
-                    {/* Phone */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Phone (Optional)</label>
-                        <input
-                            type="tel"
-                            value={phone}
-                            onChange={(e) => setPhone(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            placeholder="(555) 123-4567"
-                        />
-                    </div>
-
-                    <div className="grid grid-cols-2 gap-4">
-                        {/* Date Picker */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
-                            <input
-                                type="date"
-                                value={date}
-                                onChange={(e) => {
-                                    setDate(e.target.value);
-                                    setTime(''); // Reset time when date changes
-                                }}
-                                min={today}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                                required
-                            />
-                        </div>
-
-                        {/* Time Slot Selector */}
-                        <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Time</label>
-                            <select
-                                value={time}
-                                onChange={(e) => setTime(e.target.value)}
-                                className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500 disabled:bg-gray-50 disabled:text-gray-500"
-                                required
-                                disabled={isFetching || availableSlots.length === 0}
-                            >
-                                <option value="" disabled>
-                                    {isFetching ? "Loading slots..." : availableSlots.length === 0 ? "No slots available" : "Select Time"}
-                                </option>
-                                {availableSlots.map((t) => (
-                                    <option 
-                                      key={t} 
-                                      value={t}
-                                      // ✅ Fix: Applying styling for round hour: light blue background
-                                      style={isRoundHour(t) ? { backgroundColor: 'rgba(59, 130, 246, 0.1)' } : {}}
-                                    >
-                                        {t}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
-                    </div>
-
-                    {/* Timezone Selector */}
-                    <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Time Zone</label>
-                        <select
-                            value={timezone}
-                            onChange={(e) => setTimezone(e.target.value)}
-                            className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:ring-blue-500 focus:border-blue-500"
-                            required
-                        >
-                            {commonTimezones.map(tz => (
-                                <option key={tz} value={tz}>
-                                    {tz.replace(/_/g, ' ')}
-                                </option>
-                            ))}
-                        </select>
-                    </div>
-
-                    {/* Consent Checkbox */}
-                    <div className="flex items-start">
-                        <input
-                            id="consent"
-                            type="checkbox"
-                            checked={consent}
-                            onChange={(e) => setConsent(e.target.checked)}
-                            className="h-4 w-4 text-blue-600 border-gray-300 rounded mt-1"
-                        />
-                        <label htmlFor="consent" className="ml-3 text-sm text-gray-600">
-                            I consent to RenoMeta storing my information and contacting me regarding this appointment.
-                        </label>
-                    </div>
-
-                    {/* Submit Button */}
-                    <button
-                        type="submit"
-                        disabled={isSubmitting || !time || !consent}
-                        className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 ease-in-out disabled:bg-blue-300 disabled:cursor-not-allowed"
-                    >
-                        {isSubmitting ? "Scheduling..." : "Book Appointment"}
-                    </button>
-                    
-                    {/* Close Button */}
-                    <button
-                        type="button"
-                        onClick={() => setIsOpen(false)}
-                        className="w-full text-sm text-gray-500 py-1 hover:text-gray-700"
-                    >
-                        Close
-                    </button>
-                </form>
-            </div>
-        </div>
-    );
+interface ScheduleAppointmentModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
 }
+
+export default function ScheduleAppointmentModal({
+  open,
+  onOpenChange,
+}: ScheduleAppointmentModalProps) {
+  const { toast } = useToast();
+  const {
+    selectedDate,
+    setSelectedDate,
+    selectedTime,
+    setSelectedTime,
+    isSubmitting,
+    setIsSubmitting,
+    availableSlots,
+    resetAppointment,
+    forceRefresh, // Required for the stale availability fix
+  } = useAppointment();
+
+  // Current date for initialization and minimum date constraint
+  const todayDateString = new Date().toISOString().split("T")[0];
+
+  const [formData, setFormData] = React.useState({
+    name: "",
+    email: "",
+    phone: "",
+    appointment_date: todayDateString, // Defaulted to today
+    appointment_time: "",
+    timezone: "",
+  });
+
+  // ✨ FIX FOR 2-HOUR BUFFER IN MODAL: Synchronize form date with hook state
+  React.useEffect(() => {
+    // Only set the date if the modal is open, to trigger the availability fetch
+    if (open) { 
+      // If the form date is set, update the hook's selectedDate
+      if (formData.appointment_date) {
+        // ✅ FIX APPLIED: Use the local date creation helper
+        setSelectedDate(createLocalDate(formData.appointment_date));
+      }
+    } else {
+      // Reset selectedDate when the modal closes
+      setSelectedDate(undefined); 
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [open, formData.appointment_date]); // Dependency on open and date ensures it runs when modal shows or date input changes
+
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
+  ) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+
+    if (name === "appointment_date") {
+      // When the user changes the date input, this line triggers the useAppointment useEffect
+      // ✅ FIX APPLIED: Use the local date creation helper
+      setSelectedDate(createLocalDate(value));
+    }
+    if (name === "appointment_time") {
+      setSelectedTime(normalizeTime(value));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+
+    if (
+      !formData.name.trim() ||
+      !formData.email.trim() ||
+      !formData.appointment_date ||
+      !formData.appointment_time ||
+      !formData.timezone
+    ) {
+      toast({
+        title: "Missing fields",
+        description: "Fill in all required fields.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    // Ensure slot is still available (quick check to prevent double-booking race conditions)
+    if (
+      !availableSlots.find(
+        (s) => s.value === normalizeTime(formData.appointment_time)
+      )
+    ) {
+      toast({
+        title: "Time Slot Unavailable",
+        description: "The selected time was just booked. Please try again.",
+        variant: "destructive",
+      });
+      setIsSubmitting(false);
+      return;
+    }
+
+    try {
+      await fetch("/.netlify/functions/book-appointment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...formData,
+          appointment_time: normalizeTime(formData.appointment_time),
+          source: "form",
+        }),
+      });
+
+      toast({
+        title: "Appointment Scheduled",
+        description: `See you on ${formData.appointment_date} at ${normalizeTime(
+          formData.appointment_time
+        )}`,
+      });
+
+      onOpenChange(false);
+      resetAppointment();
+      forceRefresh(); // Ensures slot disappears after successful booking
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        appointment_date: todayDateString,
+        appointment_time: "",
+        timezone: "",
+      });
+    } catch (err: any) {
+      console.error("Error scheduling:", err);
+      toast({
+        title: "Error",
+        description: "Problem scheduling. Please try again later.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogOverlay className="bg-black/50" />
+      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-16 animate-fade-in-up">
+        <DialogDescription className="sr-only">
+          Book your strategy call.
+        </DialogDescription>
+
+        {/* Close Button */}
+        <Button
+          onClick={() => onOpenChange(false)}
+          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
+          variant="ghost"
+          size="icon"
+        >
+          ✕
+        </Button>
+
+        <form onSubmit={handleSubmit} className="mt-2">
+          {/* Name / Email / Phone / Date */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Full Name *
+              </label>
+              <Input
+                name="name"
+                value={formData.name}
+                onChange={handleChange}
+                required
+                className="w-full text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Email *
+              </label>
+              <Input
+                name="email"
+                type="email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="w-full text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Phone
+              </label>
+              <Input
+                name="phone"
+                type="tel"
+                value={formData.phone}
+                onChange={handleChange}
+                className="w-full text-gray-900"
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Date *
+              </label>
+              <input
+                type="date"
+                name="appointment_date"
+                value={formData.appointment_date}
+                onChange={handleChange}
+                min={todayDateString}
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              />
+            </div>
+          </div>
+
+          {/* Time + Timezone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time *
+              </label>
+              <select
+                name="appointment_time"
+                value={formData.appointment_time}
+                onChange={handleChange}
+                required
+                disabled={availableSlots.length === 0}
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">
+                  {availableSlots.length > 0
+                    ? "Choose a time"
+                    : "No times available"}
+                </option>
+                {/* This ensures we only map over the filtered list */}
+                {availableSlots.map((slot) => (
+                  <option key={slot.value} value={slot.value}>
+                    {slot.value} 
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time Zone *
+              </label>
+              <select
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">Choose a time zone</option>
+                <option value="America/New_York">Eastern (EST)</option>
+                <option value="America/Chicago">Central (CST)</option>
+                <option value="America/Denver">Mountain (MST)</option>
+                <option value="America/Los_Angeles">Pacific (PST)</option>
+              </select>
+            </div>
+          </div>
+
+          {/* Submit */}
+          <Button
+            type="submit"
+            disabled={isSubmitting || availableSlots.length === 0}
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
+          >
+            {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
+          </Button>
+
+          {/* Consent */}
+          <p className="text-xs text-gray-400 mt-4">
+            By scheduling, you consent to receive appointment reminders and updates by text from RenoMeta. 
+  Standard rates may apply. Reply STOP anytime to unsubscribe. Learn more in our{" "}
+            <a href="/privacy-policy" className="text-blue-400 hover:underline">
+              Privacy Policy
+            </a>{" "}
+            and Terms.
+          </p>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+}
+
