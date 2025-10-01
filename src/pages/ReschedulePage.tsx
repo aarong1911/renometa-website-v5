@@ -3,25 +3,18 @@ import { useSearchParams } from "react-router-dom";
 // Assuming supabase is correctly imported and initialized elsewhere, as indicated in your code
 // import { supabase } from "@/lib/supabaseClient"; 
 
-// --- Mock Supabase Client for Immersive Context ---
-// In a real environment, you would use the imported 'supabase' object.
-// We mock it here to ensure the file is self-contained and runnable for review.
+// --- Mock Supabase Client for Immersive Context (Keep this for demonstration) ---
 const supabase = {
   from: (table: string) => ({
     select: (columns: string) => ({
       eq: (column: string, value: string) => ({
         single: () => Promise.resolve({ data: null, error: { message: "Mock error" } }),
-        // Mock data structure: The user reported 10:00 and 11:00 were booked, but 12:00 and 13:00 were missing from the list.
-        // We ensure the mock returns some data for demonstration, but the core fix is in 'timeSlots'.
-        // The previous booking at 9:00 on 10/2 needs to be present in the data for this component to work correctly.
-        // Since the user said 9:00 was booked, let's assume one appointment exists.
         then: (callback: (result: any) => void) => {
           setTimeout(() => {
             const data = [
-              // This is the appointment currently being rescheduled (should be filtered out by row.id !== apptId)
-              { id: 'mock-id-123', appointment_time: '09:00' }, 
-              // Example of another booked slot on the same day
-              { id: 'mock-id-456', appointment_time: '11:30' } 
+              // Mock data of slots taken by OTHERS on the selected date. 
+              { id: 'mock-id-456', appointment_time: '11:30' }, 
+              { id: 'mock-id-789', appointment_time: '14:00' } 
             ];
             const error = null;
             callback({ data, error });
@@ -33,6 +26,26 @@ const supabase = {
 };
 // --- End Mock ---
 
+/**
+ * Helper to generate time slots from start to end hour in 30-minute intervals (e.g., 8 to 18 gives 8:00 up to 17:30).
+ */
+const generateTimeSlots = (startHour: number, endHour: number): string[] => {
+  const slots: string[] = [];
+  for (let h = startHour; h < endHour; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const time = `${String(h).padStart(2, '0')}:${String(m).padStart(2, '0')}`;
+      slots.push(time);
+    }
+  }
+  return slots;
+};
+
+/**
+ * Helper function to check if a time slot is a round hour (e.g., "09:00", "14:00").
+ */
+const isRoundHour = (timeSlot: string): boolean => {
+  return timeSlot.endsWith(":00");
+};
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
@@ -41,14 +54,17 @@ export default function ReschedulePage() {
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
 
-  const [date, setDate] = useState(sp.get("date") ?? "");
-  const [time, setTime] = useState(sp.get("time") ?? "");
-  const [name, setName] = useState(sp.get("name") ?? "Unknown");
+  // Use the time and date from the URL (the currently booked details)
+  const originalTime = sp.get("time") ?? "";
+  const originalDate = sp.get("date") ?? ""; // Store original date
+
+  const [date, setDate] = useState(originalDate);
+  const [time, setTime] = useState(originalTime); // The currently selected new time
+  const [name] = useState(sp.get("name") ?? "Unknown");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
 
-
-  // 🔹 Keep track of taken slots
+  // 🔹 Keep track of taken slots (slots taken by others)
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
   // Fetch taken slots for this date
@@ -56,23 +72,23 @@ export default function ReschedulePage() {
     const fetchTaken = async () => {
       if (!date) return;
 
-      // Reset message when date changes
       setMessage(null);
 
+      // Fetch all appointments for the selected date
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time,id")
         .eq("appointment_date", date);
 
       if (!error && data) {
-        // exclude this appointment’s current slot (so user can keep it)
-        const filtered = data
-          .filter((row: any) => row.id !== apptId)
-          .map((row: any) => row.appointment_time);
+        // Filter out the original appointment's ID (apptId). This ensures 
+        // we only list times taken by *other* people.
+        const filtered = (data as { id: string, appointment_time: string }[])
+          .filter((row) => row.id !== apptId)
+          .map((row) => row.appointment_time);
         setTakenSlots(filtered);
       } else if (error) {
         console.error("Error fetching taken slots:", error);
-        // Fallback to empty slots if fetch fails
         setTakenSlots([]);
       }
     };
@@ -93,11 +109,16 @@ export default function ReschedulePage() {
       return;
     }
     
+    // Prevent submitting if the user hasn't actually changed anything
+    if (date === originalDate && time === originalTime) {
+       setMessage({ type: 'error', text: "Please select a different date or time to reschedule." });
+       return;
+    }
+    
     setIsSubmitting(true);
     setMessage(null);
 
     try {
-      // NOTE: Replacing alert() with custom message handling
       const res = await fetch("/.netlify/functions/reschedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -123,15 +144,17 @@ export default function ReschedulePage() {
     }
   };
 
-  // ✅ FIX: Updated timeSlots to include all half-hour intervals, matching a typical full booking schedule.
-  const timeSlots = [
-    "09:00", "09:30", "10:00", "10:30",
-    "11:00", "11:30", "12:00", "12:30",
-    "13:00", "13:30", "14:00", "14:30",
-    "15:00", "15:30", "16:00", "16:30"
-  ];
+  // Generate full time slot list from 8:00 to 18:00
+  const timeSlots = generateTimeSlots(8, 18); 
+  
+  // Check if the user is currently viewing the date of their original appointment
+  const isViewingOriginalDate = date === originalDate;
 
-  const availableSlots = timeSlots.filter((slot) => !takenSlots.includes(slot));
+  const availableSlots = timeSlots
+    // 1. Filter slots taken by OTHERS on the selected date
+    .filter((slot) => !takenSlots.includes(slot))
+    // 2. Filter out the user's ORIGINAL booked time ONLY if they are viewing the original date
+    .filter((slot) => !(isViewingOriginalDate && slot === originalTime));
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -148,9 +171,12 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-        <p className="text-sm text-gray-500 mb-6">Name: {name}</p>
+        {/* Added clarity on the current booking */}
+        <p className="text-sm text-gray-500 mb-6">
+          You are currently booked for <strong className="text-gray-900">{originalTime}</strong> on <strong className="text-gray-900">{originalDate}</strong> ({tz.replace(/_/g, ' ')})
+        </p>
 
-        {/* Message Box (replacing alert) */}
+        {/* Message Box */}
         {message && (
           <div
             className={`p-3 rounded-lg text-sm mb-4 ${
@@ -169,9 +195,14 @@ export default function ReschedulePage() {
               type="date"
               value={date}
               onChange={(e) => {
-                setDate(e.target.value);
+                const newDate = e.target.value;
+                setDate(newDate);
                 // Reset time selection when date changes
-                setTime(""); 
+                if (newDate !== originalDate) {
+                    setTime("");
+                } else {
+                    setTime(originalTime);
+                }
               }}
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-blue-500 focus:border-blue-500"
               required
@@ -189,14 +220,22 @@ export default function ReschedulePage() {
               disabled={availableSlots.length === 0}
             >
               <option value="">
-                {availableSlots.length === 0 ? "No slots available for this date" : "Select a time"}
+                {availableSlots.length === 0 ? "No slots available for this date" : "Select a new time"}
               </option>
               {availableSlots.map((t) => (
-                <option key={t} value={t}>
+                <option 
+                  key={t} 
+                  value={t}
+                  // Apply light blue faded background for round hour (e.g., 9:00, 10:00)
+                  style={isRoundHour(t) ? { backgroundColor: 'rgba(59, 130, 246, 0.1)' } : {}}
+                >
                   {t}
                 </option>
               ))}
             </select>
+            {availableSlots.length === 0 && (
+                <p className="text-xs text-red-500 mt-1">There are no available slots for the selected date.</p>
+            )}
           </div>
 
           {/* Timezone (read-only) */}
@@ -213,7 +252,8 @@ export default function ReschedulePage() {
           {/* Submit */}
           <button
             type="submit"
-            disabled={isSubmitting || availableSlots.length === 0 || !time}
+            // Button is disabled if: submitting, no slots, no time selected, OR trying to submit the same date/time
+            disabled={isSubmitting || availableSlots.length === 0 || !time || (date === originalDate && time === originalTime)}
             className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 transition duration-150 ease-in-out disabled:bg-blue-300 disabled:cursor-not-allowed"
           >
             {isSubmitting ? "Updating..." : "Update Appointment"}
