@@ -194,7 +194,7 @@ export default function ScheduleAppointmentModal({
           ✕
         </Button>
 
-        <form onSubmit={handleSubmit} className="space-y-3 mt-2">
+        <form onSubmit={handleSubmit} className="mt-2">
           {/* Name / Email / Phone / Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
