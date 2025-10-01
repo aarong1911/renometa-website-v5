@@ -160,7 +160,7 @@ background-size: 30px 30px;
 background-image: linear-gradient(to right, rgba(255,255,255,.1) 1px, transparent 1px),
 linear-gradient(to bottom, rgba(255,255,255,.1) 1px, transparent 1px);
 }
-}
+} /* Closing @layer utilities */
 
 /* ------------------------------------------- /
 / 🛑 NEW: Custom Calendar Styles /
