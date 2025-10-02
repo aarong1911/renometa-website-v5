@@ -1,187 +1,240 @@
 import { useState, useEffect, useMemo, useCallback } from "react";
 import { useSearchParams } from "react-router-dom";
-// Using the fixed import path
-import { supabase } from '../lib/supabaseClient.ts'; 
-import { ChevronDown, Calendar as CalendarIcon } from "lucide-react";
+import { Calendar as CalendarIcon, X, ChevronLeft, ChevronRight } from "lucide-react";
+import { format } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import { createClient } from "@supabase/supabase-js";
+
+// --- Firebase/Supabase/Auth Setup ---
+// Global variables provided by the environment
+declare const __firebase_config: string | undefined;
+const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+
+// Supabase configuration derived from Firebase config
+const SUPABASE_URL = firebaseConfig.projectId ? `https://${firebaseConfig.projectId}.supabase.co` : '';
+const SUPABASE_ANON_KEY = firebaseConfig.apiKey || '';
+
+const supabase = SUPABASE_URL && SUPABASE_ANON_KEY 
+    ? createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+    : undefined;
 
 // --- Date & Time Helpers ---
-// (These helpers are essential for the core business logic)
-
 const generateTimeSlots = (startHour: number, endHour: number): string[] => {
-  const slots: string[] = [];
-  for (let h = startHour; h < endHour; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hh = String(h).padStart(2, "0");
-      const mm = String(m).padStart(2, "0");
-      slots.push(`${hh}:${mm}`);
-    }
-  }
-  return slots;
+  const slots: string[] = [];
+  for (let h = startHour; h < endHour; h++) {
+    for (let m = 0; m < 60; m += 30) {
+      const hh = String(h).padStart(2, "0");
+      const mm = String(m).padStart(2, "0");
+      slots.push(`${hh}:${mm}`);
+    }
+  }
+  return slots;
 };
 
 const isRoundHour = (timeSlot: string): boolean => timeSlot.endsWith(":00");
-const isWeekend = (dateObj: Date): boolean => {
-    const day = dateObj.getDay();
-    return day === 0 || day === 6; 
-};
 const formatDate = (dateObj: Date): string => {
     // Ensures the date is formatted as YYYY-MM-DD
-    return dateObj.toISOString().split("T")[0];
+    return format(dateObj, 'yyyy-MM-dd');
+};
+const parseDate = (dateString: string): Date => {
+    // Creates a Date object from YYYY-MM-DD string
+    const parts = dateString.split('-').map(Number);
+    // Note: Month is 0-indexed in Date constructor
+    return new Date(parts[0], parts[1] - 1, parts[2]); 
+}
+
+// --- Utility Component Definitions (cn and Button) ---
+
+// Re-defining cn (utility for combining tailwind classes)
+const cn = (...classes: (string | boolean | undefined | null)[]): string => classes.filter(Boolean).join(' ');
+
+// Re-defining Button component for self-contained React app
+const buttonVariants = (props: { variant: 'outline' | 'ghost' | 'default', className?: string }) => {
+    let base = "inline-flex items-center justify-center rounded-lg text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 disabled:opacity-50 disabled:pointer-events-none";
+    
+    if (props.variant === 'outline') {
+        base += " border border-input bg-white hover:bg-gray-100";
+    } else if (props.variant === 'ghost') {
+        base += " hover:bg-gray-100";
+    } else { // default
+        base += " bg-blue-600 text-white hover:bg-blue-700";
+    }
+    return base + (props.className ? ` ${props.className}` : '');
 };
 
-/**
- * Calculates and returns a list of dates that should be DISABLED in the calendar.
- * This includes weekends and past dates relative to today.
- * The original date (if still in the future) is considered available for viewing.
- */
-const getDisabledDates = (originalDate: string): Date[] => {
-    const today = new Date();
-    today.setHours(0, 0, 0, 0); // Normalize today
-    
-    const disabledDates: Date[] = [];
-
-    // 1. Disable all dates up to and including today.
-    let datePointer = new Date('2000-01-01T00:00:00'); // Start far in the past
-    
-    while (datePointer <= today) {
-        disabledDates.push(new Date(datePointer));
-        datePointer.setDate(datePointer.getDate() + 1);
-    }
-    
-    // 2. Disable all future weekends within the calendar's visible range (e.g., next 6 months).
-    // Let's check the next 6 months.
-    const sixMonthsFromNow = new Date(today);
-    sixMonthsFromNow.setMonth(sixMonthsFromNow.getMonth() + 6);
-    
-    let futurePointer = new Date(today);
-    futurePointer.setDate(futurePointer.getDate() + 1); // Start checking from tomorrow
-
-    while (futurePointer <= sixMonthsFromNow) {
-        if (isWeekend(futurePointer)) {
-            disabledDates.push(new Date(futurePointer));
-        }
-        futurePointer.setDate(futurePointer.getDate() + 1);
-    }
-    
-    return disabledDates;
-}
-
-/**
- * --- Date Picker Component Placeholder ---
- * This structure is designed to be easily replaced by a Calendar component 
- * (like the one in src/components/ui/calendar.tsx) wrapped in a Popover.
- * For now, it retains the functional dropdown list, but with the appearance
- * of a date input.
- */
-interface DateSelectProps {
-    value: string;
-    onChange: (date: string) => void;
-    // We now pass the raw list of available dates 
-    availableDatesList: { label: string, value: string }[]; 
-}
-
-const DateSelect: React.FC<DateSelectProps> = ({ value, onChange, availableDatesList }) => {
-    
-    const [isOpen, setIsOpen] = useState(false);
-    const selectedOption = availableDatesList.find(o => o.value === value);
-
-    const handleSelect = (optionValue: string) => {
-        onChange(optionValue);
-        setIsOpen(false);
-    };
-    
-    const displayValue = selectedOption 
-        ? selectedOption.label.replace('Current: ', '')
-        : (value ? new Date(value + 'T00:00:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' }) : 'Select New Date');
-
+const Button: React.FC<React.ButtonHTMLAttributes<HTMLButtonElement> & { variant?: 'outline' | 'ghost' | 'default' }> = ({
+    className, variant = 'default', children, ...props
+}) => {
     return (
-        <div className="relative font-inter" onBlur={() => setTimeout(() => setIsOpen(false), 100)}>
-            {/* The input appearance for the date picker */}
-            <button
-                type="button"
-                onClick={() => setIsOpen(!isOpen)}
-                className="w-full border border-gray-300 rounded-lg px-3 py-2 text-left bg-white flex justify-between items-center transition-all duration-150 shadow-sm hover:border-blue-500 focus:outline-none focus:ring-2 focus:ring-blue-500 text-gray-900"
-            >
-                <span>{displayValue}</span>
-                <CalendarIcon className="h-4 w-4 text-gray-400" />
-            </button>
-
-            {/* The calendar/dropdown popover content */}
-            {isOpen && (
-                <div className="absolute z-20 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-xl max-h-60 overflow-y-auto">
-                    {availableDatesList.map((option) => (
-                        <div
-                            key={option.value}
-                            onClick={() => !option.label.startsWith('Current:') && handleSelect(option.value)}
-                            className={`px-3 py-2 text-sm transition-colors ${
-                                option.label.startsWith('Current:')
-                                    ? 'bg-yellow-50 font-bold text-gray-800 cursor-default'
-                                    : option.value === value 
-                                    ? 'bg-blue-600 text-white font-medium cursor-pointer' 
-                                    : 'hover:bg-gray-100 text-gray-900 cursor-pointer'
-                            }`}
-                        >
-                            {option.label}
-                        </div>
-                    ))}
-                    {availableDatesList.length === 0 && (
-                        <div className="px-3 py-2 text-sm text-gray-500">No available weekdays in the next 30 days.</div>
-                    )}
-                </div>
-            )}
-        </div>
+        <button 
+            className={cn(buttonVariants({ variant, className: className }), className)} 
+            {...props}
+        >
+            {children}
+        </button>
     );
+};
+
+// --- Calendar Component (src/components/ui/calendar.tsx) ---
+interface CalendarProps extends React.ComponentProps<typeof DayPicker> {
+    className?: string;
+    classNames?: React.ComponentProps<typeof DayPicker>['classNames'];
+    showOutsideDays?: boolean;
+}
+
+function Calendar({
+  className,
+  classNames,
+  showOutsideDays = true,
+  ...props
+}: CalendarProps) {
+  return (
+    <DayPicker
+      showOutsideDays={showOutsideDays}
+      className={cn("p-2", className)}
+      classNames={{
+        months: "flex flex-col sm:flex-row space-y-2 sm:space-x-2 sm:space-y-0",
+        month: "space-y-2",
+        caption: "flex justify-center pt-1 relative items-center",
+        caption_label: "text-xs font-medium",
+        nav: "space-x-1 flex items-center",
+        nav_button: cn(
+          buttonVariants({ variant: "outline", className: "h-6 w-6" }),
+          "bg-transparent p-0 opacity-50 hover:opacity-100"
+        ),
+        nav_button_previous: "absolute left-1",
+        nav_button_next: "absolute right-1",
+        table: "w-full border-collapse space-y-1",
+        head_row: "flex",
+        head_cell:
+          "text-muted-foreground rounded-md w-7 font-normal text-[0.7rem]",
+        row: "flex w-full mt-1",
+        cell: "h-7 w-7 text-center text-xs p-0 relative focus-within:relative focus-within:z-20",
+        day: cn(
+          buttonVariants({ variant: "ghost", className: "h-7 w-7" }),
+          "p-0 font-medium aria-selected:opacity-100" // Use font-medium for standard day display
+        ),
+        day_range_end: "day-range-end",
+        day_selected:
+          "bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700", // Selected day style
+        day_today: "border border-blue-500 text-blue-500 font-bold bg-blue-50/50 hover:bg-blue-50", // Today's style
+        day_outside:
+          "text-gray-400 opacity-80", // Outside days style
+        day_disabled: "text-gray-400 opacity-60 pointer-events-none line-through", // Disabled style (past dates, weekends)
+        day_range_middle:
+          "aria-selected:bg-accent aria-selected:text-accent-foreground",
+        day_hidden: "invisible",
+        "day-today-custom-highlight": "bg-blue-100 ring-2 ring-blue-500", 
+        ...classNames,
+      }}
+      components={{
+        IconLeft: ({ ..._props }) => <ChevronLeft className="h-3 w-3" />,
+        IconRight: ({ ..._props }) => <ChevronRight className="h-3 w-3" />,
+      }}
+      {...props}
+    />
+  );
 }
 
 
-/**
- * --- Main Reschedule Component ---
- */
-export default function ReschedulePage() {
-  const [sp] = useSearchParams();
+// --- ChatDatePicker Component ---
+interface ChatDatePickerProps {
+  selectedDate: Date | undefined;
+  onDateSelect: (date: Date | undefined) => void;
+  onReset: () => void;
+}
 
-  // Default values from URL params
-  const apptId = sp.get("appt_id") ?? "default-appt-id"; 
-  const tz = sp.get("tz") ?? "America/New_York";
-  // Fallback values for date/time
-  const originalDate = sp.get("date") ?? formatDate(new Date()); 
-  const originalTime = sp.get("time") ?? "10:00"; 
+// Get the current date for comparisons
+const today = new Date();
+today.setHours(0, 0, 0, 0);
+
+// Define modifiers for react-day-picker to target today's date
+const modifiers = {
+    today: today,
+};
+
+const ChatDatePicker = ({ selectedDate, onDateSelect, onReset }: ChatDatePickerProps) => {
+  return (
+    <div className="flex flex-col space-y-3">
+      <div className="mx-auto transform scale-90 origin-top">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={onDateSelect}
+          defaultMonth={selectedDate || new Date()} 
+          disabled={(date) => {
+            const day = date.getDay();
+            // Disable past dates and weekends (Sun=0, Sat=6)
+            return date < today || day === 0 || day === 6;
+          }}
+          initialFocus
+          className="rounded-xl border bg-white pointer-events-auto shadow-lg"
+          modifiers={modifiers}
+          modifiersClassNames={{
+                today: "day-today-custom-highlight", 
+            }}
+        />
+      </div>
+      <Button 
+        onClick={onReset} 
+        variant="outline" 
+        className="w-full text-blue-600 border-blue-600 hover:bg-blue-600/10 transition-colors"
+      >
+        Clear Selection
+      </Button>
+    </div>
+  );
+};
+
+
+// --- Main Reschedule Component ---
+export default function ReschedulePage() {
+  const [sp] = useSearchParams();
+
+  // Default values from URL params
+  const apptId = sp.get("appt_id") ?? "default-appt-id"; 
+  const tz = sp.get("tz") ?? "America/New_York";
+  const originalDateStr = sp.get("date") ?? formatDate(new Date()); 
+  const originalTime = sp.get("time") ?? "10:00"; 
   const currentApptTimezone = tz.replace(/_/g, ' ');
 
-  // State for the new selection
-  const [date, setDate] = useState(originalDate);
-  const [time, setTime] = useState(""); 
+  // State for the new selection: Date is stored as a Date object internally
+  const [selectedDateObj, setSelectedDateObj] = useState<Date | undefined>(parseDate(originalDateStr));
+  const [time, setTime] = useState(""); 
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  // State for appointment fetching and UI status
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [message, setMessage] = useState<string | null>(null);
+  // State for appointment fetching and UI status
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [message, setMessage] = useState<string | null>(null);
   
-  const today = useMemo(() => formatDate(new Date()), []);
-  
-  // List of all dates that are valid to select (weekdays, non-past) for the DateSelect component
-  const availableDatesList = useMemo(() => generateAvailableDates(originalDate), [originalDate]);
+  const todayStr = useMemo(() => formatDate(new Date()), []);
 
-  // List of all dates that must be disabled in a Calendar component (weekends, past dates)
-  const disabledDates = useMemo(() => getDisabledDates(originalDate), [originalDate]);
+  // String representation of the currently selected date for API calls
+  const dateStr = useMemo(() => selectedDateObj ? formatDate(selectedDateObj) : '', [selectedDateObj]);
 
-  // --- Supabase Data Fetching (Read only) ---
-  useEffect(() => {
-    const fetchTaken = async () => {
-      // Check if supabase object is available before attempting the fetch
-      if (!date || typeof supabase === 'undefined') {
+  // --- Supabase Data Fetching (Read only) ---
+  useEffect(() => {
+    const fetchTaken = async () => {
+      // Check if supabase object is available before attempting the fetch
+      if (!dateStr || typeof supabase === 'undefined') {
           setTakenSlots([]);
           return;
       }
       setMessage(null);
+      // Suppress console log if Supabase is not configured to avoid unnecessary clutter
+      if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+          console.error("Supabase environment variables are missing. Data fetching disabled.");
+          return;
+      }
 
-      try {
-          const { data, error } = await supabase
-            .from("appointments")
-            .select("appointment_time,id")
-            .eq("appointment_date", date);
+      try {
+          const { data, error } = await supabase
+            .from("appointments")
+            .select("appointment_time,id")
+            .eq("appointment_date", dateStr);
 
-          if (error) throw error;
+          if (error) throw error;
           
           const filteredSlots = (data as { id: string, appointment_time: string }[])
              .filter((row) => row.id !== apptId) // exclude current appt's ID
@@ -189,27 +242,34 @@ export default function ReschedulePage() {
 
           setTakenSlots(filteredSlots);
 
-      } catch (error: any) {
+      } catch (error: any) {
             console.error("Error fetching taken slots from Supabase:", error.message);
             setMessage("❌ Error loading availability. See console for details.");
             setTakenSlots([]);
       }
-    };
-    
+    };
+    
     fetchTaken();
-  }, [date, apptId]); 
+  }, [dateStr, apptId]); 
 
-  const handleDateChange = useCallback((newDate: string) => {
-    setDate(newDate);
+  const handleDateSelect = useCallback((date: Date | undefined) => {
+    setSelectedDateObj(date);
+    setIsCalendarOpen(false); // Close calendar on selection
     // Reset time selection when date changes
     setTime(""); 
   }, []);
+  
+  const handleDateReset = useCallback(() => {
+    setSelectedDateObj(undefined);
+    setIsCalendarOpen(false);
+    setTime("");
+  }, []);
 
-  // All slots from 08:00 → 18:00
-  const timeSlots = useMemo(() => generateTimeSlots(8, 18), []);
+  // All slots from 08:00 → 18:00
+  const timeSlots = useMemo(() => generateTimeSlots(8, 18), []);
 
-  const isViewingOriginalDate = date === originalDate;
-  const isToday = date === today;
+  const isViewingOriginalDate = dateStr === originalDateStr;
+  const isToday = dateStr === todayStr;
 
   // Calculates the time 2 hours from now, rounded up to the nearest half hour
   const getTodayCutoffTime = () => {
@@ -237,23 +297,32 @@ export default function ReschedulePage() {
   
   const currentTimeCutoff = isToday ? getTodayCutoffTime() : '00:00'; 
 
-  // Filter available slots
-  const availableSlots = useMemo(() => timeSlots
-    .filter((slot) => !(isViewingOriginalDate && slot === originalTime)) 
+  // Filter available slots
+  const availableSlots = useMemo(() => {
+    if (!selectedDateObj) return []; // No date selected, no slots available
+
+    return timeSlots
+    .filter((slot) => !(isViewingOriginalDate && slot === originalTime)) 
     .filter((slot) => !takenSlots.includes(slot))
-    .filter((slot) => !isToday || slot > currentTimeCutoff), 
-    [timeSlots, isViewingOriginalDate, originalTime, takenSlots, isToday, currentTimeCutoff]
+    .filter((slot) => !isToday || slot > currentTimeCutoff)
+    .filter(slot => {
+        // Simple check to ensure slots are within business hours for clarity
+        const [hour] = slot.split(':').map(Number);
+        return hour >= 8 && hour < 18;
+    });
+}, 
+    [timeSlots, isViewingOriginalDate, originalTime, takenSlots, isToday, currentTimeCutoff, selectedDateObj]
 );
 
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
     
-    if (!time) {
-        setMessage("❌ Please select a new time.");
+    if (!dateStr || !time) {
+        setMessage("❌ Please select a new date and time.");
         return;
     }
-    if (date === originalDate && time === originalTime) {
+    if (dateStr === originalDateStr && time === originalTime) {
         setMessage("❌ Please select a different date or time to reschedule.");
         return;
     }
@@ -261,8 +330,7 @@ export default function ReschedulePage() {
     setIsSubmitting(true);
     setMessage(null);
 
-    try {
-      // Calls the secure Netlify Function for write operation using the correct path /api/reschedule
+    try {
       const response = await fetch('/api/reschedule', { 
           method: 'POST',
           headers: {
@@ -270,7 +338,7 @@ export default function ReschedulePage() {
           },
           body: JSON.stringify({
               appointmentId: apptId,
-              newDate: date,
+              newDate: dateStr,
               newTime: time,
           }),
       });
@@ -282,128 +350,148 @@ export default function ReschedulePage() {
       }
       
       // Update successful
-      setMessage(`✅ Appointment rescheduled successfully to ${date} at ${time}!`);
+      setMessage(`✅ Appointment rescheduled successfully to ${format(parseDate(dateStr), 'MM/dd/yyyy')} at ${time}!`);
       
-    } catch (error: any) {
+    } catch (error: any) {
         console.error("Reschedule Error:", error.message);
-        setMessage(`❌ Reschedule failed: ${error.message}`);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        setMessage(`❌ Reschedule failed: ${error.message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
 
-  const formattedOriginalDate = new Date(originalDate + 'T00:00:00').toLocaleDateString('en-US', { month: '2-digit', day: '2-digit', year: 'numeric' });
+  const formattedOriginalDate = format(parseDate(originalDateStr), 'MM/dd/yyyy');
+  const formattedSelectedDate = selectedDateObj ? format(selectedDateObj, 'MM/dd/yyyy') : 'Select New Date';
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8 font-inter">
-      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
-        
-        <div className="flex justify-center mb-6">
-          <img
-            src="https://renometa.com/images/renometa-logo.png"
-            alt="RenoMeta Logo"
-            className="h-12"
-          />
-        </div>
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4 py-8 font-inter">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow-xl p-6">
+        
+        <div className="flex justify-center mb-6">
+          <img
+            src="https://renometa.com/images/renometa-logo.png"
+            alt="RenoMeta Logo"
+            className="h-12"
+          />
+        </div>
 
-        <h1 className="text-xl font-semibold text-gray-900 mb-2">
-          Reschedule Appointment
-        </h1>
-        
-        {/* Current Appointment Details - NOW SHOWING REAL DATA */}
-        <p className="text-sm text-gray-500 mb-6 border-b pb-4">
-          Current appt:{" "}
+        <h1 className="text-xl font-semibold text-gray-900 mb-2">
+          Reschedule Appointment
+        </h1>
+        
+        {/* Current Appointment Details - NOW SHOWING REAL DATA */}
+        <p className="text-sm text-gray-500 mb-6 border-b pb-4">
+          Current appt:{" "}
           <strong className="text-gray-900 font-bold">
-              {formattedOriginalDate} at {originalTime}
-          </strong>
+              {formattedOriginalDate} at {originalTime}
+          </strong>
           {" "}
           (Timezone: {currentApptTimezone})
-        </p>
+        </p>
 
-        {message && (
-          <div className={`mb-4 text-sm p-3 rounded-lg ${message.startsWith("✅") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{message}</div>
-        )}
+        {message && (
+          <div className={`mb-4 text-sm p-3 rounded-lg ${message.startsWith("✅") ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>{message}</div>
+        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          
-          {/* New Date - Now using the placeholder component with the Calendar icon */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">New Date</label>
-            <DateSelect
-                value={date}
-                onChange={handleDateChange}
-                availableDatesList={availableDatesList}
-            />
-            <p className="text-xs text-gray-500 mt-1">Available slots are for weekdays (Mon-Fri) in the next 30 days.</p>
-            {/* NOTE: If you integrate a Calendar component here (e.g., from src/components/ui/calendar.tsx), 
-               you should pass the 'disabledDates' array to it to grey out weekends and past days.
-               e.g., <Calendar disabled={disabledDates} onSelect={handleDateChange} />
-            */}
-          </div>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          
+          {/* New Date - Using Calendar/Popover Logic */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">New Date</label>
+            <div className="relative">
+                <Button
+                    type="button"
+                    variant="outline"
+                    onClick={() => setIsCalendarOpen(true)}
+                    className="w-full justify-between border-gray-300 transition-all duration-150 shadow-sm hover:border-blue-500 focus:ring-2 focus:ring-blue-500 text-gray-900"
+                >
+                    <span className={selectedDateObj ? "font-medium" : "text-gray-500"}>
+                        {formattedSelectedDate}
+                    </span>
+                    <CalendarIcon className="h-4 w-4 text-gray-400" />
+                </Button>
 
-          {/* Time */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">New Time (8:00 - 18:00)</label>
-            <select
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-              disabled={availableSlots.length === 0}
-              className="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-500 text-gray-900"
-              required
-            >
-              <option value="">
-                {availableSlots.length === 0 ? "No available slots" : "Select a new time"}
+                {isCalendarOpen && (
+                    <div 
+                        className="fixed inset-0 z-40 bg-black/40 flex items-center justify-center p-4"
+                        onClick={() => setIsCalendarOpen(false)}
+                    >
+                        <div 
+                            className="bg-white rounded-xl shadow-2xl p-4 w-full max-w-sm relative"
+                            onClick={(e) => e.stopPropagation()} // Keep popover open when clicking inside
+                        >
+                            <button
+                                type="button"
+                                onClick={() => setIsCalendarOpen(false)}
+                                className="absolute top-2 right-2 p-1 text-gray-400 hover:text-gray-700 transition"
+                            >
+                                <X className="h-5 w-5" />
+                            </button>
+                            <ChatDatePicker
+                                selectedDate={selectedDateObj}
+                                onDateSelect={handleDateSelect}
+                                onReset={handleDateReset}
+                            />
+                        </div>
+                    </div>
+                )}
+            </div>
+            <p className="text-xs text-gray-500 mt-1">Select a weekday (Mon-Fri) that is not in the past.</p>
+          </div>
+
+          {/* Time */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">New Time (8:00 - 18:00)</label>
+            <select
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              disabled={availableSlots.length === 0 || !selectedDateObj}
+              className="w-full border rounded-lg px-3 py-2 disabled:bg-gray-100 disabled:text-gray-500 text-gray-900"
+              required
+            >
+              <option value="">
+                {!selectedDateObj ? "Select a date first" : availableSlots.length === 0 ? "No available slots" : "Select a new time"}
               </option>
-              {availableSlots.map((t) => (
-                <option 
+              {availableSlots.map((t) => (
+                <option 
                     key={t} 
                     value={t}
                     className={isRoundHour(t) ? 'font-medium' : ''}
                 >
-                  {t}
-                </option>
-              ))}
-            </select>
+                  {t}
+                </option>
+              ))}
+            </select>
             {isToday && availableSlots.length > 0 && (
                 <p className="text-xs text-blue-600 mt-1">Times earlier than {currentTimeCutoff} (2-hour booking buffer) are hidden.</p>
             )}
             {isViewingOriginalDate && availableSlots.length > 0 && (
-                 <p className="text-xs text-yellow-600 mt-1">Your current time slot ({originalTime}) is hidden as you must select a new time.</p>
+                 <p className="text-xs text-yellow-600 mt-1">Your current time slot ({originalTime}) is unavailable on this date.</p>
             )}
-          </div>
+          </div>
 
-          {/* Timezone */}
-          <div>
-            <label className="block text-sm font-medium mb-1 text-gray-700">Time Zone</label>
-            <input
-              type="text"
-              value={currentApptTimezone}
-              readOnly
-              className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 font-medium cursor-default"
-            />
-          </div>
+          {/* Timezone */}
+          <div>
+            <label className="block text-sm font-medium mb-1 text-gray-700">Time Zone</label>
+            <input
+              type="text"
+              value={currentApptTimezone}
+              readOnly
+              className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-700 font-medium cursor-default"
+            />
+            <p className="text-xs text-gray-500 mt-1">This appointment is fixed to the original timezone.</p>
+          </div>
 
-          {/* Submit */}
-          <button
-            type="submit"
-            disabled={isSubmitting || (date === originalDate && time === originalTime) || !time}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium shadow-md hover:bg-blue-700 disabled:bg-blue-300 transition duration-150 mt-6"
-          >
-            {isSubmitting ? "Updating..." : "Update Appointment"}
-          </button>
-        </form>
-      </div>
-      </div>
-  );
+          {/* Submit */}
+          <button
+            type="submit"
+            disabled={isSubmitting || !dateStr || !time || (dateStr === originalDateStr && time === originalTime)}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium shadow-md hover:bg-blue-700 disabled:bg-blue-300 transition duration-150 mt-6"
+          >
+            {isSubmitting ? "Updating..." : "Update Appointment"}
+          </button>
+        </form>
+      </div>
+      </div>
+  );
 }
-```eof
-
-### Key Changes Summary:
-
-1.  **Current Appointment Display:** The display now correctly shows the original date, time, and timezone from the URL parameters (e.g., `Current appt: 10/02/2025 at 10:00 (Timezone: America/New York)`).
-2.  **Disabled Dates Logic:** A new helper function, `getDisabledDates`, was added to generate an array of `Date` objects corresponding to **all past dates and all weekends**. This array is what you should pass to the `disabled` prop of your actual `Calendar` component.
-3.  **Date Picker UI:** The `DateSelect` component was visually updated to look like a calendar input field (with the calendar icon) to better reflect the desired UI, while still using the reliable list-based selection logic as a temporary measure.
-4.  **Time Slot Filtering:** The logic to filter out the **original time slot** on the original date, and the logic to filter out **already booked time slots** (using the Supabase fetch) are both confirmed as functional.
-
-When you integrate your actual calendar component (`src/components/ui/calendar.tsx`), you will replace the custom `DateSelect` with a Popover/Dialog containing your Calendar component, passing the `disabledDates` array to its `disabled` prop and using the `handleDateChange` function as its `onSelect` handler.
-
