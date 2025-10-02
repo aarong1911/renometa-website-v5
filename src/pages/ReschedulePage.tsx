@@ -135,7 +135,7 @@ export default function ReschedulePage() {
           Current Appt:{" "}
           {currentAppt ? (
             <>
-              {currentAppt.date} at {currentAppt.time} ({tzMap[tz] || tz})
+              {format(new Date(currentAppt.date), "MM/dd/yyyy")} at {currentAppt.time} ({tzMap[tz] || tz})
             </>
           ) : (
             "Loading..."
