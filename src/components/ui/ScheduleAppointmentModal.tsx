@@ -8,9 +8,9 @@ import {
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
-import { useAppointment } from "@/hooks/useAppointment";
 import { Calendar } from "@/components/ui/calendar";
 import { Calendar as CalendarIcon } from "lucide-react";
+import { useAppointment } from "@/hooks/useAppointment";
 import { format } from "date-fns";
 
 interface ScheduleAppointmentModalProps {
@@ -34,8 +34,6 @@ export default function ScheduleAppointmentModal({
     resetAppointment,
   } = useAppointment();
 
-  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-
   const todayDateString = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = React.useState({
@@ -46,6 +44,8 @@ export default function ScheduleAppointmentModal({
     appointment_time: "",
     timezone: "",
   });
+
+  const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -78,7 +78,6 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
-    // Ensure slot is still available
     if (!availableSlots.find((s) => s.value === formData.appointment_time)) {
       toast({
         title: "Time Slot Unavailable",
@@ -131,7 +130,6 @@ export default function ScheduleAppointmentModal({
           Book your strategy call.
         </DialogDescription>
 
-        {/* Close Button */}
         <Button
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
@@ -182,7 +180,7 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* Date Dropdown */}
+            {/* New Date with Dropdown Calendar */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
@@ -191,26 +189,30 @@ export default function ScheduleAppointmentModal({
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                  className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm flex justify-between items-center"
+                  className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-gray-800 text-white placeholder:text-gray-300"
                 >
-                  {selectedDate
-                    ? format(selectedDate, "MM/dd/yyyy")
+                  {formData.appointment_date
+                    ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
                     : "Select a date"}
-                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                  <CalendarIcon className="h-4 w-4 text-gray-300" />
                 </button>
 
                 {isCalendarOpen && (
-                  <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                  <div className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-900">
                     <Calendar
                       mode="single"
-                      selected={selectedDate}
+                      selected={
+                        formData.appointment_date
+                          ? new Date(formData.appointment_date)
+                          : undefined
+                      }
                       onSelect={(d) => {
                         if (d) {
-                          setSelectedDate(d);
                           setFormData((prev) => ({
                             ...prev,
                             appointment_date: format(d, "yyyy-MM-dd"),
                           }));
+                          setSelectedDate(d);
                           setIsCalendarOpen(false);
                         }
                       }}
@@ -220,6 +222,16 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
+                      classNames={{
+                        caption_label: "text-gray-900 font-medium",
+                        head_cell: "text-gray-500 font-normal",
+                        day: "text-gray-900 hover:bg-blue-600 hover:text-white rounded-md",
+                        day_selected:
+                          "bg-blue-600 text-white hover:bg-blue-700",
+                        day_disabled:
+                          "text-gray-400 opacity-50 line-through cursor-not-allowed",
+                        nav_button: "text-gray-600 hover:text-black",
+                      }}
                     />
                   </div>
                 )}
