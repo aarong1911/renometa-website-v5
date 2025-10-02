@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useState, useEffect, useMemo } from "react";
+import { useSearchParams } from "react-router-dom";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
 import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/lib/supabaseClient";
-import { Button } from "@/components/ui/button";
 
-// Short timezone mapping
+// Map long TZ names to short versions
 const tzMap: Record<string, string> = {
   "America/New_York": "EST",
   "America/Chicago": "CST",
@@ -23,159 +23,136 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-interface ScheduleAppointmentModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
-}
+export default function ReschedulePage() {
+  const [sp] = useSearchParams();
+  const apptId = sp.get("appt_id") ?? "";
+  const tz = sp.get("tz") ?? "America/New_York";
 
-export default function ScheduleAppointmentModal({
-  open,
-  onOpenChange,
-}: ScheduleAppointmentModalProps) {
-  const [formData, setFormData] = useState({
-    name: "",
-    email: "",
-    phone: "",
-    appointment_date: "",
-    appointment_time: "",
-    timezone: "America/New_York",
-  });
-
+  const [currentAppt, setCurrentAppt] = useState<{ date: string; time: string } | null>(null);
+  const [date, setDate] = useState<Date | undefined>();
+  const [time, setTime] = useState("");
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
-  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const allSlots = useMemo(() => generateTimeSlots(), []);
+
+  // Fetch current appointment
+  useEffect(() => {
+    const fetchAppt = async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("appointment_date, appointment_time")
+        .eq("id", apptId)
+        .single();
+
+      if (data) {
+        setCurrentAppt({ date: data.appointment_date, time: data.appointment_time });
+      }
+    };
+    if (apptId) fetchAppt();
+  }, [apptId]);
 
   // Fetch taken slots for selected date
   useEffect(() => {
     const fetchSlots = async () => {
-      if (!formData.appointment_date) return;
+      if (!date) return;
+      const dateStr = format(date, "yyyy-MM-dd");
 
       const { data } = await supabase
         .from("appointments")
-        .select("appointment_time");
+        .select("appointment_time,id")
+        .eq("appointment_date", dateStr);
 
       if (data) {
-        setTakenSlots(data.map((row: any) => row.appointment_time));
+        const filtered = data
+          .filter((row) => row.id !== apptId) // exclude current appt
+          .map((row) => row.appointment_time);
+        setTakenSlots(filtered);
       }
     };
     fetchSlots();
-  }, [formData.appointment_date]);
+  }, [date, apptId]);
 
-  // 2-hour buffer logic
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const cutoffTime = useMemo(() => {
-    if (!formData.appointment_date || formData.appointment_date !== todayStr)
-      return "00:00";
+    if (!date || format(date, "yyyy-MM-dd") !== todayStr) return "00:00";
     const now = new Date();
-    now.setMinutes(now.getMinutes() + 120);
+    now.setMinutes(now.getMinutes() + 120); // +2 hours
     const hh = String(now.getHours()).padStart(2, "0");
     const mm = now.getMinutes() < 30 ? "30" : "00";
     return `${hh}:${mm}`;
-  }, [formData.appointment_date, todayStr]);
+  }, [date, todayStr]);
 
+  // Filter available slots
   const availableSlots = allSlots.filter((slot) => {
-    if (!formData.appointment_date) return false;
+    if (!date) return false;
+    const dateStr = format(date, "yyyy-MM-dd");
+
+    // Remove taken slots
     if (takenSlots.includes(slot)) return false;
-    if (formData.appointment_date === todayStr && slot <= cutoffTime)
-      return false;
+
+    // Remove original appt slot if rescheduling same date
+    if (currentAppt && dateStr === currentAppt.date && slot === currentAppt.time) return false;
+
+    // Apply buffer for today
+    if (dateStr === todayStr && slot <= cutoffTime) return false;
+
     return true;
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
+    if (!date || !time) return;
 
-    try {
-      await fetch("/.netlify/functions/book-appointment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, source: "modal" }),
-      });
+    await fetch("/.netlify/functions/reschedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        appt_id: apptId,
+        date: format(date, "yyyy-MM-dd"),
+        time,
+        tz,
+      }),
+    });
 
-      alert(
-        `✅ Appointment scheduled for ${format(
-          new Date(formData.appointment_date),
-          "MM/dd/yyyy"
-        )} at ${formData.appointment_time} (${tzMap[formData.timezone]})`
-      );
-
-      onOpenChange(false);
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        appointment_date: "",
-        appointment_time: "",
-        timezone: "America/New_York",
-      });
-    } catch (err: any) {
-      alert("❌ Error scheduling appointment. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
+    alert("✅ Appointment rescheduled successfully!");
   };
 
   return (
-    <div
-      className={`fixed inset-0 z-50 flex items-center justify-center ${
-        open ? "" : "hidden"
-      }`}
-    >
-      <div className="bg-[#1d2531] text-white w-[90%] max-w-[550px] rounded-xl shadow-lg px-6 py-12 relative">
-        {/* Close button */}
-        <button
-          onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
-        >
-          ✕
-        </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow p-6">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            src="https://renometa.com/images/renometa-logo.png"
+            alt="RenoMeta Logo"
+            className="h-12"
+          />
+        </div>
 
-        <h2 className="text-xl font-semibold mb-6">Book Your Appointment</h2>
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">Reschedule Appointment</h1>
+        <p className="text-sm text-gray-500 mb-6">
+          Current Appt:{" "}
+          {currentAppt ? (
+            <>
+              {format(new Date(currentAppt.date), "MM/dd/yyyy")} at {currentAppt.time} ({tzMap[tz] || tz})
+            </>
+          ) : (
+            "Loading..."
+          )}
+        </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Name, Email, Phone */}
-          <input
-            type="text"
-            placeholder="Full Name *"
-            value={formData.name}
-            onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-            required
-            className="w-full border rounded-lg px-3 py-2 text-gray-900"
-          />
-          <input
-            type="email"
-            placeholder="Email *"
-            value={formData.email}
-            onChange={(e) =>
-              setFormData({ ...formData, email: e.target.value })
-            }
-            required
-            className="w-full border rounded-lg px-3 py-2 text-gray-900"
-          />
-          <input
-            type="tel"
-            placeholder="Phone"
-            value={formData.phone}
-            onChange={(e) =>
-              setFormData({ ...formData, phone: e.target.value })
-            }
-            className="w-full border rounded-lg px-3 py-2 text-gray-900"
-          />
-
-          {/* Date dropdown */}
+          {/* Date Dropdown */}
           <div>
-            <label className="block text-sm font-medium mb-1">Date *</label>
+            <label className="block text-sm font-medium mb-1">New date</label>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-white text-gray-900"
+                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center"
               >
-                {formData.appointment_date
-                  ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
-                  : "Select a date"}
+                {date ? format(date, "MM/dd/yyyy") : "Select a date"}
                 <CalendarIcon className="h-4 w-4 text-gray-500" />
               </button>
 
@@ -183,18 +160,9 @@ export default function ScheduleAppointmentModal({
                 <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
                   <Calendar
                     mode="single"
-                    selected={
-                      formData.appointment_date
-                        ? new Date(formData.appointment_date)
-                        : undefined
-                    }
+                    selected={date}
                     onSelect={(d) => {
-                      setFormData({
-                        ...formData,
-                        appointment_date: d
-                          ? format(d, "yyyy-MM-dd")
-                          : "",
-                      });
+                      setDate(d);
                       setIsCalendarOpen(false);
                     }}
                     disabled={(day) =>
@@ -209,15 +177,13 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Time dropdown */}
+          {/* Time */}
           <div>
-            <label className="block text-sm font-medium mb-1">Time *</label>
+            <label className="block text-sm font-medium mb-1">New time</label>
             <select
-              value={formData.appointment_time}
-              onChange={(e) =>
-                setFormData({ ...formData, appointment_time: e.target.value })
-              }
-              className="w-full border rounded-lg px-3 py-2 text-gray-900"
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
               required
             >
               <option value="">Select a time</option>
@@ -229,34 +195,26 @@ export default function ScheduleAppointmentModal({
             </select>
           </div>
 
-          {/* Time zone */}
+          {/* Timezone */}
           <div>
-            <label className="block text-sm font-medium mb-1">Time Zone *</label>
-            <select
-              value={formData.timezone}
-              onChange={(e) =>
-                setFormData({ ...formData, timezone: e.target.value })
-              }
-              className="w-full border rounded-lg px-3 py-2 text-gray-900"
-              required
-            >
-              <option value="America/New_York">Eastern (EST)</option>
-              <option value="America/Chicago">Central (CST)</option>
-              <option value="America/Denver">Mountain (MST)</option>
-              <option value="America/Los_Angeles">Pacific (PST)</option>
-            </select>
+            <label className="block text-sm font-medium mb-1">Time zone</label>
+            <input
+              type="text"
+              value={tzMap[tz] || tz}
+              readOnly
+              className="w-full border rounded-lg px-3 py-2 bg-gray-100"
+            />
           </div>
 
-          {/* Submit */}
-          <Button
+          <button
             type="submit"
-            disabled={isSubmitting}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-300"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700"
           >
-            {isSubmitting ? "Scheduling..." : "Schedule Appointment"}
-          </Button>
+            Update Appointment
+          </button>
         </form>
       </div>
     </div>
   );
 }
+
