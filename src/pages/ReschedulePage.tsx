@@ -1,41 +1,59 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-
-// Generate all slots 08:00 → 18:00 in 30-min increments
-const generateTimeSlots = (startHour: number, endHour: number): string[] => {
-  const slots: string[] = [];
-  for (let h = startHour; h < endHour; h++) {
-    for (let m = 0; m < 60; m += 30) {
-      const hh = String(h).padStart(2, "0");
-      const mm = String(m).padStart(2, "0");
-      slots.push(`${hh}:${mm}`);
-    }
-  }
-  return slots;
-};
-
-// Round-hour helper
-const isRoundHour = (time: string) => time.endsWith(":00");
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
-  // Params from URL
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
-  const originalDate = sp.get("date") ?? "";
-  const originalTime = sp.get("time") ?? "";
 
-  const [date, setDate] = useState(originalDate);
+  // Current appointment details
+  const [originalDate, setOriginalDate] = useState("");
+  const [originalTime, setOriginalTime] = useState("");
+
+  // Form state
+  const [date, setDate] = useState("");
   const [time, setTime] = useState("");
-  const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // All slots 08:00 → 18:00
-  const timeSlots = generateTimeSlots(8, 18);
+  // Slots
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
 
-  // Fetch taken slots for this date
+  // Generate slots 08:00 → 18:00, 30min increments
+  const timeSlots = useMemo(() => {
+    const slots: string[] = [];
+    for (let h = 8; h < 18; h++) {
+      for (let m = 0; m < 60; m += 30) {
+        const hh = String(h).padStart(2, "0");
+        const mm = String(m).padStart(2, "0");
+        slots.push(`${hh}:${mm}`);
+      }
+    }
+    return slots;
+  }, []);
+
+  // ✅ Fetch current appointment
+  useEffect(() => {
+    const fetchOriginal = async () => {
+      if (!apptId) return;
+      const { data, error } = await supabase
+        .from("appointments")
+        .select("appointment_date, appointment_time")
+        .eq("id", apptId)
+        .single();
+
+      if (!error && data) {
+        setOriginalDate(data.appointment_date);
+        setOriginalTime(data.appointment_time);
+        setDate(data.appointment_date);
+        setTime(""); // force user to pick new time
+      }
+    };
+    fetchOriginal();
+  }, [apptId]);
+
+  // ✅ Fetch taken slots for this date
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date) return;
@@ -46,28 +64,45 @@ export default function ReschedulePage() {
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId) // exclude this appointment id
+          .filter((row) => row.id !== apptId) // exclude current appt
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
-      } else {
-        setTakenSlots([]);
       }
     };
     fetchTaken();
   }, [date, apptId]);
 
-  // Apply buffer + remove taken slots + remove original slot on same date
+  // ✅ Weekends check
+  const isWeekend = (d: string) => {
+    const day = new Date(d).getDay();
+    return day === 0 || day === 6;
+  };
+
+  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newDate = e.target.value;
+    if (isWeekend(newDate)) {
+      alert("❌ Weekends cannot be selected. Please pick a weekday.");
+      return;
+    }
+    setDate(newDate);
+    setTime(""); // reset time
+  };
+
+  // ✅ Available slots
   const availableSlots = timeSlots.filter((slot) => {
+    // Remove other users' taken slots
     if (takenSlots.includes(slot)) return false;
+    // Remove original slot on original date
     if (date === originalDate && slot === originalTime) return false;
 
-    // 2h buffer if rescheduling today
+    // Apply 2h buffer if rescheduling for today
     const today = new Date().toISOString().split("T")[0];
     if (date === today) {
+      const now = new Date();
       const [h, m] = slot.split(":").map(Number);
       const slotDate = new Date();
       slotDate.setHours(h, m, 0, 0);
-      const minAllowed = new Date(new Date().getTime() + 2 * 60 * 60 * 1000);
+      const minAllowed = new Date(now.getTime() + 2 * 60 * 60 * 1000);
       if (slotDate <= minAllowed) return false;
     }
 
@@ -80,13 +115,8 @@ export default function ReschedulePage() {
       alert("❌ Appointment ID missing.");
       return;
     }
-    if (!date || !time) {
-      alert("❌ Please select date and time.");
-      return;
-    }
-
-    setIsSubmitting(true);
     try {
+      setIsSubmitting(true);
       const res = await fetch("/.netlify/functions/reschedule", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -98,9 +128,8 @@ export default function ReschedulePage() {
           status: "rescheduled",
         }),
       });
-
       if (res.ok) {
-        alert(`✅ Appointment rescheduled to ${date} at ${time}`);
+        alert("✅ Appointment rescheduled successfully!");
       } else {
         const err = await res.json();
         alert("❌ Error: " + err.error);
@@ -111,6 +140,9 @@ export default function ReschedulePage() {
       setIsSubmitting(false);
     }
   };
+
+  // ✅ Round hour highlight
+  const isRoundHour = (slot: string) => slot.endsWith(":00");
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
@@ -127,15 +159,11 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-
-        {/* ✅ Show current appt */}
         <p className="text-sm text-gray-500 mb-6">
           Current appt:{" "}
-          {originalDate && originalTime ? (
-            <strong>{originalDate} / {originalTime}</strong>
-          ) : (
-            "-"
-          )}
+          {originalDate && originalTime
+            ? `${originalDate} / ${originalTime}`
+            : "-"}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -145,9 +173,9 @@ export default function ReschedulePage() {
             <input
               type="date"
               value={date}
-              onChange={(e) => setDate(e.target.value)}
-              min={new Date().toISOString().split("T")[0]}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800 focus:ring-blue-500 focus:border-blue-500"
+              onChange={handleDateChange}
+              className="w-full border rounded-lg px-3 py-2"
+              min={new Date().toISOString().split("T")[0]} // block past dates
               required
             />
           </div>
@@ -158,7 +186,7 @@ export default function ReschedulePage() {
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-gray-800"
+              className="w-full border rounded-lg px-3 py-2"
               required
             >
               <option value="">Select a time</option>
@@ -166,7 +194,11 @@ export default function ReschedulePage() {
                 <option
                   key={t}
                   value={t}
-                  style={isRoundHour(t) ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}}
+                  style={
+                    isRoundHour(t)
+                      ? { backgroundColor: "rgba(59,130,246,0.1)" }
+                      : {}
+                  }
                 >
                   {t}
                 </option>
@@ -174,22 +206,22 @@ export default function ReschedulePage() {
             </select>
           </div>
 
-          {/* Timezone */}
+          {/* Timezone (read-only) */}
           <div>
             <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
               type="text"
               value={tz}
               readOnly
-              className="w-full border rounded-lg px-3 py-2 bg-gray-100 text-gray-600"
+              className="w-full border rounded-lg px-3 py-2 bg-gray-100"
             />
           </div>
 
           {/* Submit */}
           <button
             type="submit"
-            disabled={isSubmitting || !time}
-            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-300 disabled:cursor-not-allowed"
+            disabled={isSubmitting || !date || !time}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-gray-300"
           >
             {isSubmitting ? "Updating..." : "Update Appointment"}
           </button>
