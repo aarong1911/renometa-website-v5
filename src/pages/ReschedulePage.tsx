@@ -29,7 +29,7 @@ export default function ReschedulePage() {
     return slots;
   }, []);
 
-  // 🔹 Fetch taken slots for the selected date
+  // 🔹 Fetch taken slots for selected date
   useEffect(() => {
     if (!date) return;
     const fetchTaken = async () => {
@@ -41,7 +41,7 @@ export default function ReschedulePage() {
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId) // exclude this appt
+          .filter((row) => row.id !== apptId)
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
       } else {
@@ -51,7 +51,7 @@ export default function ReschedulePage() {
     fetchTaken();
   }, [date, apptId]);
 
-  // 🔹 Apply taken slots + buffer + exclude current slot
+  // 🔹 Available slots logic
   const availableSlots = useMemo(() => {
     if (!date) return [];
     const dateStr = format(date, "yyyy-MM-dd");
@@ -60,7 +60,7 @@ export default function ReschedulePage() {
       if (takenSlots.includes(slot)) return false;
       if (dateStr === originalDate && slot === originalTime) return false;
 
-      // Apply 2-hour buffer for same day
+      // 2-hour buffer if rescheduling today
       const todayStr = format(new Date(), "yyyy-MM-dd");
       if (dateStr === todayStr) {
         const [hh, mm] = slot.split(":").map(Number);
@@ -101,6 +101,9 @@ export default function ReschedulePage() {
     }
   };
 
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow p-6">
@@ -125,24 +128,21 @@ export default function ReschedulePage() {
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date */}
+          {/* New Date */}
           <div>
             <label className="block text-sm font-medium mb-1">New Date</label>
             <Calendar
               mode="single"
               selected={date}
               onSelect={setDate}
+              defaultMonth={date || new Date()}
               captionLayout="dropdown"
-              disabled={(d) => {
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                return d < today || d.getDay() === 0 || d.getDay() === 6;
-              }}
+              disabled={(d) => d < today || d.getDay() === 0 || d.getDay() === 6}
               className="rounded-md border bg-white w-full"
             />
           </div>
 
-          {/* Time */}
+          {/* New Time */}
           <div>
             <label className="block text-sm font-medium mb-1">New Time</label>
             <select
