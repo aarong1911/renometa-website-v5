@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/Calendar";
 import { Button } from "@/components/ui/button";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
   const apptId = sp.get("appt_id") ?? "";
-  const tz = sp.get("tz") ?? "America/New_York"; // Appointment's original TZ
+  const tz = sp.get("tz") ?? "America/New_York";
   const originalDate = sp.get("date") ?? "";
   const originalTime = sp.get("time") ?? "";
 
@@ -27,12 +27,14 @@ export default function ReschedulePage() {
     }
     return slots;
   };
+
   const [allSlots] = useState<string[]>(generateSlots());
 
-  // 🔹 Fetch taken slots (exclude current appt’s slot)
+  // 🔹 Fetch taken slots for the selected date
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date) return;
+
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time,id")
@@ -40,32 +42,31 @@ export default function ReschedulePage() {
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId)
+          .filter((row) => row.id !== apptId) // exclude this appt
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
       } else {
         setTakenSlots([]);
       }
     };
+
     fetchTaken();
   }, [date, apptId]);
 
-  // 🔹 Filter available slots
+  // 🔹 Filter slots
   const availableSlots = allSlots.filter((slot) => {
     if (takenSlots.includes(slot)) return false;
+    // hide the user’s current slot when rescheduling same date
     if (date === originalDate && slot === originalTime) return false;
 
-    // Apply 2-hour buffer in appointment’s TZ
-    const todayInTZ = new Date().toLocaleDateString("en-CA", { timeZone: tz });
-    if (date === todayInTZ) {
+    // 2-hour buffer if rescheduling today
+    const today = new Date().toISOString().split("T")[0];
+    if (date === today) {
       const [hh, mm] = slot.split(":").map(Number);
-
-      const tzNow = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
-      const minAllowed = new Date(tzNow.getTime() + 2 * 60 * 60 * 1000);
-
-      const slotDate = new Date(tzNow);
+      const slotDate = new Date();
       slotDate.setHours(hh, mm, 0, 0);
 
+      const minAllowed = new Date(Date.now() + 2 * 60 * 60 * 1000);
       if (slotDate <= minAllowed) return false;
     }
     return true;
@@ -117,11 +118,8 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
-
-        {/* Current Appointment */}
         <p className="text-sm text-gray-500 mb-6">
-          Current appt:{" "}
-          {originalDate && originalTime ? `${originalDate} / ${originalTime} (${tz})` : "-"}
+          Current appt: {originalDate} / {originalTime}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -130,12 +128,10 @@ export default function ReschedulePage() {
             <label className="block text-sm font-medium mb-1">New date</label>
             <Calendar
               mode="single"
-              selected={date ? new Date(date + "T00:00:00") : undefined}
-              onSelect={(d) =>
-                setDate(d ? d.toLocaleDateString("en-CA", { timeZone: tz }) : "")
-              }
+              selected={date ? new Date(date) : undefined}
+              onSelect={(d) => setDate(d ? d.toISOString().split("T")[0] : "")}
               disabled={(day) => {
-                const today = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+                const today = new Date();
                 today.setHours(0, 0, 0, 0);
                 return (
                   day < today || // past dates
@@ -163,7 +159,11 @@ export default function ReschedulePage() {
                 <option
                   key={t}
                   value={t}
-                  style={t.endsWith(":00") ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}}
+                  style={
+                    t.endsWith(":00")
+                      ? { backgroundColor: "rgba(59,130,246,0.1)" }
+                      : {}
+                  }
                 >
                   {t}
                 </option>
@@ -176,7 +176,7 @@ export default function ReschedulePage() {
             <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
               type="text"
-              value={tz.replace(/_/g, " ")}
+              value={tz}
               readOnly
               className="w-full border rounded-lg px-3 py-2 bg-gray-100"
             />
@@ -195,3 +195,4 @@ export default function ReschedulePage() {
     </div>
   );
 }
+
