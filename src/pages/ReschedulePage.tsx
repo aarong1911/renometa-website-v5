@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/Calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { CalendarIcon } from "lucide-react";
@@ -15,70 +15,65 @@ export default function ReschedulePage() {
   const originalDate = sp.get("date") ?? "";
   const originalTime = sp.get("time") ?? "";
 
-  const [date, setDate] = useState<Date | undefined>(
-    originalDate ? new Date(originalDate) : undefined
-  );
-  const [time, setTime] = useState(originalTime);
+  const [date, setDate] = useState(originalDate);
+  const [time, setTime] = useState("");
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [open, setOpen] = useState(false); // controls popover open/close
 
-  // Generate 30-min slots 08:00–18:00
-  const generateSlots = () => {
+  // Generate 30-min slots 08:00 → 18:00
+  const generateSlots = (): string[] => {
     const slots: string[] = [];
     for (let h = 8; h < 18; h++) {
-      for (let m = 0; m < 60; m += 30) {
+      for (let m of [0, 30]) {
         slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
       }
     }
     return slots;
   };
-  const timeSlots = generateSlots();
+  const [allSlots] = useState<string[]>(generateSlots());
 
-  // Fetch taken slots
+  // Fetch taken slots for selected date
   useEffect(() => {
-    const fetchSlots = async () => {
+    const fetchTaken = async () => {
       if (!date) return;
-      const dateStr = date.toISOString().split("T")[0];
 
       const { data, error } = await supabase
         .from("appointments")
-        .select("id, appointment_time")
-        .eq("appointment_date", dateStr);
+        .select("appointment_time,id")
+        .eq("appointment_date", date);
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId)
-          .map((row) => row.appointment_time.slice(0, 5));
+          .filter((row) => row.id !== apptId) // exclude current appt
+          .map((row) => row.appointment_time);
         setTakenSlots(filtered);
+      } else {
+        setTakenSlots([]);
       }
     };
-    fetchSlots();
+    fetchTaken();
   }, [date, apptId]);
 
-  // Filter available slots
-  const availableSlots = timeSlots.filter((slot) => {
-    if (!date) return false;
-
-    const today = new Date();
-    const dateStr = date.toISOString().split("T")[0];
-
+  // Filter slots
+  const availableSlots = allSlots.filter((slot) => {
     if (takenSlots.includes(slot)) return false;
-    if (dateStr === originalDate && slot === originalTime) return false;
+    if (date === originalDate && slot === originalTime) return false; // hide original slot
 
-    if (date.toDateString() === today.toDateString()) {
-      const [h, m] = slot.split(":").map(Number);
-      const slotTime = new Date(today);
-      slotTime.setHours(h, m, 0, 0);
-      const minAllowed = new Date(today.getTime() + 2 * 60 * 60 * 1000);
-      if (slotTime <= minAllowed) return false;
+    const today = new Date().toISOString().split("T")[0];
+    if (date === today) {
+      const [hh, mm] = slot.split(":").map(Number);
+      const slotDate = new Date();
+      slotDate.setHours(hh, mm, 0, 0);
+      const minAllowed = new Date(Date.now() + 2 * 60 * 60 * 1000);
+      if (slotDate <= minAllowed) return false;
     }
-
     return true;
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!date || !time || !apptId) return;
+    if (!apptId) return;
 
     setIsSubmitting(true);
     try {
@@ -87,7 +82,7 @@ export default function ReschedulePage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           appt_id: apptId,
-          date: date.toISOString().split("T")[0],
+          date,
           time,
           tz,
           status: "rescheduled",
@@ -95,13 +90,13 @@ export default function ReschedulePage() {
       });
 
       if (res.ok) {
-        alert("✅ Appointment rescheduled!");
+        alert("✅ Appointment rescheduled successfully!");
       } else {
         const err = await res.json();
         alert("❌ Error: " + err.error);
       }
-    } catch (err) {
-      alert("❌ Network error.");
+    } catch {
+      alert("❌ Network error. Please try again.");
     } finally {
       setIsSubmitting(false);
     }
@@ -110,6 +105,7 @@ export default function ReschedulePage() {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow p-6">
+        {/* Logo */}
         <div className="flex justify-center mb-6">
           <img
             src="https://renometa.com/images/renometa-logo.png"
@@ -122,15 +118,14 @@ export default function ReschedulePage() {
           Reschedule Appointment
         </h1>
         <p className="text-sm text-gray-500 mb-6">
-          Current appt:{" "}
-          {originalDate && originalTime ? `${originalDate} / ${originalTime}` : "-"}
+          Current appt: {originalDate} / {originalTime}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date Picker */}
+          {/* Date Picker with Popover */}
           <div>
             <label className="block text-sm font-medium mb-1">New date</label>
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <Button
                   variant="outline"
@@ -139,14 +134,17 @@ export default function ReschedulePage() {
                   }`}
                 >
                   <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(date, "MM/dd/yyyy") : <span>Select a date</span>}
+                  {date ? format(new Date(date), "MM/dd/yyyy") : <span>Select a date</span>}
                 </Button>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0" align="start">
                 <Calendar
                   mode="single"
-                  selected={date}
-                  onSelect={setDate}
+                  selected={date ? new Date(date) : undefined}
+                  onSelect={(d) => {
+                    setDate(d ? d.toISOString().split("T")[0] : "");
+                    setOpen(false); // ✅ close after selecting
+                  }}
                   disabled={(day) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -166,13 +164,18 @@ export default function ReschedulePage() {
               onChange={(e) => setTime(e.target.value)}
               className="w-full border rounded-lg px-3 py-2"
               required
+              disabled={availableSlots.length === 0}
             >
-              <option value="">Select a time</option>
+              <option value="">
+                {availableSlots.length > 0 ? "Select a time" : "No slots available"}
+              </option>
               {availableSlots.map((t) => (
                 <option
                   key={t}
                   value={t}
-                  style={t.endsWith(":00") ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}}
+                  style={
+                    t.endsWith(":00") ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}
+                  }
                 >
                   {t}
                 </option>
@@ -194,8 +197,8 @@ export default function ReschedulePage() {
           {/* Submit */}
           <Button
             type="submit"
-            disabled={!date || !time || isSubmitting}
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-lg font-medium"
+            disabled={isSubmitting || !time || !date}
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700 disabled:bg-blue-300"
           >
             {isSubmitting ? "Updating..." : "Update Appointment"}
           </Button>
