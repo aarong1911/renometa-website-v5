@@ -8,27 +8,16 @@ import {
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
-// Assuming useAppointment.ts has been updated with forceRefresh
-import { useAppointment } from "@/hooks/useAppointment"; 
+import { Calendar as CalendarIcon } from "lucide-react";
+import { Calendar } from "@/components/ui/calendar"; // ✅ use custom calendar
+import { format } from "date-fns";
+import { useAppointment } from "@/hooks/useAppointment";
 
-// --- DATE FIX: Helper function to create a date object in local time ---
-/**
- * Takes a YYYY-MM-DD string and creates a new Date object representing 
- * midnight of that day in the user's local timezone. This prevents the
- * common bug where new Date('YYYY-MM-DD') defaults to UTC and rolls back
- * the date in timezones ahead of GMT.
- */
 const createLocalDate = (dateString: string): Date => {
-  // YYYY-MM-DD -> [YYYY, MM, DD]
   const parts = dateString.split("-").map(Number);
-  // Date constructor (year, monthIndex, day) uses LOCAL time
-  // Note: month is 0-indexed in JS Date (0=Jan, 11=Dec)
-  return new Date(parts[0], parts[1] - 1, parts[2]); 
+  return new Date(parts[0], parts[1] - 1, parts[2]);
 };
-// -----------------------------------------------------------------------
 
-
-// Normalize to HH:mm always
 const normalizeTime = (raw: string | null | undefined): string => {
   if (!raw) return "";
   return raw.trim().slice(0, 5);
@@ -53,36 +42,31 @@ export default function ScheduleAppointmentModal({
     setIsSubmitting,
     availableSlots,
     resetAppointment,
-    forceRefresh, // Required for the stale availability fix
+    forceRefresh,
   } = useAppointment();
 
-  // Current date for initialization and minimum date constraint
   const todayDateString = new Date().toISOString().split("T")[0];
 
   const [formData, setFormData] = React.useState({
     name: "",
     email: "",
     phone: "",
-    appointment_date: todayDateString, // Defaulted to today
+    appointment_date: todayDateString,
     appointment_time: "",
     timezone: "",
   });
 
-  // ✨ FIX FOR 2-HOUR BUFFER IN MODAL: Synchronize form date with hook state
+  const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
+
   React.useEffect(() => {
-    // Only set the date if the modal is open, to trigger the availability fetch
-    if (open) { 
-      // If the form date is set, update the hook's selectedDate
+    if (open) {
       if (formData.appointment_date) {
-        // ✅ FIX APPLIED: Use the local date creation helper
         setSelectedDate(createLocalDate(formData.appointment_date));
       }
     } else {
-      // Reset selectedDate when the modal closes
-      setSelectedDate(undefined); 
+      setSelectedDate(undefined);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [open, formData.appointment_date]); // Dependency on open and date ensures it runs when modal shows or date input changes
+  }, [open, formData.appointment_date, setSelectedDate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
@@ -90,11 +74,6 @@ export default function ScheduleAppointmentModal({
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
 
-    if (name === "appointment_date") {
-      // When the user changes the date input, this line triggers the useAppointment useEffect
-      // ✅ FIX APPLIED: Use the local date creation helper
-      setSelectedDate(createLocalDate(value));
-    }
     if (name === "appointment_time") {
       setSelectedTime(normalizeTime(value));
     }
@@ -114,21 +93,6 @@ export default function ScheduleAppointmentModal({
       toast({
         title: "Missing fields",
         description: "Fill in all required fields.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    // Ensure slot is still available (quick check to prevent double-booking race conditions)
-    if (
-      !availableSlots.find(
-        (s) => s.value === normalizeTime(formData.appointment_time)
-      )
-    ) {
-      toast({
-        title: "Time Slot Unavailable",
-        description: "The selected time was just booked. Please try again.",
         variant: "destructive",
       });
       setIsSubmitting(false);
@@ -155,7 +119,7 @@ export default function ScheduleAppointmentModal({
 
       onOpenChange(false);
       resetAppointment();
-      forceRefresh(); // Ensures slot disappears after successful booking
+      forceRefresh();
       setFormData({
         name: "",
         email: "",
@@ -195,7 +159,7 @@ export default function ScheduleAppointmentModal({
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone / Date */}
+          {/* Name / Email / Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -234,19 +198,54 @@ export default function ScheduleAppointmentModal({
                 className="w-full text-gray-900"
               />
             </div>
+
+            {/* ✅ Replaced Date Input with Dropdown Calendar */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
               </label>
-              <input
-                type="date"
-                name="appointment_date"
-                value={formData.appointment_date}
-                onChange={handleChange}
-                min={todayDateString}
-                required
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-              />
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  className="w-full border rounded-md px-3 py-2 flex justify-between items-center bg-white text-gray-600 h-11 text-sm"
+                >
+                  {formData.appointment_date
+                    ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
+                    : "Select a date"}
+                  <CalendarIcon className="h-4 w-4 text-gray-500" />
+                </button>
+
+                {isCalendarOpen && (
+                  <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData.appointment_date
+                          ? new Date(formData.appointment_date)
+                          : undefined
+                      }
+                      onSelect={(d) => {
+                        if (d) {
+                          const formatted = format(d, "yyyy-MM-dd");
+                          setFormData((prev) => ({
+                            ...prev,
+                            appointment_date: formatted,
+                          }));
+                          setSelectedDate(d);
+                        }
+                        setIsCalendarOpen(false);
+                      }}
+                      disabled={(day) =>
+                        day < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                        day.getDay() === 0 ||
+                        day.getDay() === 6
+                      }
+                      initialFocus
+                    />
+                  </div>
+                )}
+              </div>
             </div>
           </div>
 
@@ -269,10 +268,9 @@ export default function ScheduleAppointmentModal({
                     ? "Choose a time"
                     : "No times available"}
                 </option>
-                {/* This ensures we only map over the filtered list */}
                 {availableSlots.map((slot) => (
                   <option key={slot.value} value={slot.value}>
-                    {slot.value} 
+                    {slot.value}
                   </option>
                 ))}
               </select>
@@ -320,4 +318,3 @@ export default function ScheduleAppointmentModal({
     </Dialog>
   );
 }
-
