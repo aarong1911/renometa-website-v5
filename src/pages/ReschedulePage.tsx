@@ -2,16 +2,13 @@ import { useState, useEffect } from "react";
 import { useSearchParams } from "react-router-dom";
 import { supabase } from "@/lib/supabaseClient";
 import { Calendar } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { CalendarIcon } from "lucide-react";
-import { format } from "date-fns";
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
 
   const apptId = sp.get("appt_id") ?? "";
-  const tz = sp.get("tz") ?? "America/New_York";
+  const tz = sp.get("tz") ?? "America/New_York"; // Appointment's original TZ
   const originalDate = sp.get("date") ?? "";
   const originalTime = sp.get("time") ?? "";
 
@@ -19,9 +16,8 @@ export default function ReschedulePage() {
   const [time, setTime] = useState("");
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [open, setOpen] = useState(false); // controls popover open/close
 
-  // Generate 30-min slots 08:00 → 18:00
+  // 🔹 Generate 30-min slots 08:00 → 18:00
   const generateSlots = (): string[] => {
     const slots: string[] = [];
     for (let h = 8; h < 18; h++) {
@@ -33,11 +29,10 @@ export default function ReschedulePage() {
   };
   const [allSlots] = useState<string[]>(generateSlots());
 
-  // Fetch taken slots for selected date
+  // 🔹 Fetch taken slots (exclude current appt’s slot)
   useEffect(() => {
     const fetchTaken = async () => {
       if (!date) return;
-
       const { data, error } = await supabase
         .from("appointments")
         .select("appointment_time,id")
@@ -45,7 +40,7 @@ export default function ReschedulePage() {
 
       if (!error && data) {
         const filtered = data
-          .filter((row) => row.id !== apptId) // exclude current appt
+          .filter((row) => row.id !== apptId)
           .map((row) => row.appointment_time);
         setTakenSlots(filtered);
       } else {
@@ -55,17 +50,22 @@ export default function ReschedulePage() {
     fetchTaken();
   }, [date, apptId]);
 
-  // Filter slots
+  // 🔹 Filter available slots
   const availableSlots = allSlots.filter((slot) => {
     if (takenSlots.includes(slot)) return false;
-    if (date === originalDate && slot === originalTime) return false; // hide original slot
+    if (date === originalDate && slot === originalTime) return false;
 
-    const today = new Date().toISOString().split("T")[0];
-    if (date === today) {
+    // Apply 2-hour buffer in appointment’s TZ
+    const todayInTZ = new Date().toLocaleDateString("en-CA", { timeZone: tz });
+    if (date === todayInTZ) {
       const [hh, mm] = slot.split(":").map(Number);
-      const slotDate = new Date();
+
+      const tzNow = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+      const minAllowed = new Date(tzNow.getTime() + 2 * 60 * 60 * 1000);
+
+      const slotDate = new Date(tzNow);
       slotDate.setHours(hh, mm, 0, 0);
-      const minAllowed = new Date(Date.now() + 2 * 60 * 60 * 1000);
+
       if (slotDate <= minAllowed) return false;
     }
     return true;
@@ -117,43 +117,33 @@ export default function ReschedulePage() {
         <h1 className="text-xl font-semibold text-gray-900 mb-4">
           Reschedule Appointment
         </h1>
+
+        {/* Current Appointment */}
         <p className="text-sm text-gray-500 mb-6">
-          Current appt: {originalDate} / {originalTime}
+          Current appt:{" "}
+          {originalDate && originalTime ? `${originalDate} / ${originalTime} (${tz})` : "-"}
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Date Picker with Popover */}
+          {/* Date */}
           <div>
             <label className="block text-sm font-medium mb-1">New date</label>
-            <Popover open={open} onOpenChange={setOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  className={`w-full justify-start text-left font-normal ${
-                    !date && "text-muted-foreground"
-                  }`}
-                >
-                  <CalendarIcon className="mr-2 h-4 w-4" />
-                  {date ? format(new Date(date), "MM/dd/yyyy") : <span>Select a date</span>}
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={date ? new Date(date) : undefined}
-                  onSelect={(d) => {
-                    setDate(d ? d.toISOString().split("T")[0] : "");
-                    setOpen(false); // ✅ close after selecting
-                  }}
-                  disabled={(day) => {
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    return day < today || day.getDay() === 0 || day.getDay() === 6;
-                  }}
-                  initialFocus
-                />
-              </PopoverContent>
-            </Popover>
+            <Calendar
+              mode="single"
+              selected={date ? new Date(date + "T00:00:00") : undefined}
+              onSelect={(d) =>
+                setDate(d ? d.toLocaleDateString("en-CA", { timeZone: tz }) : "")
+              }
+              disabled={(day) => {
+                const today = new Date(new Date().toLocaleString("en-US", { timeZone: tz }));
+                today.setHours(0, 0, 0, 0);
+                return (
+                  day < today || // past dates
+                  day.getDay() === 0 || // Sunday
+                  day.getDay() === 6 // Saturday
+                );
+              }}
+            />
           </div>
 
           {/* Time */}
@@ -173,9 +163,7 @@ export default function ReschedulePage() {
                 <option
                   key={t}
                   value={t}
-                  style={
-                    t.endsWith(":00") ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}
-                  }
+                  style={t.endsWith(":00") ? { backgroundColor: "rgba(59,130,246,0.1)" } : {}}
                 >
                   {t}
                 </option>
@@ -188,7 +176,7 @@ export default function ReschedulePage() {
             <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
               type="text"
-              value={tz}
+              value={tz.replace(/_/g, " ")}
               readOnly
               className="w-full border rounded-lg px-3 py-2 bg-gray-100"
             />
