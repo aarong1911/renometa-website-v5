@@ -1,12 +1,17 @@
 import { useState, useEffect, useMemo } from "react";
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
+import { useSearchParams } from "react-router-dom";
+import { Calendar as CalendarIcon } from "lucide-react";
 import { format } from "date-fns";
-import { DayPicker } from "react-day-picker";
+import { Calendar } from "@/components/ui/calendar";
 import { supabase } from "@/lib/supabaseClient";
 
-interface ScheduleAppointmentModalProps {
-  onClose: () => void;
-}
+// Map long TZ names to short versions
+const tzMap: Record<string, string> = {
+  "America/New_York": "EST",
+  "America/Chicago": "CST",
+  "America/Denver": "MST",
+  "America/Los_Angeles": "PST",
+};
 
 const generateTimeSlots = () => {
   const slots: string[] = [];
@@ -18,7 +23,12 @@ const generateTimeSlots = () => {
   return slots;
 };
 
-export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmentModalProps) {
+export default function ReschedulePage() {
+  const [sp] = useSearchParams();
+  const apptId = sp.get("appt_id") ?? "";
+  const tz = sp.get("tz") ?? "America/New_York";
+
+  const [currentAppt, setCurrentAppt] = useState<{ date: string; time: string } | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
   const [takenSlots, setTakenSlots] = useState<string[]>([]);
@@ -26,7 +36,23 @@ export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmen
 
   const allSlots = useMemo(() => generateTimeSlots(), []);
 
-  // Fetch taken slots
+  // Fetch current appointment
+  useEffect(() => {
+    const fetchAppt = async () => {
+      const { data } = await supabase
+        .from("appointments")
+        .select("appointment_date, appointment_time")
+        .eq("id", apptId)
+        .single();
+
+      if (data) {
+        setCurrentAppt({ date: data.appointment_date, time: data.appointment_time });
+      }
+    };
+    if (apptId) fetchAppt();
+  }, [apptId]);
+
+  // Fetch taken slots for selected date
   useEffect(() => {
     const fetchSlots = async () => {
       if (!date) return;
@@ -34,99 +60,105 @@ export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmen
 
       const { data } = await supabase
         .from("appointments")
-        .select("appointment_time");
+        .select("appointment_time,id")
+        .eq("appointment_date", dateStr);
 
       if (data) {
-        setTakenSlots(data.map((row) => row.appointment_time));
+        const filtered = data
+          .filter((row) => row.id !== apptId) // exclude current appt
+          .map((row) => row.appointment_time);
+        setTakenSlots(filtered);
       }
     };
     fetchSlots();
-  }, [date]);
+  }, [date, apptId]);
 
   const todayStr = format(new Date(), "yyyy-MM-dd");
   const cutoffTime = useMemo(() => {
     if (!date || format(date, "yyyy-MM-dd") !== todayStr) return "00:00";
     const now = new Date();
-    now.setMinutes(now.getMinutes() + 120);
+    now.setMinutes(now.getMinutes() + 120); // +2 hours
     const hh = String(now.getHours()).padStart(2, "0");
     const mm = now.getMinutes() < 30 ? "30" : "00";
     return `${hh}:${mm}`;
   }, [date, todayStr]);
 
+  // Filter available slots
   const availableSlots = allSlots.filter((slot) => {
     if (!date) return false;
     const dateStr = format(date, "yyyy-MM-dd");
+
+    // Remove taken slots
     if (takenSlots.includes(slot)) return false;
+
+    // Remove original appt slot if rescheduling same date
+    if (currentAppt && dateStr === currentAppt.date && slot === currentAppt.time) return false;
+
+    // Apply buffer for today
     if (dateStr === todayStr && slot <= cutoffTime) return false;
+
     return true;
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time) return;
-    alert(`✅ Appointment booked for ${format(date, "MM/dd/yyyy")} at ${time}`);
-    onClose();
+
+    await fetch("/.netlify/functions/reschedule", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        appt_id: apptId,
+        date: format(date, "yyyy-MM-dd"),
+        time,
+        tz,
+      }),
+    });
+
+    alert("✅ Appointment rescheduled successfully!");
   };
 
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
-      <div className="bg-gray-900 text-white rounded-xl shadow-xl w-full max-w-lg p-6">
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-lg font-semibold">Schedule Appointment</h2>
-          <button onClick={onClose} className="text-gray-400 hover:text-white">
-            ✕
-          </button>
+    <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
+      <div className="w-full max-w-md bg-white rounded-2xl shadow p-6">
+        {/* Logo */}
+        <div className="flex justify-center mb-6">
+          <img
+            src="https://renometa.com/images/renometa-logo.png"
+            alt="RenoMeta Logo"
+            className="h-12"
+          />
         </div>
 
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">Reschedule Appointment</h1>
+        <p className="text-sm text-gray-500 mb-6">
+          Current Appt:{" "}
+          {currentAppt ? (
+            <>
+              {format(new Date(currentAppt.date), "MM/dd/yyyy")} at {currentAppt.time} ({tzMap[tz] || tz})
+            </>
+          ) : (
+            "Loading..."
+          )}
+        </p>
+
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Full Name */}
+          {/* Date Dropdown */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Full Name *</label>
-            <input
-              type="text"
-              placeholder="Enter your full name"
-              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
-              required
-            />
-          </div>
-
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email *</label>
-            <input
-              type="email"
-              placeholder="Enter your email"
-              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
-              required
-            />
-          </div>
-
-          {/* Phone */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
-            <input
-              type="tel"
-              placeholder="Enter your phone number"
-              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
-            />
-          </div>
-
-          {/* Date */}
-          <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Date *</label>
+            <label className="block text-sm font-medium mb-1">New date</label>
             <div className="relative">
               <button
                 type="button"
                 onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-gray-800 text-white placeholder-gray-300"
+                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center"
               >
                 {date ? format(date, "MM/dd/yyyy") : "Select a date"}
-                <CalendarIcon className="h-4 w-4 text-gray-400" />
+                <CalendarIcon className="h-4 w-4 text-gray-500" />
               </button>
 
               {isCalendarOpen && (
                 <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
-                  <DayPicker
+                  <Calendar
                     mode="single"
                     selected={date}
                     onSelect={(d) => {
@@ -139,31 +171,6 @@ export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmen
                       day.getDay() === 6
                     }
                     initialFocus
-                    className="p-2"
-                    classNames={{
-                      months: "flex flex-col space-y-2",
-                      month: "space-y-2",
-                      caption: "flex justify-center pt-1 relative items-center text-gray-900",
-                      caption_label: "text-sm font-medium",
-                      nav: "space-x-1 flex items-center",
-                      nav_button: "h-6 w-6 bg-transparent text-gray-700 hover:text-black",
-                      nav_button_previous: "absolute left-1",
-                      nav_button_next: "absolute right-1",
-                      table: "w-full border-collapse space-y-1",
-                      head_row: "flex text-gray-500",
-                      head_cell: "w-9 font-normal text-xs",
-                      row: "flex w-full mt-1",
-                      cell: "h-9 w-9 text-center text-sm p-0 relative",
-                      day: "h-9 w-9 p-0 font-normal text-gray-900 hover:bg-gray-100 rounded-md",
-                      day_selected: "bg-blue-600 text-white rounded-md",
-                      day_today: "border border-blue-500 text-blue-500 font-bold rounded-md",
-                      day_outside: "text-gray-400 opacity-50",
-                      day_disabled: "text-gray-400 opacity-50 line-through",
-                    }}
-                    components={{
-                      IconLeft: () => <ChevronLeft className="h-4 w-4" />,
-                      IconRight: () => <ChevronRight className="h-4 w-4" />,
-                    }}
                   />
                 </div>
               )}
@@ -172,14 +179,14 @@ export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmen
 
           {/* Time */}
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Time *</label>
+            <label className="block text-sm font-medium mb-1">New time</label>
             <select
               value={time}
               onChange={(e) => setTime(e.target.value)}
-              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
+              className="w-full border rounded-lg px-3 py-2"
               required
             >
-              <option value="">Choose a time</option>
+              <option value="">Select a time</option>
               {availableSlots.map((t) => (
                 <option key={t} value={t}>
                   {t}
@@ -188,15 +195,27 @@ export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmen
             </select>
           </div>
 
-          {/* Submit */}
+          {/* Timezone */}
+          <div>
+            <label className="block text-sm font-medium mb-1">Time zone</label>
+            <input
+              type="text"
+              value={tzMap[tz] || tz}
+              readOnly
+              className="w-full border rounded-lg px-3 py-2 bg-gray-100"
+            />
+          </div>
+
           <button
             type="submit"
-            className="w-full bg-yellow-500 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-400"
+            className="w-full bg-blue-600 text-white py-2 px-4 rounded-lg font-medium hover:bg-blue-700"
           >
-            Schedule Appointment
+            Update Appointment
           </button>
         </form>
       </div>
     </div>
   );
 }
+
+
