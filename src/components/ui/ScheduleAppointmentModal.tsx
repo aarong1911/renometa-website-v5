@@ -1,310 +1,202 @@
-import React, { useState } from "react";
-import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { useToast } from "@/hooks/use-toast";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogOverlay,
-} from "@/components/ui/dialog";
-import { Calendar } from "@/components/ui/calendar";
-import { Calendar as CalendarIcon } from "lucide-react";
-import { useAppointment } from "@/hooks/useAppointment";
+import { useState, useEffect, useMemo } from "react";
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight } from "lucide-react";
 import { format } from "date-fns";
+import { DayPicker } from "react-day-picker";
+import { supabase } from "@/lib/supabaseClient";
 
 interface ScheduleAppointmentModalProps {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  onClose: () => void;
 }
 
-export default function ScheduleAppointmentModal({
-  open,
-  onOpenChange,
-}: ScheduleAppointmentModalProps) {
-  const { toast } = useToast();
-  const {
-    selectedDate,
-    setSelectedDate,
-    selectedTime,
-    setSelectedTime,
-    isSubmitting,
-    setIsSubmitting,
-    availableSlots,
-    resetAppointment,
-  } = useAppointment();
+const generateTimeSlots = () => {
+  const slots: string[] = [];
+  for (let h = 8; h < 18; h++) {
+    for (let m of [0, 30]) {
+      slots.push(`${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}`);
+    }
+  }
+  return slots;
+};
 
-  const todayDateString = new Date().toISOString().split("T")[0];
-
-  const [formData, setFormData] = React.useState({
-    name: "",
-    email: "",
-    phone: "",
-    appointment_date: todayDateString,
-    appointment_time: "",
-    timezone: "",
-  });
-
+export default function ScheduleAppointmentModal({ onClose }: ScheduleAppointmentModalProps) {
+  const [date, setDate] = useState<Date | undefined>();
+  const [time, setTime] = useState("");
+  const [takenSlots, setTakenSlots] = useState<string[]>([]);
   const [isCalendarOpen, setIsCalendarOpen] = useState(false);
 
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
-  ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+  const allSlots = useMemo(() => generateTimeSlots(), []);
 
-    if (name === "appointment_time") {
-      setSelectedTime(value);
-    }
-  };
+  // Fetch taken slots
+  useEffect(() => {
+    const fetchSlots = async () => {
+      if (!date) return;
+      const dateStr = format(date, "yyyy-MM-dd");
+
+      const { data } = await supabase
+        .from("appointments")
+        .select("appointment_time");
+
+      if (data) {
+        setTakenSlots(data.map((row) => row.appointment_time));
+      }
+    };
+    fetchSlots();
+  }, [date]);
+
+  const todayStr = format(new Date(), "yyyy-MM-dd");
+  const cutoffTime = useMemo(() => {
+    if (!date || format(date, "yyyy-MM-dd") !== todayStr) return "00:00";
+    const now = new Date();
+    now.setMinutes(now.getMinutes() + 120);
+    const hh = String(now.getHours()).padStart(2, "0");
+    const mm = now.getMinutes() < 30 ? "30" : "00";
+    return `${hh}:${mm}`;
+  }, [date, todayStr]);
+
+  const availableSlots = allSlots.filter((slot) => {
+    if (!date) return false;
+    const dateStr = format(date, "yyyy-MM-dd");
+    if (takenSlots.includes(slot)) return false;
+    if (dateStr === todayStr && slot <= cutoffTime) return false;
+    return true;
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
-
-    if (
-      !formData.name.trim() ||
-      !formData.email.trim() ||
-      !formData.appointment_date ||
-      !formData.appointment_time ||
-      !formData.timezone
-    ) {
-      toast({
-        title: "Missing fields",
-        description: "Fill in all required fields.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    if (!availableSlots.find((s) => s.value === formData.appointment_time)) {
-      toast({
-        title: "Time Slot Unavailable",
-        description: "The selected time was just booked. Please try again.",
-        variant: "destructive",
-      });
-      setIsSubmitting(false);
-      return;
-    }
-
-    try {
-      await fetch("/.netlify/functions/book-appointment", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ...formData, source: "form" }),
-      });
-
-      toast({
-        title: "Appointment Scheduled",
-        description: `See you on ${formData.appointment_date} at ${formData.appointment_time}`,
-      });
-
-      onOpenChange(false);
-      resetAppointment();
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        appointment_date: todayDateString,
-        appointment_time: "",
-        timezone: "",
-      });
-    } catch (err: any) {
-      console.error("Error scheduling:", err);
-      toast({
-        title: "Error",
-        description: "Problem scheduling. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
+    if (!date || !time) return;
+    alert(`✅ Appointment booked for ${format(date, "MM/dd/yyyy")} at ${time}`);
+    onClose();
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogOverlay className="bg-black/50" />
-      <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
-        <DialogDescription className="sr-only">
-          Book your strategy call.
-        </DialogDescription>
+    <div className="fixed inset-0 flex items-center justify-center bg-black/60 z-50">
+      <div className="bg-gray-900 text-white rounded-xl shadow-xl w-full max-w-lg p-6">
+        <div className="flex justify-between items-center mb-4">
+          <h2 className="text-lg font-semibold">Schedule Appointment</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-white">
+            ✕
+          </button>
+        </div>
 
-        <Button
-          onClick={() => onOpenChange(false)}
-          className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
-          variant="ghost"
-          size="icon"
-        >
-          ✕
-        </Button>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Full Name */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Full Name *</label>
+            <input
+              type="text"
+              placeholder="Enter your full name"
+              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
+              required
+            />
+          </div>
 
-        <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Full Name *
-              </label>
-              <Input
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Email *
-              </label>
-              <Input
-                name="email"
-                type="email"
-                value={formData.email}
-                onChange={handleChange}
-                required
-                className="w-full text-gray-900"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Phone
-              </label>
-              <Input
-                name="phone"
-                type="tel"
-                value={formData.phone}
-                onChange={handleChange}
-                className="w-full text-gray-900"
-              />
-            </div>
+          {/* Email */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Email *</label>
+            <input
+              type="email"
+              placeholder="Enter your email"
+              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
+              required
+            />
+          </div>
 
-            {/* New Date with Dropdown Calendar */}
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Date *
-              </label>
-              <div className="relative">
-                <button
-                  type="button"
-                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-                  className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-gray-800 text-white placeholder:text-gray-300"
-                >
-                  {formData.appointment_date
-                    ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
-                    : "Select a date"}
-                  <CalendarIcon className="h-4 w-4 text-gray-300" />
-                </button>
+          {/* Phone */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Phone</label>
+            <input
+              type="tel"
+              placeholder="Enter your phone number"
+              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
+            />
+          </div>
 
-                {isCalendarOpen && (
-                  <div className="absolute z-50 mt-2 bg-white border border-gray-200 rounded-lg shadow-lg text-gray-900">
-                    <Calendar
-                      mode="single"
-                      selected={
-                        formData.appointment_date
-                          ? new Date(formData.appointment_date)
-                          : undefined
-                      }
-                      onSelect={(d) => {
-                        if (d) {
-                          setFormData((prev) => ({
-                            ...prev,
-                            appointment_date: format(d, "yyyy-MM-dd"),
-                          }));
-                          setSelectedDate(d);
-                          setIsCalendarOpen(false);
-                        }
-                      }}
-                      disabled={(day) =>
-                        day < new Date(new Date().setHours(0, 0, 0, 0)) ||
-                        day.getDay() === 0 ||
-                        day.getDay() === 6
-                      }
-                      initialFocus
-                      classNames={{
-                        caption_label: "text-gray-900 font-medium",
-                        head_cell: "text-gray-500 font-normal",
-                        day: "text-gray-900 hover:bg-blue-600 hover:text-white rounded-md",
-                        day_selected:
-                          "bg-blue-600 text-white hover:bg-blue-700",
-                        day_disabled:
-                          "text-gray-400 opacity-50 line-through cursor-not-allowed",
-                        nav_button: "text-gray-600 hover:text-black",
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
+          {/* Date */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Date *</label>
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                className="w-full border rounded-lg px-3 py-2 flex justify-between items-center bg-gray-800 text-white placeholder-gray-300"
+              >
+                {date ? format(date, "MM/dd/yyyy") : "Select a date"}
+                <CalendarIcon className="h-4 w-4 text-gray-400" />
+              </button>
+
+              {isCalendarOpen && (
+                <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                  <DayPicker
+                    mode="single"
+                    selected={date}
+                    onSelect={(d) => {
+                      setDate(d);
+                      setIsCalendarOpen(false);
+                    }}
+                    disabled={(day) =>
+                      day < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                      day.getDay() === 0 ||
+                      day.getDay() === 6
+                    }
+                    initialFocus
+                    className="p-2"
+                    classNames={{
+                      months: "flex flex-col space-y-2",
+                      month: "space-y-2",
+                      caption: "flex justify-center pt-1 relative items-center text-gray-900",
+                      caption_label: "text-sm font-medium",
+                      nav: "space-x-1 flex items-center",
+                      nav_button: "h-6 w-6 bg-transparent text-gray-700 hover:text-black",
+                      nav_button_previous: "absolute left-1",
+                      nav_button_next: "absolute right-1",
+                      table: "w-full border-collapse space-y-1",
+                      head_row: "flex text-gray-500",
+                      head_cell: "w-9 font-normal text-xs",
+                      row: "flex w-full mt-1",
+                      cell: "h-9 w-9 text-center text-sm p-0 relative",
+                      day: "h-9 w-9 p-0 font-normal text-gray-900 hover:bg-gray-100 rounded-md",
+                      day_selected: "bg-blue-600 text-white rounded-md",
+                      day_today: "border border-blue-500 text-blue-500 font-bold rounded-md",
+                      day_outside: "text-gray-400 opacity-50",
+                      day_disabled: "text-gray-400 opacity-50 line-through",
+                    }}
+                    components={{
+                      IconLeft: () => <ChevronLeft className="h-4 w-4" />,
+                      IconRight: () => <ChevronRight className="h-4 w-4" />,
+                    }}
+                  />
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Time + Timezone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Time *
-              </label>
-              <select
-                name="appointment_time"
-                value={formData.appointment_time}
-                onChange={handleChange}
-                required
-                disabled={availableSlots.length === 0}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-              >
-                <option value="">
-                  {availableSlots.length > 0
-                    ? "Choose a time"
-                    : "No times available"}
+          {/* Time */}
+          <div>
+            <label className="block text-sm font-medium text-gray-300 mb-1">Time *</label>
+            <select
+              value={time}
+              onChange={(e) => setTime(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2 bg-gray-800 text-white placeholder-gray-300"
+              required
+            >
+              <option value="">Choose a time</option>
+              {availableSlots.map((t) => (
+                <option key={t} value={t}>
+                  {t}
                 </option>
-                {availableSlots.map((slot) => (
-                  <option key={slot.value} value={slot.value}>
-                    {slot.value}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Time Zone *
-              </label>
-              <select
-                name="timezone"
-                value={formData.timezone}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-              >
-                <option value="">Choose a time zone</option>
-                <option value="America/New_York">Eastern (EST)</option>
-                <option value="America/Chicago">Central (CST)</option>
-                <option value="America/Denver">Mountain (MST)</option>
-                <option value="America/Los_Angeles">Pacific (PST)</option>
-              </select>
-            </div>
+              ))}
+            </select>
           </div>
 
           {/* Submit */}
-          <Button
+          <button
             type="submit"
-            disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
+            className="w-full bg-yellow-500 text-gray-900 py-2 px-4 rounded-lg font-semibold hover:bg-yellow-400"
           >
-            {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
-          </Button>
-
-          {/* Consent */}
-          <p className="text-xs text-gray-400 mt-4">
-            By submitting, you agree to receive text messages from RenoMeta. Msg
-            & data rates may apply. Reply STOP to opt out. View our{" "}
-            <a href="/privacy-policy" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>{" "}
-            and Terms.
-          </p>
+            Schedule Appointment
+          </button>
         </form>
-      </DialogContent>
-    </Dialog>
+      </div>
+    </div>
   );
 }
