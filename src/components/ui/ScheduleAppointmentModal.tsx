@@ -1,5 +1,4 @@
 // src/components/ui/ScheduleAppointmentModal.tsx
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -15,13 +14,10 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
-// --- Time Zone Safe Date Handling ---
 const createLocalDate = (dateString: string): Date => {
   const parts = dateString.split("-").map(Number);
-  // Creates a date at midnight in the system's local time zone
   return new Date(parts[0], parts[1] - 1, parts[2]);
 };
-// ------------------------------------
 
 const normalizeTime = (raw: string | null | undefined): string => {
   if (!raw) return "";
@@ -48,7 +44,6 @@ export default function ScheduleAppointmentModal({
     forceRefresh,
   } = useAppointment();
 
-  // Initialize date string for today
   const todayDateString = format(new Date(), "yyyy-MM-dd");
 
   const [formData, setFormData] = React.useState({
@@ -57,8 +52,7 @@ export default function ScheduleAppointmentModal({
     phone: "",
     appointment_date: todayDateString,
     appointment_time: "",
-    // Setting default to EST
-    timezone: "America/New_York", 
+    timezone: "America/New_York",
   });
 
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -131,7 +125,7 @@ export default function ScheduleAppointmentModal({
         phone: "",
         appointment_date: todayDateString,
         appointment_time: "",
-        timezone: "America/New_York", // Reset to default EST
+        timezone: "America/New_York",
       });
     } catch (err: any) {
       console.error("Error scheduling:", err);
@@ -164,7 +158,7 @@ export default function ScheduleAppointmentModal({
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone / Date Group */}
+          {/* Name / Email / Phone / Date */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -204,7 +198,7 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* ✅ Date with calendar dropdown */}
+            {/* Date with Calendar */}
             <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
@@ -222,7 +216,6 @@ export default function ScheduleAppointmentModal({
                 </button>
 
                 {isCalendarOpen && (
-                  // FIX: Added text-gray-900 to the container to ensure dark text visibility
                   <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg text-gray-900">
                     <Calendar
                       mode="single"
@@ -248,7 +241,13 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      // Removed custom classNames, relying on default styles + dark container text
+                      classNames={{
+                        caption_label: "text-gray-800 font-medium",
+                        nav_button: "text-gray-800",
+                        head_cell: "text-gray-800",
+                        day: "text-gray-800 hover:bg-gray-100 rounded-md",
+                        day_selected: "bg-blue-600 text-white rounded-md",
+                      }}
                     />
                   </div>
                 )}
@@ -256,8 +255,7 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Time + Timezone Group */}
-          {/* 👇 FIX: Added mt-6 to increase separation from the field group above it */}
+          {/* Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -307,7 +305,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-20"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
