@@ -9,7 +9,7 @@ import {
   DialogOverlay,
 } from "@/components/ui/dialog";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar";
+import { Calendar } from "@/components/ui/calendar"; 
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
@@ -34,9 +34,7 @@ export default function ScheduleAppointmentModal({
 }: ScheduleAppointmentModalProps) {
   const { toast } = useToast();
   const {
-    selectedDate,
     setSelectedDate,
-    selectedTime,
     setSelectedTime,
     isSubmitting,
     setIsSubmitting,
@@ -199,12 +197,12 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* ✅ Calendar Popup Styled */}
+            {/* ✅ Date with dropdown calendar */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
               </label>
-              <div className="relative">
+              <div className="relative mb-6"> {/* margin added below button */}
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
@@ -244,10 +242,11 @@ export default function ScheduleAppointmentModal({
                       initialFocus
                       classNames={{
                         caption_label: "text-gray-800 font-medium",
-                        nav_button: "text-gray-800",
-                        head_cell: "text-gray-800",
+                        nav_button: "text-gray-800 hover:text-black",
+                        head_cell: "text-gray-800 font-semibold",
                         day: "text-gray-800 hover:bg-gray-100 rounded-md",
                         day_selected: "bg-blue-600 text-white rounded-md",
+                        day_disabled: "text-gray-400 opacity-50",
                       }}
                     />
                   </div>
@@ -259,7 +258,7 @@ export default function ScheduleAppointmentModal({
           {/* Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-4">
+              <label className="block text-sm font-medium text-gray-300 mb-1">
                 Time *
               </label>
               <select
@@ -306,7 +305,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
