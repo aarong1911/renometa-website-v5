@@ -1,4 +1,5 @@
 // src/components/ui/ScheduleAppointmentModal.tsx
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -14,6 +15,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
+// --- Time Zone Safe Date Handling ---
 const createLocalDate = (dateString: string): Date => {
   const parts = dateString.split("-").map(Number);
   return new Date(parts[0], parts[1] - 1, parts[2]);
@@ -52,7 +54,7 @@ export default function ScheduleAppointmentModal({
     phone: "",
     appointment_date: todayDateString,
     appointment_time: "",
-    timezone: "America/New_York",
+    timezone: "America/New_York", // default EST
   });
 
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -157,9 +159,9 @@ export default function ScheduleAppointmentModal({
           ✕
         </Button>
 
-        <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone / Date */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <form onSubmit={handleSubmit} className="mt-2">
+          {/* Name / Email / Phone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Full Name *
@@ -198,8 +200,8 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* Date with Calendar */}
-            <div className="mb-6">
+            {/* Date with dropdown calendar */}
+            <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
               </label>
@@ -241,13 +243,6 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      classNames={{
-                        caption_label: "text-gray-800 font-medium",
-                        nav_button: "text-gray-800",
-                        head_cell: "text-gray-800",
-                        day: "text-gray-800 hover:bg-gray-100 rounded-md",
-                        day_selected: "bg-blue-600 text-white rounded-md",
-                      }}
                     />
                   </div>
                 )}
@@ -255,56 +250,57 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-  {/* ✅ Time + Timezone Group with consistent spacing */}
-<div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
-  <div>
-    <label className="block text-sm font-medium text-gray-300 mb-1">
-      Time *
-    </label>
-    <select
-      name="appointment_time"
-      value={formData.appointment_time}
-      onChange={handleChange}
-      required
-      disabled={availableSlots.length === 0}
-      className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-    >
-      <option value="">
-        {availableSlots.length > 0
-          ? "Choose a time"
-          : "No times available"}
-      </option>
-      {availableSlots.map((slot) => (
-        <option key={slot.value} value={slot.value}>
-          {slot.value}
-        </option>
-      ))}
-    </select>
-  </div>
-  <div>
-    <label className="block text-sm font-medium text-gray-300 mb-1">
-      Time Zone *
-    </label>
-    <select
-      name="timezone"
-      value={formData.timezone}
-      onChange={handleChange}
-      required
-      className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-    >
-      <option value="">Choose a time zone</option>
-      <option value="America/New_York">Eastern (EST)</option>
-      <option value="America/Chicago">Central (CST)</option>
-      <option value="America/Denver">Mountain (MST)</option>
-      <option value="America/Los_Angeles">Pacific (PST)</option>
-    </select>
-  </div>
-</div>
+          {/* Time + Timezone */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time *
+              </label>
+              <select
+                name="appointment_time"
+                value={formData.appointment_time}
+                onChange={handleChange}
+                required
+                disabled={availableSlots.length === 0}
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">
+                  {availableSlots.length > 0
+                    ? "Choose a time"
+                    : "No times available"}
+                </option>
+                {availableSlots.map((slot) => (
+                  <option key={slot.value} value={slot.value}>
+                    {slot.value}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Time Zone *
+              </label>
+              <select
+                name="timezone"
+                value={formData.timezone}
+                onChange={handleChange}
+                required
+                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+              >
+                <option value="">Choose a time zone</option>
+                <option value="America/New_York">Eastern (EST)</option>
+                <option value="America/Chicago">Central (CST)</option>
+                <option value="America/Denver">Mountain (MST)</option>
+                <option value="America/Los_Angeles">Pacific (PST)</option>
+              </select>
+            </div>
+          </div>
+
           {/* Submit */}
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
