@@ -9,7 +9,7 @@ import {
   DialogOverlay,
 } from "@/components/ui/dialog";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar"; // ✅ use custom calendar
+import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
@@ -199,66 +199,67 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* ✅ Date with dropdown calendar styled like ReschedulePage */}
-<div>
-  <label className="block text-sm font-medium text-gray-300 mb-1">
-    Date *
-  </label>
-  <div className="relative">
-    <button
-      type="button"
-      onClick={() => setIsCalendarOpen(!isCalendarOpen)}
-      className="w-full border rounded-md px-3 py-2 flex justify-between items-center bg-white text-gray-600 h-11 text-sm"
-    >
-      {formData.appointment_date
-        ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
-        : "Select a date"}
-      <CalendarIcon className="h-4 w-4 text-gray-800" /> {/* arrows icon color */}
-    </button>
+            {/* ✅ Calendar Popup Styled */}
+            <div>
+              <label className="block text-sm font-medium text-gray-300 mb-1">
+                Date *
+              </label>
+              <div className="relative">
+                <button
+                  type="button"
+                  onClick={() => setIsCalendarOpen(!isCalendarOpen)}
+                  className="w-full border rounded-md px-3 py-2 flex justify-between items-center bg-white text-gray-600 h-11 text-sm"
+                >
+                  {formData.appointment_date
+                    ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
+                    : "Select a date"}
+                  <CalendarIcon className="h-4 w-4 text-gray-800" />
+                </button>
 
-    {isCalendarOpen && (
-      <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
-        <Calendar
-          mode="single"
-          selected={
-            formData.appointment_date
-              ? new Date(formData.appointment_date)
-              : undefined
-          }
-          onSelect={(d) => {
-            if (d) {
-              const formatted = format(d, "yyyy-MM-dd");
-              setFormData((prev) => ({
-                ...prev,
-                appointment_date: formatted,
-              }));
-              setSelectedDate(d);
-            }
-            setIsCalendarOpen(false);
-          }}
-          disabled={(day) =>
-            day < new Date(new Date().setHours(0, 0, 0, 0)) ||
-            day.getDay() === 0 ||
-            day.getDay() === 6
-          }
-          initialFocus
-          classNames={{
-            caption_label: "text-gray-800 font-medium", // month text
-            nav_button: "text-gray-800", // arrows
-            head_cell: "text-gray-800", // weekday headers
-            day: "text-gray-800 hover:bg-gray-100 rounded-md", // dates
-            day_selected: "bg-blue-600 text-white rounded-md", // selected date
-          }}
-        />
-      </div>
-    )}
-  </div>
-</div>
+                {isCalendarOpen && (
+                  <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                    <Calendar
+                      mode="single"
+                      selected={
+                        formData.appointment_date
+                          ? new Date(formData.appointment_date)
+                          : undefined
+                      }
+                      onSelect={(d) => {
+                        if (d) {
+                          const formatted = format(d, "yyyy-MM-dd");
+                          setFormData((prev) => ({
+                            ...prev,
+                            appointment_date: formatted,
+                          }));
+                          setSelectedDate(d);
+                        }
+                        setIsCalendarOpen(false);
+                      }}
+                      disabled={(day) =>
+                        day < new Date(new Date().setHours(0, 0, 0, 0)) ||
+                        day.getDay() === 0 ||
+                        day.getDay() === 6
+                      }
+                      initialFocus
+                      classNames={{
+                        caption_label: "text-gray-800 font-medium",
+                        nav_button: "text-gray-800",
+                        head_cell: "text-gray-800",
+                        day: "text-gray-800 hover:bg-gray-100 rounded-md",
+                        day_selected: "bg-blue-600 text-white rounded-md",
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
 
           {/* Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
+              <label className="block text-sm font-medium text-gray-300 mb-4">
                 Time *
               </label>
               <select
