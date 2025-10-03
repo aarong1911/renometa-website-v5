@@ -222,7 +222,8 @@ export default function ScheduleAppointmentModal({
                 </button>
 
                 {isCalendarOpen && (
-                  <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                  // 👇 FIX: Added text-gray-900 to the container to ensure dark text visibility
+                  <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg text-gray-900">
                     <Calendar
                       mode="single"
                       selected={
@@ -247,23 +248,7 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      // 👇 FIX: Use explicit and slightly different text colors to ensure visibility
-                      classNames={{
-                        // Header text (Month/Year)
-                        caption_label: "text-gray-800 font-medium", 
-                        // Navigation arrows
-                        nav_button: "text-gray-600 hover:text-gray-800",
-                        // Day names (Su, Mo, etc.)
-                        head_cell: "text-gray-600", 
-                        // Available dates
-                        day: "text-gray-800 hover:bg-gray-100 rounded-md", 
-                        // Selected day, using explicit classes from the base component
-                        day_selected:
-                          "bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700",
-                        // Disabled/Outside days (should be light gray)
-                        day_outside: "text-gray-400 opacity-80",
-                        day_disabled: "text-gray-400 opacity-60 pointer-events-none",
-                      }}
+                      // Removed custom classNames, relying on default styles + dark container text
                     />
                   </div>
                 )}
