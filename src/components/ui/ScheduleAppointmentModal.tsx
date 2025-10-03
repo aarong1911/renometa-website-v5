@@ -16,11 +16,9 @@ import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
 // --- Time Zone Safe Date Handling ---
-// This function creates a date object from a YYYY-MM-DD string
-// without time-zone shifting it to the previous day.
 const createLocalDate = (dateString: string): Date => {
   const parts = dateString.split("-").map(Number);
-  // Creates a date at midnight in the system's local time zone, avoiding UTC offset shift
+  // Creates a date at midnight in the system's local time zone
   return new Date(parts[0], parts[1] - 1, parts[2]);
 };
 // ------------------------------------
@@ -59,7 +57,7 @@ export default function ScheduleAppointmentModal({
     phone: "",
     appointment_date: todayDateString,
     appointment_time: "",
-    // Setting default to EST as requested
+    // Setting default to EST
     timezone: "America/New_York", 
   });
 
@@ -229,7 +227,7 @@ export default function ScheduleAppointmentModal({
                       mode="single"
                       selected={
                         formData.appointment_date
-                          ? createLocalDate(formData.appointment_date) // Use the time-zone safe function here
+                          ? createLocalDate(formData.appointment_date)
                           : undefined
                       }
                       onSelect={(d) => {
@@ -249,14 +247,17 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      // 👇 FIX: Re-adding classNames to force dark text for visibility
+                      // 👇 FIX: Minimal classNames overrides to force dark text
                       classNames={{
-                        caption_label: "text-gray-800 font-medium", // Month/Year text
-                        nav_button: "text-gray-800", // Navigation arrows
-                        head_cell: "text-gray-800", // Day names (Su, Mo, etc.)
-                        day: "text-gray-800 hover:bg-gray-100 rounded-md", // Available dates
+                        // Ensure all text is dark (caption, arrows, days)
+                        caption_label: "text-gray-900 font-medium", 
+                        nav_button: "text-gray-900",
+                        head_cell: "text-gray-900", 
+                        day: "text-gray-900 hover:bg-gray-100", 
+                        // The day_selected and day_outside are already styled correctly
+                        // by the base component, but we override selected for safety
                         day_selected:
-                          "bg-blue-600 text-white rounded-md", // Selected day
+                          "bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700",
                       }}
                     />
                   </div>
@@ -315,7 +316,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
