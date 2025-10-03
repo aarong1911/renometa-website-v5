@@ -255,52 +255,51 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Time + Timezone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Time *
-              </label>
-              <select
-                name="appointment_time"
-                value={formData.appointment_time}
-                onChange={handleChange}
-                required
-                disabled={availableSlots.length === 0}
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-              >
-                <option value="">
-                  {availableSlots.length > 0
-                    ? "Choose a time"
-                    : "No times available"}
-                </option>
-                {availableSlots.map((slot) => (
-                  <option key={slot.value} value={slot.value}>
-                    {slot.value}
-                  </option>
-                ))}
-              </select>
-            </div>
-            <div>
-              <label className="block text-sm font-medium text-gray-300 mb-1">
-                Time Zone *
-              </label>
-              <select
-                name="timezone"
-                value={formData.timezone}
-                onChange={handleChange}
-                required
-                className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
-              >
-                <option value="">Choose a time zone</option>
-                <option value="America/New_York">Eastern (EST)</option>
-                <option value="America/Chicago">Central (CST)</option>
-                <option value="America/Denver">Mountain (MST)</option>
-                <option value="America/Los_Angeles">Pacific (PST)</option>
-              </select>
-            </div>
-          </div>
-
+  {/* ✅ Time + Timezone Group with consistent spacing */}
+<div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
+  <div>
+    <label className="block text-sm font-medium text-gray-300 mb-1">
+      Time *
+    </label>
+    <select
+      name="appointment_time"
+      value={formData.appointment_time}
+      onChange={handleChange}
+      required
+      disabled={availableSlots.length === 0}
+      className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+    >
+      <option value="">
+        {availableSlots.length > 0
+          ? "Choose a time"
+          : "No times available"}
+      </option>
+      {availableSlots.map((slot) => (
+        <option key={slot.value} value={slot.value}>
+          {slot.value}
+        </option>
+      ))}
+    </select>
+  </div>
+  <div>
+    <label className="block text-sm font-medium text-gray-300 mb-1">
+      Time Zone *
+    </label>
+    <select
+      name="timezone"
+      value={formData.timezone}
+      onChange={handleChange}
+      required
+      className="w-full border border-gray-300 rounded-md bg-white text-gray-600 h-11 px-3 text-sm"
+    >
+      <option value="">Choose a time zone</option>
+      <option value="America/New_York">Eastern (EST)</option>
+      <option value="America/Chicago">Central (CST)</option>
+      <option value="America/Denver">Mountain (MST)</option>
+      <option value="America/Los_Angeles">Pacific (PST)</option>
+    </select>
+  </div>
+</div>
           {/* Submit */}
           <Button
             type="submit"
