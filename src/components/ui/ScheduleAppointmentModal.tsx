@@ -164,7 +164,7 @@ export default function ScheduleAppointmentModal({
         </Button>
 
         <form onSubmit={handleSubmit} className="space-y-3 mt-2">
-          {/* Name / Email / Phone */}
+          {/* Name / Email / Phone / Date Group */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -222,7 +222,7 @@ export default function ScheduleAppointmentModal({
                 </button>
 
                 {isCalendarOpen && (
-                  // 👇 FIX: Added text-gray-900 to the container to ensure dark text visibility
+                  // FIX: Added text-gray-900 to the container to ensure dark text visibility
                   <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg text-gray-900">
                     <Calendar
                       mode="single"
@@ -256,8 +256,9 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Time + Timezone */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          {/* Time + Timezone Group */}
+          {/* 👇 FIX: Added mt-6 to increase separation from the field group above it */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mt-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Time *
@@ -306,7 +307,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-20"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
