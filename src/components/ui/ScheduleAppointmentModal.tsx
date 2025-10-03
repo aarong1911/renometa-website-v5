@@ -9,7 +9,7 @@ import {
   DialogOverlay,
 } from "@/components/ui/dialog";
 import { Calendar as CalendarIcon } from "lucide-react";
-import { Calendar } from "@/components/ui/calendar"; 
+import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
@@ -216,6 +216,7 @@ export default function ScheduleAppointmentModal({
 
                 {isCalendarOpen && (
                   <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
+                    {/* 👇 FIX: Removed the classNames prop to use default styling */}
                     <Calendar
                       mode="single"
                       selected={
@@ -240,15 +241,8 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      classNames={{
-                        caption_label: "text-gray-800 font-medium",
-                        nav_button: "text-gray-800",
-                        head_cell: "text-gray-800",
-                        day: "text-gray-800 hover:bg-gray-100 rounded-md",
-                        day_selected:
-                          "bg-blue-600 text-white rounded-md",
-                      }}
                     />
+                    {/* 👆 FIX: classNames removed */}
                   </div>
                 )}
               </div>
