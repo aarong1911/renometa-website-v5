@@ -1,3 +1,5 @@
+// src/components/ui/ScheduleAppointmentModal.tsx
+
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -13,10 +15,15 @@ import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
 import { useAppointment } from "@/hooks/useAppointment";
 
+// --- Time Zone Safe Date Handling ---
+// This function creates a date object from a YYYY-MM-DD string
+// without time-zone shifting it to the previous day.
 const createLocalDate = (dateString: string): Date => {
   const parts = dateString.split("-").map(Number);
+  // Creates a date at midnight in the system's local time zone, avoiding UTC offset shift
   return new Date(parts[0], parts[1] - 1, parts[2]);
 };
+// ------------------------------------
 
 const normalizeTime = (raw: string | null | undefined): string => {
   if (!raw) return "";
@@ -43,7 +50,8 @@ export default function ScheduleAppointmentModal({
     forceRefresh,
   } = useAppointment();
 
-  const todayDateString = new Date().toISOString().split("T")[0];
+  // Initialize date string for today
+  const todayDateString = format(new Date(), "yyyy-MM-dd");
 
   const [formData, setFormData] = React.useState({
     name: "",
@@ -51,7 +59,8 @@ export default function ScheduleAppointmentModal({
     phone: "",
     appointment_date: todayDateString,
     appointment_time: "",
-    timezone: "",
+    // Setting default to EST as requested
+    timezone: "America/New_York", 
   });
 
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -124,7 +133,7 @@ export default function ScheduleAppointmentModal({
         phone: "",
         appointment_date: todayDateString,
         appointment_time: "",
-        timezone: "",
+        timezone: "America/New_York", // Reset to default EST
       });
     } catch (err: any) {
       console.error("Error scheduling:", err);
@@ -209,19 +218,18 @@ export default function ScheduleAppointmentModal({
                   className="w-full border rounded-md px-3 py-2 flex justify-between items-center bg-white text-gray-600 h-11 text-sm"
                 >
                   {formData.appointment_date
-                    ? format(new Date(formData.appointment_date), "MM/dd/yyyy")
+                    ? format(createLocalDate(formData.appointment_date), "MM/dd/yyyy")
                     : "Select a date"}
                   <CalendarIcon className="h-4 w-4 text-gray-800" />
                 </button>
 
                 {isCalendarOpen && (
                   <div className="absolute z-50 mt-2 bg-white border rounded-lg shadow-lg">
-                    {/* 👇 FIX: Removed the classNames prop to use default styling */}
                     <Calendar
                       mode="single"
                       selected={
                         formData.appointment_date
-                          ? new Date(formData.appointment_date)
+                          ? createLocalDate(formData.appointment_date) // Use the time-zone safe function here
                           : undefined
                       }
                       onSelect={(d) => {
@@ -241,8 +249,16 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
+                      // 👇 FIX: Re-adding classNames to force dark text for visibility
+                      classNames={{
+                        caption_label: "text-gray-800 font-medium", // Month/Year text
+                        nav_button: "text-gray-800", // Navigation arrows
+                        head_cell: "text-gray-800", // Day names (Su, Mo, etc.)
+                        day: "text-gray-800 hover:bg-gray-100 rounded-md", // Available dates
+                        day_selected:
+                          "bg-blue-600 text-white rounded-md", // Selected day
+                      }}
                     />
-                    {/* 👆 FIX: classNames removed */}
                   </div>
                 )}
               </div>
