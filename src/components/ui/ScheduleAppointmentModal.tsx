@@ -197,12 +197,12 @@ export default function ScheduleAppointmentModal({
               />
             </div>
 
-            {/* ✅ Date with dropdown calendar */}
-            <div>
+            {/* ✅ Date with calendar dropdown */}
+            <div className="mb-6">
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
               </label>
-              <div className="relative mb-6"> {/* margin added below button */}
+              <div className="relative">
                 <button
                   type="button"
                   onClick={() => setIsCalendarOpen(!isCalendarOpen)}
@@ -242,11 +242,11 @@ export default function ScheduleAppointmentModal({
                       initialFocus
                       classNames={{
                         caption_label: "text-gray-800 font-medium",
-                        nav_button: "text-gray-800 hover:text-black",
-                        head_cell: "text-gray-800 font-semibold",
+                        nav_button: "text-gray-800",
+                        head_cell: "text-gray-800",
                         day: "text-gray-800 hover:bg-gray-100 rounded-md",
-                        day_selected: "bg-blue-600 text-white rounded-md",
-                        day_disabled: "text-gray-400 opacity-50",
+                        day_selected:
+                          "bg-blue-600 text-white rounded-md",
                       }}
                     />
                   </div>
@@ -305,7 +305,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-6"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
