@@ -247,17 +247,22 @@ export default function ScheduleAppointmentModal({
                         day.getDay() === 6
                       }
                       initialFocus
-                      // 👇 FIX: Minimal classNames overrides to force dark text
+                      // 👇 FIX: Use explicit and slightly different text colors to ensure visibility
                       classNames={{
-                        // Ensure all text is dark (caption, arrows, days)
-                        caption_label: "text-gray-900 font-medium", 
-                        nav_button: "text-gray-900",
-                        head_cell: "text-gray-900", 
-                        day: "text-gray-900 hover:bg-gray-100", 
-                        // The day_selected and day_outside are already styled correctly
-                        // by the base component, but we override selected for safety
+                        // Header text (Month/Year)
+                        caption_label: "text-gray-800 font-medium", 
+                        // Navigation arrows
+                        nav_button: "text-gray-600 hover:text-gray-800",
+                        // Day names (Su, Mo, etc.)
+                        head_cell: "text-gray-600", 
+                        // Available dates
+                        day: "text-gray-800 hover:bg-gray-100 rounded-md", 
+                        // Selected day, using explicit classes from the base component
                         day_selected:
                           "bg-blue-600 text-white hover:bg-blue-700 focus:bg-blue-700",
+                        // Disabled/Outside days (should be light gray)
+                        day_outside: "text-gray-400 opacity-80",
+                        day_disabled: "text-gray-400 opacity-60 pointer-events-none",
                       }}
                     />
                   </div>
@@ -316,7 +321,7 @@ export default function ScheduleAppointmentModal({
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
-            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-8"
+            className="group bg-[#d9ab57] text-[#1d2939] hover:bg-[#c89b4d] px-8 py-3 text-base font-semibold rounded-md shadow-md mt-12"
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
