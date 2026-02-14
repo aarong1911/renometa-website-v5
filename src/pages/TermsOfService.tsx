@@ -140,9 +140,6 @@ const TermsOfService = () => {
                   These Terms are governed by the laws of the State of Florida, United States, without regard to its
                   conflict of laws principles.
                 </p>
-                <p className="text-sm text-gray-500">
-                  (If Florida isn’t right for you, replace this with your actual company jurisdiction.)
-                </p>
               </div>
 
               <div className="space-y-2">
