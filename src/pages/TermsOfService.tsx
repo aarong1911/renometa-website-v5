@@ -10,9 +10,7 @@ const TermsOfService = () => {
         <div className="absolute inset-0 bg-gradient-to-br from-blue-dark to-blue-light opacity-10 z-0" />
         <div className="container-custom text-center py-20 relative z-10">
           <ScrollReveal>
-            <h1 className="text-4xl md:text-5xl font-bold text-blue-dark">
-              Terms of Service
-            </h1>
+            <h1 className="text-4xl md:text-5xl font-bold text-blue-dark">Terms of Service</h1>
             <p className="text-gray-600 mt-4 max-w-xl mx-auto">
               Review the terms and conditions for using our services.
             </p>
@@ -24,65 +22,142 @@ const TermsOfService = () => {
       <section className="section bg-white">
         <div className="container-custom max-w-3xl mx-auto text-gray-700 space-y-6">
           <ScrollReveal>
-            <>
-  <p className="text-lg">Terms and Conditions for RenoMeta Inc</p>
-  <p className="text-lg">Effective Date: 08/01/2024</p>
+            <div className="space-y-6">
+              <div className="space-y-1">
+                <p className="text-lg font-semibold text-blue-dark">Terms of Service for RenoMeta Inc</p>
+                <p className="text-sm text-gray-500">Effective Date: 08/01/2024</p>
+              </div>
 
-  <p className="text-lg">1. Acceptance of Terms</p>
-  <p className="text-lg">
-    By accessing or using RenoMeta Inc B2B Marketing and Sales Software ("the Software"), you agree to comply with and be bound by these Terms and Conditions. If you do not agree with these terms, please do not use the Software.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">1. Acceptance of Terms</h2>
+                <p className="text-lg">
+                  By accessing or using RenoMeta Inc (“RenoMeta,” “we,” “us,” or “our”) software, websites, and services
+                  (collectively, the “Services”), you agree to be bound by these Terms of Service (“Terms”). If you do
+                  not agree, do not use the Services.
+                </p>
+              </div>
 
-  <p className="text-lg">2. Use of the Software</p>
-  <p className="text-lg">
-    You may use the Software for your internal business purposes only. You are responsible for ensuring that your use of the Software complies with all applicable laws and regulations.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">2. Use of the Services</h2>
+                <p className="text-lg">
+                  You may use the Services for your internal business purposes in accordance with these Terms and all
+                  applicable laws and regulations. You are responsible for all activity that occurs under your account.
+                </p>
+              </div>
 
-  <p className="text-lg">3. User Accounts and Security</p>
-  <p className="text-lg">
-    To access certain features of the Software, you may need to create a user account. You are responsible for maintaining the confidentiality of your account information and are fully responsible for all activities that occur under your account.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">3. User Accounts and Security</h2>
+                <p className="text-lg">
+                  To access certain features, you may need to create an account. You are responsible for maintaining
+                  the confidentiality of your login credentials and for all activities under your account. You agree to
+                  notify us promptly of any unauthorized use.
+                </p>
+              </div>
 
-  <p className="text-lg">4. Intellectual Property</p>
-  <p className="text-lg">
-    The Software, including all content, features, and functionality, is the exclusive property of RenoMeta Inc. You may not reproduce, distribute, modify, create derivative works of, publicly display, publicly perform, republish, download, or transmit any content or material from the Software without our prior written consent.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">4. Acceptable Use</h2>
+                <p className="text-lg">
+                  You agree not to misuse the Services. You may not use the Services to:
+                </p>
+                <ul className="list-disc pl-6 text-lg space-y-1">
+                  <li>Send spam, unsolicited messages, or messages without appropriate consent.</li>
+                  <li>Send illegal, fraudulent, or deceptive content.</li>
+                  <li>Transmit malware or attempt to gain unauthorized access to systems or data.</li>
+                  <li>Harass, abuse, or harm any person or violate any third-party rights.</li>
+                  <li>Violate carrier policies, messaging rules, or applicable communications laws.</li>
+                </ul>
+              </div>
 
-  <p className="text-lg">5. Data Privacy</p>
-  <p className="text-lg">
-    Our use of your information is governed by our Privacy Policy. By using the Software, you consent to the collection, use, and disclosure of your information as described in the Privacy Policy.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">5. Intellectual Property</h2>
+                <p className="text-lg">
+                  The Services, including all content, features, and functionality, are owned by RenoMeta or its
+                  licensors and are protected by applicable intellectual property laws. You may not reproduce,
+                  distribute, modify, create derivative works of, publicly display, publicly perform, republish,
+                  download, or transmit any part of the Services without our prior written consent, except as allowed
+                  by these Terms.
+                </p>
+              </div>
 
-  <p className="text-lg">6. Limitation of Liability</p>
-  <p className="text-lg">
-    RenoMeta Inc shall not be liable for any direct, indirect, incidental, consequential, or special damages arising out of or in any way connected with the use of the Software. In no event shall our total liability exceed the amount paid by you, if any, for accessing or using the Software.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">6. Data Privacy</h2>
+                <p className="text-lg">
+                  Our collection and use of information is described in our Privacy Policy. By using the Services, you
+                  consent to the collection, use, and disclosure of information as described in that policy.
+                </p>
+              </div>
 
-  <p className="text-lg">7. Termination</p>
-  <p className="text-lg">
-    We reserve the right to terminate or suspend your access to the Software at any time, with or without cause and with or without notice.
-  </p>
+              {/* ✅ Messaging terms help A2P/Twilio reviews */}
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">7. SMS/MMS Messaging Terms</h2>
+                <p className="text-lg">
+                  The Services may enable you to send or receive SMS/MMS messages to communicate with your customers for
+                  customer care and operational purposes (for example, missed call responses, appointment confirmations,
+                  reminders, and follow-ups).
+                </p>
+                <p className="text-lg">
+                  You are responsible for obtaining and maintaining any required consents from message recipients and
+                  for complying with all applicable laws and carrier requirements. You must not send messages that are
+                  unsolicited, promotional without consent, or otherwise non-compliant.
+                </p>
+                <p className="text-lg">
+                  Message frequency varies based on customer interaction. Recipients may opt out at any time by replying{" "}
+                  <span className="font-semibold">STOP</span> and may request assistance by replying{" "}
+                  <span className="font-semibold">HELP</span>. Message and data rates may apply.
+                </p>
+              </div>
 
-  <p className="text-lg">8. Changes to Terms and Software</p>
-  <p className="text-lg">
-    We reserve the right to modify, suspend, or discontinue the Software or any part thereof at any time without notice. We may also revise these Terms and Conditions at any time by posting the updated terms on our website. Your continued use of the Software after any such changes constitutes acceptance of the revised terms.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">8. Limitation of Liability</h2>
+                <p className="text-lg">
+                  To the maximum extent permitted by law, RenoMeta will not be liable for any indirect, incidental,
+                  consequential, special, or punitive damages arising out of or related to your use of the Services. In
+                  no event will RenoMeta’s total liability exceed the amounts paid by you to RenoMeta for the Services
+                  in the twelve (12) months preceding the event giving rise to the claim.
+                </p>
+              </div>
 
-  <p className="text-lg">9. Governing Law</p>
-  <p className="text-lg">
-    These Terms and Conditions are governed by and construed in accordance with the laws of [Insert Jurisdiction], without regard to its conflict of law principles.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">9. Termination</h2>
+                <p className="text-lg">
+                  We may suspend or terminate your access to the Services at any time if we believe you have violated
+                  these Terms or if necessary to protect the Services, our users, or third parties.
+                </p>
+              </div>
 
-  <p className="text-lg">10. Contact Us</p>
-  <p className="text-lg">
-    If you have any questions, concerns, or feedback regarding these Terms and Conditions, please contact us at Support@RenoMeta.com.
-  </p>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">10. Changes to Terms or Services</h2>
+                <p className="text-lg">
+                  We may modify these Terms from time to time by posting updated Terms on our website. Your continued
+                  use of the Services after changes become effective constitutes acceptance of the revised Terms. We may
+                  also modify, suspend, or discontinue the Services (in whole or in part) at any time.
+                </p>
+              </div>
 
-  <p className="text-lg">
-    Thank you for using RenoMeta Inc B2B Marketing and Sales Software.
-  </p>
-</>
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">11. Governing Law</h2>
+                <p className="text-lg">
+                  These Terms are governed by the laws of the State of Florida, United States, without regard to its
+                  conflict of laws principles.
+                </p>
+                <p className="text-sm text-gray-500">
+                  (If Florida isn’t right for you, replace this with your actual company jurisdiction.)
+                </p>
+              </div>
 
+              <div className="space-y-2">
+                <h2 className="text-lg font-semibold text-blue-dark">12. Contact Us</h2>
+                <p className="text-lg">
+                  If you have questions or concerns regarding these Terms, please contact us at{" "}
+                  <a className="text-blue-dark underline" href="mailto:Support@RenoMeta.com">
+                    Support@RenoMeta.com
+                  </a>
+                  .
+                </p>
+              </div>
+
+              <p className="text-lg">Thank you for using RenoMeta.</p>
+            </div>
           </ScrollReveal>
         </div>
       </section>
