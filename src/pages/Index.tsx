@@ -2,7 +2,6 @@
 import React, { useEffect } from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import HeroSection from '@/components/sections/HeroSection';
-import LogosCarouselSection from '@/components/sections/LogosCarouselSection';
 import ServicesSection from '@/components/sections/ServicesSection';
 import BenefitsSection from '@/components/sections/BenefitsSection';
 import CaseStudiesSection from '@/components/sections/CaseStudiesSection';
@@ -75,17 +74,6 @@ const Index = () => {
     }
   ];
 
-  const brandLogos = [
-    { name: 'Zapier', logo: 'https://logo.clearbit.com/zapier.com', description: 'Connect your tools and automate workflows' },
-    { name: 'React', logo: 'https://logo.clearbit.com/reactjs.org', description: 'Build dynamic, high-performance web interfaces' },
-    { name: 'Calendly', logo: 'https://logo.clearbit.com/calendly.com', description: 'Turn visitors into appointments with effortless, self-serve booking' },
-    { name: 'Slack', logo: 'https://logo.clearbit.com/slack.com', description: 'Streamline team communication and support workflows' },
-    { name: 'Stripe', logo: 'https://logo.clearbit.com/stripe.com', description: 'Accept secure payments with ease' },
-    { name: 'Google', logo: 'https://logo.clearbit.com/google.com', description: 'Boost your visibility on search and maps' },
-    { name: 'HubSpot', logo: 'https://logo.clearbit.com/hubspot.com', description: 'CRM and marketing automation built for scale' },
-    { name: 'GitHub', logo: 'https://logo.clearbit.com/github.com', description: 'Version control and collaboration for modern development' }
-  ];
-
   const scrollToSection = (id: string) => {
     const element = document.getElementById(id);
     if (element) {
@@ -96,7 +84,6 @@ const Index = () => {
   return (
     <MainLayout>
       <HeroSection onScrollToSection={scrollToSection} />
-      <LogosCarouselSection brandLogos={brandLogos} />
       <ServicesSection services={services} />
       <BenefitsSection />
       <CaseStudiesSection />
