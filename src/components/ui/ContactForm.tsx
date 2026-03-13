@@ -10,7 +10,7 @@ interface ContactFormProps {
 
 const ContactForm = ({ onSuccess }: ContactFormProps) => {
   const { formData, isSubmitting, handleChange, handleSubmit } = useContactForm({
-    onSuccess
+    onSuccess,
   });
 
   return (
@@ -31,6 +31,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               className="w-full text-gray-900 placeholder-gray-500"
             />
           </div>
+
           <div>
             <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
               Email Address *
@@ -46,9 +47,10 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               className="w-full text-gray-900 placeholder-gray-500"
             />
           </div>
+
           <div>
             <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number
+              Phone Number *
             </label>
             <Input
               id="phone"
@@ -57,9 +59,11 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
               value={formData.phone}
               onChange={handleChange}
               placeholder="(123) 456-7890"
+              required
               className="w-full text-gray-900 placeholder-gray-500"
             />
           </div>
+
           <div>
             <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
               Company
@@ -74,7 +78,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             />
           </div>
         </div>
-        
+
         <div className="relative">
           <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
             Service of Interest
@@ -84,7 +88,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             name="service"
             value={formData.service}
             onChange={handleChange}
-            className="w-full border border-gray-300 rounded-md bg-white text-gray-900 placeholder-gray-500 appearance-none h-11 pl-3 pr-12 text-sm"
+            className="w-full border border-gray-300 rounded-md bg-white text-gray-900 appearance-none h-11 pl-3 pr-12 text-sm"
           >
             <option value="general">General Inquiry</option>
             <option value="website-development">Smart Website Development</option>
@@ -94,12 +98,12 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             <option value="integration">Seamless Integration</option>
           </select>
 
-          {/* Custom centered arrow */}
           <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
             <svg
               className="w-7 h-7 text-gray-500"
               viewBox="0 0 20 20"
               fill="currentColor"
+              aria-hidden="true"
             >
               <path
                 fillRule="evenodd"
@@ -125,7 +129,6 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           />
         </div>
 
-        {/* ✅ Consent Checkbox */}
         <div className="md:col-span-2 flex items-start space-x-2">
           <input
             type="checkbox"
@@ -134,18 +137,37 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
             required
             checked={formData.consent}
             onChange={handleChange}
-            className="mt-1"
+            className="mt-1 h-4 w-4 shrink-0"
           />
-          <label htmlFor="contact-consent" className="text-xs text-gray-500 leading-snug">
-            I consent to receive SMS notifications and service alerts from RenoMeta related to my appointments and service requests. 
-            Message frequency varies. Message & data rates may apply. Text HELP to +1-888-792-1166 for assistance. 
-            Reply STOP to unsubscribe at any time.
+          <label htmlFor="contact-consent" className="text-xs text-gray-600 leading-snug">
+            By checking this box and submitting this form, you agree to receive SMS messages from
+            RenoMeta related to your inquiry, appointment scheduling, reminders, and service
+            updates. Message frequency varies. Message &amp; data rates may apply. Reply STOP to
+            unsubscribe or HELP for assistance. View our{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-800"
+            >
+              Privacy Policy
+            </a>{' '}
+            and{' '}
+            <a
+              href="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-800"
+            >
+              Terms of Service
+            </a>
+            .
           </label>
         </div>
-        
+
         <div>
-          <Button 
-            type="submit" 
+          <Button
+            type="submit"
             className="w-full md:w-auto bg-blue-dark hover:bg-blue-light"
             disabled={isSubmitting}
           >
