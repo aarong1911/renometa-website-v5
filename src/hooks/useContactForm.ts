@@ -1,102 +1,182 @@
-import { useState } from "react";
-import { useToast } from "@/hooks/use-toast";
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import ScrollReveal from './ScrollReveal';
+import { useContactForm } from '@/hooks/useContactForm';
 
-interface ContactFormData {
-  name: string;
-  email: string;
-  phone: string;
-  company: string;
-  message: string;
-  service: string;
-  consent?: boolean;
-}
-
-interface UseContactFormProps {
+interface ContactFormProps {
   onSuccess?: () => void;
 }
 
-export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
-  const { toast } = useToast();
-
-  const [formData, setFormData] = useState<ContactFormData>({
-    name: "",
-    email: "",
-    phone: "",
-    company: "",
-    message: "",
-    service: "general",
-    consent: false,
+const ContactForm = ({ onSuccess }: ContactFormProps) => {
+  const { formData, isSubmitting, handleChange, handleSubmit } = useContactForm({
+    onSuccess,
   });
 
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  return (
+    <ScrollReveal>
+      <form onSubmit={handleSubmit} className="space-y-5">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <div>
+            <label htmlFor="name" className="block text-sm font-medium text-gray-700 mb-1">
+              Full Name *
+            </label>
+            <Input
+              id="name"
+              name="name"
+              value={formData.name}
+              onChange={handleChange}
+              placeholder="Your full name"
+              required
+              className="w-full text-gray-900 placeholder-gray-500"
+            />
+          </div>
 
-  const handleChange = (
-    e: React.ChangeEvent<
-      HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement
-    >
-  ) => {
-    const { name, value, type, checked } = e.target;
-    setFormData((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
-  };
+          <div>
+            <label htmlFor="email" className="block text-sm font-medium text-gray-700 mb-1">
+              Email Address *
+            </label>
+            <Input
+              id="email"
+              name="email"
+              type="email"
+              value={formData.email}
+              onChange={handleChange}
+              placeholder="your@email.com"
+              required
+              className="w-full text-gray-900 placeholder-gray-500"
+            />
+          </div>
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setIsSubmitting(true);
+          <div>
+            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+              Phone Number *
+            </label>
+            <Input
+              id="phone"
+              name="phone"
+              type="tel"
+              value={formData.phone}
+              onChange={handleChange}
+              placeholder="(123) 456-7890"
+              required
+              className="w-full text-gray-900 placeholder-gray-500"
+            />
+          </div>
 
-    const payload = {
-      ...formData,
-      source: "contact-form",
-    };
+          <div>
+            <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
+              Company
+            </label>
+            <Input
+              id="company"
+              name="company"
+              value={formData.company}
+              onChange={handleChange}
+              placeholder="Your company name"
+              className="w-full text-gray-900 placeholder-gray-500"
+            />
+          </div>
+        </div>
 
-    try {
-      // ✅ Send payload to Netlify proxy
-      const res = await fetch("/.netlify/functions/contact", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
+        <div className="relative">
+          <label htmlFor="service" className="block text-sm font-medium text-gray-700 mb-1">
+            Service of Interest
+          </label>
+          <select
+            id="service"
+            name="service"
+            value={formData.service}
+            onChange={handleChange}
+            className="w-full border border-gray-300 rounded-md bg-white text-gray-900 appearance-none h-11 pl-3 pr-12 text-sm"
+          >
+            <option value="general">General Inquiry</option>
+            <option value="website-development">Smart Website Development</option>
+            <option value="advanced-seo">Advanced SEO</option>
+            <option value="ai-agents">AI-Powered Agents</option>
+            <option value="automation">Intelligent Automation</option>
+            <option value="integration">Seamless Integration</option>
+          </select>
 
-      if (!res.ok) {
-        throw new Error(`Request failed with status ${res.status}`);
-      }
+          <div className="pointer-events-none absolute right-3 top-1/2 -translate-y-1/2 mt-3.5">
+            <svg
+              className="w-7 h-7 text-gray-500"
+              viewBox="0 0 20 20"
+              fill="currentColor"
+              aria-hidden="true"
+            >
+              <path
+                fillRule="evenodd"
+                d="M5.23 7.21a.75.75 0 011.06.02L10 11.292l3.71-4.06a.75.75 0 111.08 1.04l-4.25 4.65a.75.75 0 01-1.08 0l-4.25-4.65a.75.75 0 01.02-1.06z"
+                clipRule="evenodd"
+              />
+            </svg>
+          </div>
+        </div>
 
-      toast({
-        title: "Message Sent!",
-        description: "We'll get back to you as soon as possible.",
-      });
+        <div>
+          <label htmlFor="message" className="block text-sm font-medium text-gray-700 mb-1">
+            Message *
+          </label>
+          <Textarea
+            id="message"
+            name="message"
+            value={formData.message}
+            onChange={handleChange}
+            placeholder="Tell us about your project or inquiry"
+            required
+            className="w-full min-h-[150px] text-gray-900 placeholder-gray-500"
+          />
+        </div>
 
-      // reset form
-      setFormData({
-        name: "",
-        email: "",
-        phone: "",
-        company: "",
-        message: "",
-        service: "general",
-        consent: false,
-      });
+        <div className="md:col-span-2 flex items-start space-x-2">
+          <input
+            type="checkbox"
+            id="contact-consent"
+            name="consent"
+            required
+            checked={formData.consent}
+            onChange={handleChange}
+            className="mt-1 h-4 w-4 shrink-0"
+          />
+          <label htmlFor="contact-consent" className="text-xs text-gray-600 leading-snug">
+            By checking this box and submitting this form, you agree to receive SMS messages from
+            RenoMeta related to your inquiry, appointment scheduling, reminders, and service
+            updates. Message frequency varies. Message &amp; data rates may apply. Reply STOP to
+            unsubscribe or HELP for assistance. View our{' '}
+            <a
+              href="/privacy-policy"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-800"
+            >
+              Privacy Policy
+            </a>{' '}
+            and{' '}
+            <a
+              href="/terms-of-service"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="underline hover:text-gray-800"
+            >
+              Terms of Service
+            </a>
+            .
+          </label>
+        </div>
 
-      if (onSuccess) onSuccess();
-    } catch (err: any) {
-      console.error("❌ Error submitting contact form:", err);
-      toast({
-        title: "Error",
-        description:
-          "There was a problem sending your message. Please try again later.",
-        variant: "destructive",
-      });
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
+        <div>
+          <Button
+            type="submit"
+            className="w-full md:w-auto bg-blue-dark hover:bg-blue-light"
+            disabled={isSubmitting}
+          >
+            {isSubmitting ? 'Sending...' : 'Send Message'}
+          </Button>
+        </div>
+      </form>
+    </ScrollReveal>
+  );
+};
 
-  return {
-    formData,
-    isSubmitting,
-    handleChange,
-    handleSubmit,
-  };
-}
+export default ContactForm;
