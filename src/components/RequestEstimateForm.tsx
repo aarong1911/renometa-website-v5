@@ -22,7 +22,7 @@ export default function RequestEstimateForm({ userRequestId }: { userRequestId: 
 
     try {
       // FIX: Changed the URL to the correct local Netlify function endpoint
-      const res = await fetch("http://localhost:8888/.netlify/functions/book-appointment", {
+      const res = await fetch("/.netlify/functions/book-appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
