@@ -2,15 +2,17 @@
   command = "npm run build"
   publish = "dist"
 
+[build.environment]
+  NPM_FLAGS = "--legacy-peer-deps"
+
 [functions]
   directory = "netlify/functions"
-  # node_bundler = "esbuild" # optional, for faster builds
 
 [dev]
   framework = "#custom"
-  command = "npm run dev" # runs Vite
-  targetPort = 5173       # match Vite’s dev server (default)
-  port = 8888             # Netlify proxy port (access site at http://localhost:8888)
+  command = "npm run dev"
+  targetPort = 5173
+  port = 8888
   autoLaunch = true
 
 [[redirects]]
