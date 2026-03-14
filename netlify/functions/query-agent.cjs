@@ -1,12 +1,11 @@
 // netlify/functions/query-agent.cjs
+//
+// ✅ Uses openai SDK directly — no langchain, no zod dependency issues
 
 const { createClient } = require('@supabase/supabase-js');
-const { OpenAIEmbeddings, ChatOpenAI } = require('@langchain/openai');
-const { HumanMessage } = require('@langchain/core/messages');
+const OpenAI = require('openai');
 
-// ✅ FIX: Removed node-fetch — Node 18+ has native fetch built in
-
-const MAX_QUERIES_PER_WEBSITE = 10; // Max chat queries per website per 24 hours
+const MAX_QUERIES_PER_WEBSITE = 10;
 const RESET_HOURS = 24;
 
 const corsHeaders = {
@@ -20,17 +19,7 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const embeddings = new OpenAIEmbeddings({
-  apiKey: process.env.OPENAI_API_KEY,
-  modelName: 'text-embedding-ada-002',
-});
-
-const chatModel = new ChatOpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-  modelName: 'gpt-4o',
-  temperature: 0.2,
-  timeout: 60000,
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const systemPrompt = `You are an AI assistant trained specifically on the content of a remodeling or home repair company's website. Your job is to help website visitors by answering their questions, explaining services clearly, and encouraging them to take action — like requesting a quote, booking an appointment, or contacting the team.
 
@@ -69,6 +58,14 @@ function formatResponseToHTML(answer) {
   return `<div class="ai-reply">${formatted}</div>`;
 }
 
+async function getEmbedding(text) {
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: text,
+  });
+  return response.data[0].embedding;
+}
+
 exports.handler = async (event) => {
   console.log('--- query-agent function invoked ---');
 
@@ -87,13 +84,13 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: 'Invalid JSON body provided' };
   }
 
-  const { user_request_id, question, chat_history = [] } = parsedBody;
+  const { user_request_id, question } = parsedBody;
 
   if (!user_request_id || !question) {
     return { statusCode: 400, headers: corsHeaders, body: 'Missing user_request_id or question' };
   }
 
-  // ✅ LIMIT: Check how many queries have been made for this website in the last 24 hours
+  // ✅ Check query limit for this website in last 24 hours
   const windowStart = new Date(Date.now() - RESET_HOURS * 60 * 60 * 1000).toISOString();
 
   const { data: recentQueries, error: limitCheckError } = await supabase
@@ -112,7 +109,6 @@ exports.handler = async (event) => {
     const resetsAt = new Date(new Date(oldest.created_at).getTime() + RESET_HOURS * 60 * 60 * 1000);
     const resetsAtStr = resetsAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 
-    console.warn(`⚠️ Query limit hit for request ${user_request_id}: ${recentQueries.length} queries in last 24h`);
     return {
       statusCode: 429,
       headers: corsHeaders,
@@ -124,43 +120,42 @@ exports.handler = async (event) => {
     };
   }
 
-  console.log(`INFO: Query ${(recentQueries?.length || 0) + 1}/${MAX_QUERIES_PER_WEBSITE} for request ${user_request_id}`);
-
   try {
     // Query expansion for short queries
     let searchQuestion = question;
     if (question.split(' ').length <= 3 && !question.includes('?')) {
       try {
-        const expansionPrompt = `The user asked a very short or single-word query. Expand it into a more detailed and natural language search query that covers potential user intent, without adding extra conversational text. This query will be used to search a knowledge base.
+        const expansionResponse = await openai.chat.completions.create({
+          model: 'gpt-4o',
+          temperature: 0,
+          messages: [{
+            role: 'user',
+            content: `Expand this short query into a detailed natural language search query. Return only the expanded query, nothing else.
 
 Examples:
-User: "services"
-Expanded: "What services does this company provide?"
+"services" → "What services does this company provide?"
+"pricing" → "What is the pricing information for the products or services offered?"
+"contact" → "How can I contact the company or find their contact information?"
 
-User: "pricing"
-Expanded: "What is the pricing information for the products or services offered?"
+Query: "${question}"
+Expanded:`
+          }],
+        });
 
-User: "contact"
-Expanded: "How can I contact the company or find their contact information?"
-
-User: "${question}"
-Expanded:`;
-
-        const expansionResponse = await chatModel.invoke([new HumanMessage(expansionPrompt)]);
-        const expandedQuery = expansionResponse.content.trim();
-
+        const expandedQuery = expansionResponse.choices[0]?.message?.content?.trim();
         if (expandedQuery && expandedQuery.length > question.length && expandedQuery.length < 200) {
           searchQuestion = expandedQuery;
           console.log(`INFO: Query expanded to: "${searchQuestion}"`);
         }
       } catch (expansionError) {
-        console.error('ERROR: Failed to expand query:', expansionError.message);
+        console.error('Query expansion failed:', expansionError.message);
       }
     }
 
-    // Vector similarity search
-    const queryEmbedding = await embeddings.embedQuery(searchQuestion);
+    // Generate embedding for search
+    const queryEmbedding = await getEmbedding(searchQuestion);
 
+    // Vector similarity search in Supabase
     const { data: retrievedDocs, error: matchError } = await supabase.rpc('match_documents', {
       query_embedding: queryEmbedding,
       match_threshold: 0.01,
@@ -168,7 +163,7 @@ Expanded:`;
     });
 
     if (matchError) {
-      console.error('ERROR: Supabase vector search failed:', matchError.message);
+      console.error('Vector search failed:', matchError.message);
       return {
         statusCode: 500,
         headers: corsHeaders,
@@ -176,11 +171,11 @@ Expanded:`;
       };
     }
 
-    // Filter to only docs belonging to this request
+    // Filter to only docs for this request
     const relevantDocs = (retrievedDocs || []).filter(doc => doc.user_request_id === user_request_id);
 
     if (relevantDocs.length === 0) {
-      console.log('INFO: No relevant documents found after filtering.');
+      console.log('No relevant documents found after filtering.');
       return {
         statusCode: 200,
         headers: corsHeaders,
@@ -191,21 +186,21 @@ Expanded:`;
       };
     }
 
-    if (relevantDocs[0].similarity < 0.85) {
-      console.warn(`WARN: Top result similarity was only ${relevantDocs[0].similarity.toFixed(4)}. Context might be weak.`);
-    }
-
     const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
 
-    const messages = [
-      { role: "system", content: systemPrompt },
-      { role: "user", content: `Context:\n${context}\n\nOriginal User Question: ${question}\n\nAnswer the original user question based ONLY on the provided context.` },
-    ];
+    // Generate answer with GPT-4o
+    const chatResponse = await openai.chat.completions.create({
+      model: 'gpt-4o',
+      temperature: 0.2,
+      messages: [
+        { role: 'system', content: systemPrompt },
+        { role: 'user', content: `Context:\n${context}\n\nUser Question: ${question}\n\nAnswer based ONLY on the provided context.` },
+      ],
+    });
 
-    const chatResponse = await chatModel.invoke(messages);
-    const answer = chatResponse.content;
+    const answer = chatResponse.choices[0]?.message?.content || "I'm not sure how to respond to that.";
 
-    // Store the Q&A in agent_conversations
+    // Store the Q&A
     const { error: insertError } = await supabase.from('agent_conversations').insert({
       user_request_id,
       question,
@@ -214,11 +209,10 @@ Expanded:`;
     });
 
     if (insertError) {
-      console.error('WARN: Failed to store Q&A:', insertError.message);
+      console.error('Failed to store Q&A:', insertError.message);
     }
 
     const queriesRemaining = MAX_QUERIES_PER_WEBSITE - (recentQueries?.length || 0) - 1;
-    console.log(`INFO: Answer generated. ${queriesRemaining} queries remaining for this website.`);
 
     return {
       statusCode: 200,
