@@ -32,39 +32,39 @@ export function CustomerServiceAgent() {
     });
 
     try {
-      // ✅ FIX: Use relative URL instead of hardcoded localhost
-      // This works both locally (netlify dev) and in production
       const response = await axios.post('/.netlify/functions/setup-agent', data);
       console.log('setup-agent response:', response.data);
 
       if (response.data.requestId) {
         setSubmittedRequestId(response.data.requestId);
         if (response.data.requestId !== userRequestId) {
-          console.warn(`Mismatch: frontend userRequestId (${userRequestId}) vs backend returned ID (${response.data.requestId}). Aligning frontend.`);
           setUserRequestId(response.data.requestId);
         }
       } else {
-        console.warn('setup-agent response missing requestId. Using initial userRequestId.');
         setSubmittedRequestId(userRequestId);
       }
 
     } catch (error: any) {
-  const isRateLimit = error.response?.status === 429;
-  const message = error.response?.data?.message;
+      console.error('Error calling setup-agent function:', error);
 
-  toast({
-    title: isRateLimit ? "Daily limit reached" : "Error creating agent",
-    description: isRateLimit
-      ? message || "You've reached the limit of 2 websites per 24 hours."
-      : `Failed: ${error.message}`,
-    variant: "destructive",
-  });
+      // ✅ Handle rate limit (429) with a friendly message
+      const isRateLimit = error.response?.status === 429;
+      const message = error.response?.data?.message;
 
-  setStep('form');
-  setUserData(null);
-  setSubmittedRequestId(null);
-  setUserRequestId(uuidv4());
-}
+      toast({
+        title: isRateLimit ? "Daily limit reached" : "Error creating agent",
+        description: isRateLimit
+          ? message || "You've reached the limit of 2 websites per 24 hours."
+          : `Failed to initiate agent creation: ${error.response?.data?.body || error.message || 'Unknown error'}`,
+        variant: "destructive",
+      });
+
+      setStep('form');
+      setUserData(null);
+      setSubmittedRequestId(null);
+      setUserRequestId(uuidv4());
+    }
+  };
 
   const handleCrawlingComplete = () => {
     setStep('chat');
@@ -145,7 +145,6 @@ export function CustomerServiceAgent() {
         </Button>
       </DialogTrigger>
       <DialogContent className={`${getDialogSize()} ${step === 'chat' ? 'p-0 flex flex-col' : ''}`}>
-        {/* ✅ FIX: Added VisuallyHidden DialogTitle and DialogDescription for accessibility */}
         <VisuallyHidden>
           <DialogTitle>Customer Service Agent</DialogTitle>
           <DialogDescription>Set up your AI customer service agent</DialogDescription>
