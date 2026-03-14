@@ -1,14 +1,13 @@
 // netlify/functions/setup-agent.cjs
 
 const { createClient } = require('@supabase/supabase-js');
-const axios = require('axios');
 
 if (!process.env.SUPABASE_URL || !process.env.SUPABASE_SERVICE_ROLE_KEY) {
   throw new Error("Missing Supabase credentials in environment variables.");
 }
 
-const MAX_WEBSITES_PER_USER = 2;    // Max websites per user per 24 hours
-const RESET_HOURS = 24;             // Reset window in hours
+const MAX_WEBSITES_PER_USER = 2;
+const RESET_HOURS = 24;
 
 exports.handler = async function(event, context) {
   console.log('--- setup-agent function invoked ---');
@@ -42,9 +41,8 @@ exports.handler = async function(event, context) {
 
   const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
 
-  // ✅ LIMIT: Check how many websites this email has submitted in the last 24 hours
+  // Check 2-website limit per 24 hours
   const windowStart = new Date(Date.now() - RESET_HOURS * 60 * 60 * 1000).toISOString();
-
   const { data: recentRequests, error: limitCheckError } = await supabase
     .from('agent_requests')
     .select('id, company_site, created_at')
@@ -57,12 +55,10 @@ exports.handler = async function(event, context) {
   }
 
   if (recentRequests && recentRequests.length >= MAX_WEBSITES_PER_USER) {
-    // Find when the oldest one expires so we can tell the user
     const oldest = recentRequests.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
     const resetsAt = new Date(new Date(oldest.created_at).getTime() + RESET_HOURS * 60 * 60 * 1000);
     const resetsAtStr = resetsAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
 
-    console.warn(`⚠️ Rate limit hit for ${email}: ${recentRequests.length} sites in last 24h`);
     return {
       statusCode: 429,
       headers: corsHeaders,
@@ -76,7 +72,7 @@ exports.handler = async function(event, context) {
 
   try {
     // Insert new agent request
-    const { data, error } = await supabase
+    const { error } = await supabase
       .from('agent_requests')
       .insert({
         id: userRequestId,
@@ -87,9 +83,7 @@ exports.handler = async function(event, context) {
         status: 'pending',
         progress: 0,
         created_at: new Date().toISOString(),
-      })
-      .select()
-      .single();
+      });
 
     if (error) {
       console.error('❌ Supabase insert failed:', error);
@@ -101,32 +95,58 @@ exports.handler = async function(event, context) {
 
     console.log(`✅ New agent request created: ${userRequestId}`);
 
-    // Trigger the background crawl function
+    // Build the background function URL
     const isLocal = process.env.NETLIFY_DEV === 'true';
+    // process.env.URL already includes https:// e.g. "https://renometa.com"
     const baseUrl = isLocal
       ? 'http://localhost:8888'
-      : `https://${process.env.URL || event.headers.host}`;
+      : (process.env.URL || `https://${event.headers.host}`);
 
-    // Background functions use the same URL path but Netlify routes them differently
     const crawlUrl = `${baseUrl}/.netlify/functions/crawl-and-index-background`;
-
     console.log(`🚀 Triggering background crawl at: ${crawlUrl}`);
 
-    // Fire and forget
-    axios.post(crawlUrl, {
+    const crawlPayload = JSON.stringify({
       user_request_id: userRequestId,
       company_site: website,
       company_name: company,
       email,
-    }, {
-      headers: { 'Content-Type': 'application/json' },
-      timeout: 5000, // Just enough to trigger it — background function takes over
-    }).catch(err => {
-      // Background functions return 202 Accepted, not 200 — don't treat as error
-      if (err.response?.status !== 202) {
-        console.error('Failed to trigger background crawl:', err.message);
-      }
     });
+
+    // Use native fetch to trigger the background function
+    // Background functions return 202 Accepted immediately
+    try {
+      const crawlResponse = await fetch(crawlUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: crawlPayload,
+      });
+
+      console.log(`Background function response status: ${crawlResponse.status}`);
+
+      // 202 = background function accepted, 200 = also fine
+      if (crawlResponse.status !== 202 && crawlResponse.status !== 200) {
+        const responseText = await crawlResponse.text();
+        console.error(`Unexpected status from background function: ${crawlResponse.status} - ${responseText}`);
+
+        // Update status to failed if trigger didn't work
+        await supabase.from('agent_requests')
+          .update({
+            status: 'crawling_initiation_failed',
+            error_message: `Failed to start background crawl: HTTP ${crawlResponse.status}`,
+          })
+          .eq('id', userRequestId);
+      } else {
+        console.log(`✅ Background crawl triggered successfully`);
+      }
+    } catch (fetchError) {
+      console.error(`❌ Failed to trigger background crawl:`, fetchError.message);
+      await supabase.from('agent_requests')
+        .update({
+          status: 'crawling_initiation_failed',
+          error_message: `Failed to start background crawl: ${fetchError.message}`,
+        })
+        .eq('id', userRequestId);
+    }
 
     return {
       statusCode: 200,
