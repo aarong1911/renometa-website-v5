@@ -1,12 +1,10 @@
 // netlify/functions/crawl-and-index-background.js
 //
 // ✅ Netlify Background Function — runs up to 15 minutes for free
-// Named with -background suffix so Netlify detects it automatically.
-// Does NOT return HTTP responses to the caller.
+// ✅ Uses openai SDK directly — no langchain, no zod dependency issues
 
 const { createClient } = require('@supabase/supabase-js');
-const { OpenAIEmbeddings } = require('@langchain/openai');
-const { RecursiveCharacterTextSplitter } = require('langchain/text_splitter');
+const OpenAI = require('openai');
 const crypto = require('crypto');
 
 const supabase = createClient(
@@ -14,12 +12,11 @@ const supabase = createClient(
   process.env.SUPABASE_SERVICE_ROLE_KEY
 );
 
-const embeddings = new OpenAIEmbeddings({
-  apiKey: process.env.OPENAI_API_KEY,
-  modelName: 'text-embedding-ada-002',
-});
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const MAX_PAGES_PER_SITE = 10; // Max pages crawled per website
+const MAX_PAGES_PER_SITE = 10;
+const CHUNK_SIZE = 1000;
+const CHUNK_OVERLAP = 200;
 
 exports.handler = async (event) => {
   if (event.httpMethod !== 'POST') return;
@@ -43,10 +40,30 @@ exports.handler = async (event) => {
 };
 
 
+// Simple text splitter — no langchain needed
+function splitTextIntoChunks(text, chunkSize = CHUNK_SIZE, overlap = CHUNK_OVERLAP) {
+  const chunks = [];
+  let start = 0;
+  while (start < text.length) {
+    const end = Math.min(start + chunkSize, text.length);
+    chunks.push(text.slice(start, end));
+    start += chunkSize - overlap;
+    if (start >= text.length) break;
+  }
+  return chunks;
+}
+
+async function getEmbedding(text) {
+  const response = await openai.embeddings.create({
+    model: 'text-embedding-ada-002',
+    input: text.slice(0, 8000), // Max tokens safety limit
+  });
+  return response.data[0].embedding;
+}
+
+
 async function crawlAndIndex({ user_request_id, company_site, company_name, email }) {
   try {
-    const agentCompanyName = company_name || `Crawl for ${new URL(company_site).hostname}`;
-
     await supabase.from('agent_requests').update({
       status: 'crawling',
       progress: 0.1,
@@ -54,7 +71,7 @@ async function crawlAndIndex({ user_request_id, company_site, company_name, emai
 
     console.log(`🕷️ Starting Firecrawl for ${company_site} (max ${MAX_PAGES_PER_SITE} pages)`);
 
-    // Step 1 — Crawl with Firecrawl
+    // Step 1 — Start crawl with Firecrawl
     const crawlResponse = await fetch('https://api.firecrawl.dev/v1/crawl', {
       method: 'POST',
       headers: {
@@ -124,15 +141,10 @@ async function crawlAndIndex({ user_request_id, company_site, company_name, emai
 
     console.log(`📄 Got ${pages.length} pages from Firecrawl`);
 
-    // Step 3 — Split into chunks
+    // Step 3 — Split content into chunks
     await supabase.from('agent_requests')
       .update({ status: 'indexing', progress: 0.6 })
       .eq('id', user_request_id);
-
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 1000,
-      chunkOverlap: 200,
-    });
 
     const chunks = [];
     for (const page of pages) {
@@ -140,12 +152,12 @@ async function crawlAndIndex({ user_request_id, company_site, company_name, emai
       const sourceUrl = page.metadata?.sourceURL || company_site;
       if (!content || content.length < 50) continue;
 
-      const docs = await splitter.createDocuments([content]);
-      for (const doc of docs) {
+      const textChunks = splitTextIntoChunks(content);
+      for (const chunkText of textChunks) {
         chunks.push({
           id: crypto.randomUUID(),
           user_request_id,
-          content: doc.pageContent,
+          content: chunkText,
           source_url: sourceUrl,
         });
       }
@@ -161,11 +173,11 @@ async function crawlAndIndex({ user_request_id, company_site, company_name, emai
 
     console.log(`🧩 Generated ${chunks.length} chunks, embedding...`);
 
-    // Step 4 — Embed and store
+    // Step 4 — Embed and store in batches
     for (let i = 0; i < chunks.length; i++) {
       const chunk = chunks[i];
       try {
-        const embedding = await embeddings.embedQuery(chunk.content);
+        const embedding = await getEmbedding(chunk.content);
         await supabase.from('agent_knowledge_base').insert({
           id: chunk.id,
           user_request_id: chunk.user_request_id,
@@ -175,6 +187,7 @@ async function crawlAndIndex({ user_request_id, company_site, company_name, emai
           created_at: new Date().toISOString(),
         });
 
+        // Update progress every 5 chunks
         if (i % 5 === 0) {
           const progress = 0.6 + (i / chunks.length) * 0.4;
           await supabase.from('agent_requests')
