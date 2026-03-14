@@ -3,17 +3,17 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogTrigger } from '@/components/ui/dialog';
-import { CustomerAgentForm } from './CustomerAgentForm'; // Path to your form component
-import { CrawlingProgress } from './CrawlingProgress'; // Path to your crawling progress component
-import { ChatInterface } from './ChatInterface'; // Path to your chat component
-import { CustomerAgentFormData } from '@/types/form'; // Path to your form data type
+import { Dialog, DialogContent, DialogTitle, DialogDescription, DialogTrigger } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
+import { CustomerAgentForm } from './CustomerAgentForm';
+import { CrawlingProgress } from './CrawlingProgress';
+import { ChatInterface } from './ChatInterface';
+import { CustomerAgentFormData } from '@/types/form';
 import { useToast } from '@/components/ui/use-toast';
 import axios from 'axios';
 
 type Step = 'form' | 'crawling' | 'chat';
 
-// *** FIX: Changed to a named export 'export function' from 'export default function' (if it was default) ***
 export function CustomerServiceAgent() {
   const [step, setStep] = useState<Step>('form');
   const [open, setOpen] = useState(false);
@@ -32,15 +32,16 @@ export function CustomerServiceAgent() {
     });
 
     try {
-      // Data passed here should already contain the userRequestId from CustomerAgentForm
-      const response = await axios.post('http://localhost:8888/.netlify/functions/setup-agent', data);
+      // ✅ FIX: Use relative URL instead of hardcoded localhost
+      // This works both locally (netlify dev) and in production
+      const response = await axios.post('/.netlify/functions/setup-agent', data);
       console.log('setup-agent response:', response.data);
 
       if (response.data.requestId) {
         setSubmittedRequestId(response.data.requestId);
         if (response.data.requestId !== userRequestId) {
           console.warn(`Mismatch: frontend userRequestId (${userRequestId}) vs backend returned ID (${response.data.requestId}). Aligning frontend.`);
-          setUserRequestId(response.data.requestId); // Align frontend to backend's confirmation
+          setUserRequestId(response.data.requestId);
         }
       } else {
         console.warn('setup-agent response missing requestId. Using initial userRequestId.');
@@ -57,7 +58,7 @@ export function CustomerServiceAgent() {
       setStep('form');
       setUserData(null);
       setSubmittedRequestId(null);
-      setUserRequestId(uuidv4()); // Generate a new ID for the next attempt
+      setUserRequestId(uuidv4());
     }
   };
 
@@ -75,7 +76,7 @@ export function CustomerServiceAgent() {
       setStep('form');
       setUserData(null);
       setSubmittedRequestId(null);
-      setUserRequestId(uuidv4()); // Generate new ID for next session
+      setUserRequestId(uuidv4());
     }, 300);
   };
 
@@ -85,7 +86,7 @@ export function CustomerServiceAgent() {
       setStep('form');
       setUserData(null);
       setSubmittedRequestId(null);
-      setUserRequestId(uuidv4()); // Generate new ID for next session
+      setUserRequestId(uuidv4());
     }, 300);
   };
 
@@ -140,6 +141,11 @@ export function CustomerServiceAgent() {
         </Button>
       </DialogTrigger>
       <DialogContent className={`${getDialogSize()} ${step === 'chat' ? 'p-0 flex flex-col' : ''}`}>
+        {/* ✅ FIX: Added VisuallyHidden DialogTitle and DialogDescription for accessibility */}
+        <VisuallyHidden>
+          <DialogTitle>Customer Service Agent</DialogTitle>
+          <DialogDescription>Set up your AI customer service agent</DialogDescription>
+        </VisuallyHidden>
         {renderContent()}
       </DialogContent>
     </Dialog>
