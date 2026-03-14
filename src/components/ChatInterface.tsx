@@ -1,7 +1,6 @@
 // components/ChatInterface.tsx
 
 import { useEffect, useRef, useState } from "react";
-// import { v4 as uuidv4 } from "uuid"; // REMOVED: No longer generating UUID here
 import axios from "axios";
 
 import { Button } from "@/components/ui/button";
@@ -14,7 +13,7 @@ import RequestEstimateForm from "@/components/RequestEstimateForm";
 
 interface ChatInterfaceProps {
   userData: CustomerAgentFormData;
-  userRequestId: string; // ADDED: Now expecting userRequestId as a prop
+  userRequestId: string;
   onClose: () => void;
 }
 
@@ -30,8 +29,6 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
   const [input, setInput] = useState("");
   const [isTyping, setIsTyping] = useState(false);
   const [showEstimateForm, setShowEstimateForm] = useState(false);
-  // REMOVED: No longer generating requestId locally
-  // const [requestId] = useState(() => uuidv4()); 
 
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -52,14 +49,14 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
 
     const lowerInput = input.toLowerCase();
 
-    // Estimate fallback - EXPANDED KEYWORDS
+    // Estimate fallback
     if (
       lowerInput.includes("estimate") ||
       lowerInput.includes("quote") ||
       lowerInput.includes("book") ||
-      lowerInput.includes("appointment") || // ADDED
-      lowerInput.includes("schedule") ||    // ADDED
-      lowerInput.includes("consultation")    // OPTIONAL: Added for more coverage
+      lowerInput.includes("appointment") ||
+      lowerInput.includes("schedule") ||
+      lowerInput.includes("consultation")
     ) {
       setShowEstimateForm(true);
       const estimateMessage: ChatMessage = {
@@ -70,16 +67,14 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
       };
       setMessages((prev) => [...prev, estimateMessage]);
       setIsTyping(false);
-      return; // Crucial: This stops the code from calling the AI backend
+      return;
     }
 
     try {
-      // FIX: Use userRequestId from props
-      const response = await axios.post('http://localhost:8888/.netlify/functions/query-agent', {
-        user_request_id: userRequestId, // CHANGED: Now using the prop
+      // ✅ FIX: Use relative URL instead of hardcoded localhost
+      const response = await axios.post('/.netlify/functions/query-agent', {
+        user_request_id: userRequestId,
         question: input,
-        // Optional: Pass chat history for context if your query-agent supports it
-        // chat_history: messages.map(msg => ({ role: msg.role, content: msg.content }))
       });
 
       const answer = response.data?.answer || "I'm not sure how to respond to that.";
@@ -147,11 +142,9 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
                   message.role === "agent" ? "chat-bubble-agent" : "chat-bubble-user"
                 }`}
               >
-                {/* Use dangerouslySetInnerHTML for agent messages */}
                 {message.role === "agent" ? (
                   <div dangerouslySetInnerHTML={{ __html: message.content }} />
                 ) : (
-                  // User messages are plain text, so render normally
                   message.content
                 )}
               </div>
@@ -170,8 +163,7 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
 
           {showEstimateForm && (
             <div className="mt-4">
-              {/* FIX: Ensure RequestEstimateForm also receives userRequestId */}
-              <RequestEstimateForm userRequestId={userRequestId} /> 
+              <RequestEstimateForm userRequestId={userRequestId} />
             </div>
           )}
         </div>
