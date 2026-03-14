@@ -49,18 +49,22 @@ export function CustomerServiceAgent() {
       }
 
     } catch (error: any) {
-      console.error('Error calling setup-agent function:', error);
-      toast({
-        title: "Error creating agent",
-        description: `Failed to initiate agent creation: ${error.response?.data?.body || error.message || 'Unknown error'}`,
-        variant: "destructive",
-      });
-      setStep('form');
-      setUserData(null);
-      setSubmittedRequestId(null);
-      setUserRequestId(uuidv4());
-    }
-  };
+  const isRateLimit = error.response?.status === 429;
+  const message = error.response?.data?.message;
+
+  toast({
+    title: isRateLimit ? "Daily limit reached" : "Error creating agent",
+    description: isRateLimit
+      ? message || "You've reached the limit of 2 websites per 24 hours."
+      : `Failed: ${error.message}`,
+    variant: "destructive",
+  });
+
+  setStep('form');
+  setUserData(null);
+  setSubmittedRequestId(null);
+  setUserRequestId(uuidv4());
+}
 
   const handleCrawlingComplete = () => {
     setStep('chat');
