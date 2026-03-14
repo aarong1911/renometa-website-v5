@@ -1,5 +1,3 @@
-// src/components/ui/ScheduleAppointmentModal.tsx
-
 import React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -54,7 +52,8 @@ export default function ScheduleAppointmentModal({
     phone: "",
     appointment_date: todayDateString,
     appointment_time: "",
-    timezone: "America/New_York", // default EST
+    timezone: "America/New_York",
+    consent: false,
   });
 
   const [isCalendarOpen, setIsCalendarOpen] = React.useState(false);
@@ -66,14 +65,21 @@ export default function ScheduleAppointmentModal({
       }
     } else {
       setSelectedDate(undefined);
+      setIsCalendarOpen(false);
     }
   }, [open, formData.appointment_date, setSelectedDate]);
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>
   ) => {
-    const { name, value } = e.target;
-    setFormData((prev) => ({ ...prev, [name]: value }));
+    const { name, value, type } = e.target;
+    const checked =
+      type === "checkbox" ? (e.target as HTMLInputElement).checked : undefined;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: type === "checkbox" ? checked : value,
+    }));
 
     if (name === "appointment_time") {
       setSelectedTime(normalizeTime(value));
@@ -82,11 +88,11 @@ export default function ScheduleAppointmentModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsSubmitting(true);
 
     if (
       !formData.name.trim() ||
       !formData.email.trim() ||
+      !formData.phone.trim() ||
       !formData.appointment_date ||
       !formData.appointment_time ||
       !formData.timezone
@@ -96,20 +102,34 @@ export default function ScheduleAppointmentModal({
         description: "Fill in all required fields.",
         variant: "destructive",
       });
-      setIsSubmitting(false);
       return;
     }
 
+    if (!formData.consent) {
+      toast({
+        title: "Consent required",
+        description: "Please agree to receive SMS messages before submitting.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSubmitting(true);
+
     try {
-      await fetch("/.netlify/functions/book-appointment", {
+      const response = await fetch("/.netlify/functions/book-appointment", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           ...formData,
           appointment_time: normalizeTime(formData.appointment_time),
-          source: "form",
+          source: "appointment-form",
         }),
       });
+
+      if (!response.ok) {
+        throw new Error(`Request failed with status ${response.status}`);
+      }
 
       toast({
         title: "Appointment Scheduled",
@@ -128,8 +148,9 @@ export default function ScheduleAppointmentModal({
         appointment_date: todayDateString,
         appointment_time: "",
         timezone: "America/New_York",
+        consent: false,
       });
-    } catch (err: any) {
+    } catch (err) {
       console.error("Error scheduling:", err);
       toast({
         title: "Error",
@@ -149,18 +170,17 @@ export default function ScheduleAppointmentModal({
           Book your strategy call.
         </DialogDescription>
 
-        {/* Close Button */}
         <Button
           onClick={() => onOpenChange(false)}
           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
           variant="ghost"
           size="icon"
+          aria-label="Close appointment form"
         >
           ✕
         </Button>
 
         <form onSubmit={handleSubmit} className="mt-2">
-          {/* Name / Email / Phone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -174,6 +194,7 @@ export default function ScheduleAppointmentModal({
                 className="w-full text-gray-900"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Email *
@@ -187,20 +208,21 @@ export default function ScheduleAppointmentModal({
                 className="w-full text-gray-900"
               />
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
-                Phone
+                Phone *
               </label>
               <Input
                 name="phone"
                 type="tel"
                 value={formData.phone}
                 onChange={handleChange}
+                required
                 className="w-full text-gray-900"
               />
             </div>
 
-            {/* Date with dropdown calendar */}
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Date *
@@ -250,7 +272,6 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Time + Timezone */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-6">
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
@@ -276,6 +297,7 @@ export default function ScheduleAppointmentModal({
                 ))}
               </select>
             </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-300 mb-1">
                 Time Zone *
@@ -296,7 +318,46 @@ export default function ScheduleAppointmentModal({
             </div>
           </div>
 
-          {/* Submit */}
+          <div className="flex items-start space-x-2 mt-4">
+            <input
+              type="checkbox"
+              id="appointment-consent"
+              name="consent"
+              required
+              checked={formData.consent}
+              onChange={handleChange}
+              className="mt-1 h-4 w-4 shrink-0"
+            />
+            <label
+              htmlFor="appointment-consent"
+              className="text-xs text-gray-400 leading-snug"
+            >
+              By checking this box and submitting this form, you agree to receive
+              SMS messages from RenoMeta related to your appointment scheduling,
+              reminders, and service updates. Message frequency varies. Message
+              &amp; data rates may apply. Reply STOP to unsubscribe or HELP for
+              assistance. View our{" "}
+              <a
+                href="/privacy-policy"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                Privacy Policy
+              </a>{" "}
+              and{" "}
+              <a
+                href="/terms-of-service"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-blue-400 hover:underline"
+              >
+                Terms of Service
+              </a>
+              .
+            </label>
+          </div>
+
           <Button
             type="submit"
             disabled={isSubmitting || availableSlots.length === 0}
@@ -304,16 +365,6 @@ export default function ScheduleAppointmentModal({
           >
             {isSubmitting ? "Scheduling…" : "Schedule Appointment"}
           </Button>
-
-          {/* Consent */}
-          <p className="text-xs text-gray-400 mt-4">
-            By submitting, you agree to receive text messages from RenoMeta. Msg
-            & data rates may apply. Reply STOP to opt out. View our{" "}
-            <a href="/privacy-policy" className="text-blue-400 hover:underline">
-              Privacy Policy
-            </a>{" "}
-            and Terms.
-          </p>
         </form>
       </DialogContent>
     </Dialog>
