@@ -258,12 +258,13 @@ Respond as a helpful ${companyName} customer service agent. Be conversational an
     const rawAnswer = chatResponse.choices[0]?.message?.content || "I'm not sure how to respond to that.";
     const { html, quickReplies, bookAppointment } = formatResponseToHTML(rawAnswer);
 
-    await supabase.from('agent_conversations').insert({
+    const { error: insertError } = await supabase.from('agent_conversations').insert({
       user_request_id,
       question,
       answer: rawAnswer,
       created_at: new Date().toISOString(),
-    }).catch(err => console.error('Failed to store Q&A:', err.message));
+    });
+    if (insertError) console.error('Failed to store Q&A:', insertError.message);
 
     const queriesRemaining = MAX_QUERIES_PER_WEBSITE - (recentQueries?.length || 0) - 1;
 
