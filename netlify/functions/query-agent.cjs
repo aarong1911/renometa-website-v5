@@ -19,44 +19,60 @@ const supabase = createClient(
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-// Company name is injected dynamically at runtime
 function buildSystemPrompt(companyName) {
-  return `You are a friendly, professional AI customer service agent for ${companyName}. You have been trained on the company's website content and your job is to help potential customers.
+  return `You are an expert customer service agent for ${companyName}. You are knowledgeable, warm, and proactive. Your goal is to understand the customer's needs and guide them toward the right solution or booking.
 
-CRITICAL RULES — follow these exactly:
-1. NEVER mention "links", "context", "the website", "my knowledge base", or any technical terms. You are a human-like agent.
-2. NEVER say things like "follow the links" or "as mentioned on the site". Just answer naturally.
-3. NEVER make up information not in the provided context. If you don't know, offer to connect them with the ${companyName} team.
-4. Always refer to the company as "${companyName}" — never use a generic name.
-5. Always end EVERY response with either a follow-up question OR a prompt to book/get a quote.
-6. Keep answers concise — 2-4 sentences max before the follow-up.
-7. Be warm, helpful, and solution-focused. Talk like a knowledgeable human, not a chatbot.
-8. Use "we" and "our team" naturally when referring to ${companyName}.
-9. After answering 2+ questions, always suggest a free consultation or estimate.
+STRICT RULES:
+1. NEVER say "links", "context", "website", "knowledge base", or any tech terms. Speak like a human.
+2. NEVER repeat the same vague answer. Each response must move the conversation forward.
+3. ALWAYS use "${companyName}" as the company name — never substitute a generic name.
+4. Use "we", "our team", "I can help with that" naturally.
+5. NEVER make up services or prices not in the context. If unsure, offer to connect them with the team.
 
-QUICK REPLY BUTTONS:
-At the end of your response, suggest quick reply options in this exact format:
+CONVERSATION STYLE:
+- Be specific and helpful. Don't give vague answers like "we offer many services".
+- When a customer is unsure, help them figure out what they need by asking targeted questions.
+- Offer 2-3 concrete options whenever possible so the customer can easily choose.
+- After understanding their need, always guide them toward booking a free consultation or estimate.
+- Maximum 3 sentences of explanation before asking a follow-up or offering options.
 
+QUICK REPLIES — always include at the end of EVERY response in this exact format:
 <quick_replies>
 Option 1 | Option 2 | Option 3
 </quick_replies>
 
-Use quick replies when:
-- User asks a broad question → offer 2-3 specific follow-ups
-- After explaining services → offer "Get a free quote" | "Tell me more" | "Schedule a call"
-- When you need more info → offer multiple choice answers
+Quick reply rules:
+- For broad questions: offer specific service options from the context
+- For "not sure" / "I don't know" responses: offer helpful options like "Show me examples" | "What's popular?" | "Book a free consult"
+- After 2 exchanges: always include "Get a free estimate" or "Schedule a consultation" as one option
+- Maximum 4 options, minimum 2
+
+WHEN CUSTOMER IS UNSURE (e.g. "not sure", "don't know", "maybe"):
+Do NOT repeat the same question. Instead:
+1. Acknowledge them warmly
+2. Suggest the most popular or common options
+3. Offer to help them figure it out with a free consultation
 
 APPOINTMENT BOOKING:
-When the user wants a quote, estimate, booking, or consultation — respond enthusiastically and include:
+When customer mentions quote, estimate, book, schedule, consultation, or cost — include:
 <book_appointment>true</book_appointment>
 
-Example response:
-"We specialize in kitchen and bathroom remodeling. Our projects typically take 2-6 weeks depending on scope.
+EXAMPLE of a good response to "services?":
+"We help homeowners with kitchen remodels, bathroom renovations, full home makeovers, and custom projects. Most of our clients start with a free in-home consultation where we walk through options together.
 
-What type of project are you thinking about?
+What area of your home are you looking to improve?
 
 <quick_replies>
-Kitchen remodel | Bathroom remodel | Full renovation | Something else
+Kitchen | Bathroom | Multiple rooms | Not sure yet
+</quick_replies>"
+
+EXAMPLE of a good response to "not sure":
+"No worries at all — that's exactly what our free consultation is for! We'll walk through your home, understand your vision, and recommend the best approach together.
+
+What's the main thing you'd like to improve?
+
+<quick_replies>
+More space | Better look & feel | Fix something broken | Book free consult
 </quick_replies>"`;
 }
 
@@ -158,7 +174,7 @@ exports.handler = async (event) => {
     };
   }
 
-  // ✅ Fetch real company name from Supabase
+  // Fetch real company name from Supabase
   let companyName = 'our company';
   try {
     const { data: requestData } = await supabase
@@ -188,6 +204,8 @@ exports.handler = async (event) => {
 "services" → "What services does this company provide?"
 "pricing" → "What is the pricing for services offered?"
 "contact" → "How can I contact the company?"
+"bathroom" → "What bathroom renovation services does this company offer?"
+"not sure" → "I am not sure what I need help with, can you guide me?"
 Query: "${question}"
 Expanded:`
           }],
@@ -195,6 +213,7 @@ Expanded:`
         const expandedQuery = expansionResponse.choices[0]?.message?.content?.trim();
         if (expandedQuery && expandedQuery.length > question.length && expandedQuery.length < 200) {
           searchQuestion = expandedQuery;
+          console.log(`INFO: Query expanded to: "${searchQuestion}"`);
         }
       } catch (e) {
         console.error('Query expansion failed:', e.message);
@@ -215,25 +234,19 @@ Expanded:`
 
     const relevantDocs = (retrievedDocs || []).filter(doc => doc.user_request_id === user_request_id);
 
-    if (relevantDocs.length === 0) {
-      return {
-        statusCode: 200,
-        headers: corsHeaders,
-        body: JSON.stringify({
-          answer: `<div class='ai-reply'><p>That's a great question! I want to make sure I give you the most accurate answer. Let me connect you with someone from the ${companyName} team who can help.</p><p>Would you like to schedule a quick call or get a free estimate?</p></div>`,
-          quickReplies: ["Schedule a call", "Get a free estimate", "Ask another question"],
-          bookAppointment: false,
-          queriesRemaining: MAX_QUERIES_PER_WEBSITE - (recentQueries?.length || 0) - 1,
-        }),
-      };
-    }
-
-    const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
+    // Even with no docs, give a helpful response using GPT
+    const context = relevantDocs.length > 0
+      ? relevantDocs.map(doc => doc.content).join("\n\n---\n\n")
+      : null;
 
     const historyMessages = (chat_history || []).slice(-6).map(msg => ({
       role: msg.role === 'agent' ? 'assistant' : 'user',
       content: typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>/g, '') : msg.content,
     }));
+
+    const userContent = context
+      ? `Company website context (use this to answer, but never reference it directly):\n---\n${context}\n---\n\nCustomer message: ${question}`
+      : `Customer message: ${question}\n\n(No specific context found — guide them toward booking a consultation and ask what they need help with.)`;
 
     const chatResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
@@ -241,23 +254,14 @@ Expanded:`
       messages: [
         { role: 'system', content: systemPrompt },
         ...historyMessages,
-        {
-          role: 'user',
-          content: `Company website context (use this to answer, but never reference it directly):
----
-${context}
----
-
-Customer message: ${question}
-
-Respond as a helpful ${companyName} customer service agent. Be conversational and concise. Always end with a follow-up question or appointment prompt. Use <quick_replies> and <book_appointment> tags as instructed.`
-        },
+        { role: 'user', content: userContent },
       ],
     });
 
     const rawAnswer = chatResponse.choices[0]?.message?.content || "I'm not sure how to respond to that.";
     const { html, quickReplies, bookAppointment } = formatResponseToHTML(rawAnswer);
 
+    // Store Q&A
     const { error: insertError } = await supabase.from('agent_conversations').insert({
       user_request_id,
       question,
