@@ -175,11 +175,6 @@ Would you like to confirm this appointment?`);
 
       console.log('Sending chatbot payload:', payload);
 
-      const webhookUrl = import.meta.env.VITE_APPOINTMENT_WEBHOOK_URL;
-      if (!webhookUrl) {
-        throw new Error('Webhook URL missing in environment variables');
-      }
-
       // 1. Use the book-appointment Netlify function
       const res = await fetch("/.netlify/functions/book-appointment", {
         method: 'POST',
