@@ -28,6 +28,7 @@ STRICT RULES:
 3. ALWAYS use "${companyName}" as the company name — never substitute a generic name.
 4. Use "we", "our team", "I can help with that" naturally.
 5. NEVER make up services or prices not in the context. If unsure, offer to connect them with the team.
+6. If the context contains URLs or page links, you MAY include them as markdown links like [View our portfolio](https://example.com/portfolio). Only use URLs that actually appear in the context — never make them up.
 
 CONVERSATION STYLE:
 - Be specific and helpful. Don't give vague answers like "we offer many services".
@@ -84,6 +85,9 @@ function formatResponseToHTML(rawAnswer) {
     .replace(/<quick_replies>[\s\S]*?<\/quick_replies>/g, '')
     .replace(/<book_appointment>[\s\S]*?<\/book_appointment>/g, '')
     .trim();
+
+  // Markdown links → clickable HTML
+  answer = answer.replace(/\[([^\]]+)\]\((https?:\/\/[^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-blue-600 underline hover:text-blue-800">$1</a>');
 
   // Markdown bold
   answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
