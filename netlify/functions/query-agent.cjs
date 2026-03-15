@@ -1,6 +1,4 @@
 // netlify/functions/query-agent.cjs
-//
-// ✅ Uses openai SDK directly — no langchain, no zod dependency issues
 
 const { createClient } = require('@supabase/supabase-js');
 const OpenAI = require('openai');
@@ -21,47 +19,91 @@ const supabase = createClient(
 
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const systemPrompt = `You are an AI assistant trained specifically on the content of a remodeling or home repair company's website. Your job is to help website visitors by answering their questions, explaining services clearly, and encouraging them to take action — like requesting a quote, booking an appointment, or contacting the team.
+// Company name is injected dynamically at runtime
+function buildSystemPrompt(companyName) {
+  return `You are a friendly, professional AI customer service agent for ${companyName}. You have been trained on the company's website content and your job is to help potential customers.
 
-Use only the information from the website content you were provided. If the answer is not on the site, do not guess. Instead, offer to connect the visitor with someone from the company.
+CRITICAL RULES — follow these exactly:
+1. NEVER mention "links", "context", "the website", "my knowledge base", or any technical terms. You are a human-like agent.
+2. NEVER say things like "follow the links" or "as mentioned on the site". Just answer naturally.
+3. NEVER make up information not in the provided context. If you don't know, offer to connect them with the ${companyName} team.
+4. Always refer to the company as "${companyName}" — never use a generic name.
+5. Always end EVERY response with either a follow-up question OR a prompt to book/get a quote.
+6. Keep answers concise — 2-4 sentences max before the follow-up.
+7. Be warm, helpful, and solution-focused. Talk like a knowledgeable human, not a chatbot.
+8. Use "we" and "our team" naturally when referring to ${companyName}.
+9. After answering 2+ questions, always suggest a free consultation or estimate.
 
-Always speak in a tone that matches the business: professional, friendly, and solution-oriented. Avoid jargon. Be concise but informative. When possible, include helpful context (e.g., timelines, what's included, what to expect) if it's mentioned on the site.
+QUICK REPLY BUTTONS:
+At the end of your response, suggest quick reply options in this exact format:
 
-Your top priorities:
-- Explain services clearly (e.g., kitchen remodeling, roofing, HVAC repair)
-- Guide visitors to the right next step (e.g., "You can book a free consultation here…")
-- Handle common customer questions (pricing, process, service areas) based on the site
-- Encourage trust by staying aligned with the company's brand and tone
+<quick_replies>
+Option 1 | Option 2 | Option 3
+</quick_replies>
 
-If a visitor says something like "Try now" or submits a business URL, assume they are evaluating this AI assistant for their own company, and explain how it works: "I'm powered by your website content, ready to help your customers 24/7 with questions, quotes, and bookings."
+Use quick replies when:
+- User asks a broad question → offer 2-3 specific follow-ups
+- After explaining services → offer "Get a free quote" | "Tell me more" | "Schedule a call"
+- When you need more info → offer multiple choice answers
 
-Do not answer questions unrelated to the company's website. Stay focused on what's relevant to remodeling and home repair services.`;
+APPOINTMENT BOOKING:
+When the user wants a quote, estimate, booking, or consultation — respond enthusiastically and include:
+<book_appointment>true</book_appointment>
 
-function formatResponseToHTML(answer) {
-  let formatted = answer.trim().replace(/\n{2,}/g, '\n').replace(/\s{2,}/g, ' ');
+Example response:
+"We specialize in kitchen and bathroom remodeling. Our projects typically take 2-6 weeks depending on scope.
 
-  formatted = formatted.replace(
-    /(?:The services mentioned in the context include:|Services mentioned include:|These services are designed to)/i,
-    'Here are some of our services:'
-  );
+What type of project are you thinking about?
 
-  if (formatted.match(/\d+\.\s/)) {
-    formatted = formatted.replace(/(\d+)\.\s(.+?)(?=(?:\d+\.\s)|$)/gs, '<li>$2</li>');
-    formatted = `<ol>${formatted}</ol>`;
-  } else if (formatted.match(/[-*•]\s/)) {
-    formatted = formatted.replace(/[-*•]\s(.+)/g, '<li>$1</li>');
-    formatted = `<ul>${formatted}</ul>`;
+<quick_replies>
+Kitchen remodel | Bathroom remodel | Full renovation | Something else
+</quick_replies>"`;
+}
+
+function formatResponseToHTML(rawAnswer) {
+  const quickRepliesMatch = rawAnswer.match(/<quick_replies>([\s\S]*?)<\/quick_replies>/);
+  const bookAppointment = rawAnswer.includes('<book_appointment>true</book_appointment>');
+
+  let answer = rawAnswer
+    .replace(/<quick_replies>[\s\S]*?<\/quick_replies>/g, '')
+    .replace(/<book_appointment>[\s\S]*?<\/book_appointment>/g, '')
+    .trim();
+
+  // Markdown bold
+  answer = answer.replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>');
+
+  // Numbered lists
+  if (answer.match(/^\d+\.\s/m)) {
+    answer = answer.replace(/\d+\.\s(.+)/g, '<li>$1</li>');
+    answer = `<ol>${answer}</ol>`;
+  } else if (answer.match(/^[-*•]\s/m)) {
+    answer = answer.replace(/[-*•]\s(.+)/g, '<li>$1</li>');
+    answer = `<ul>${answer}</ul>`;
   } else {
-    formatted = `<p>${formatted.replace(/\n+/g, '</p><p>')}</p>`;
+    answer = answer
+      .split(/\n\n+/)
+      .map(p => p.trim())
+      .filter(Boolean)
+      .map(p => `<p>${p.replace(/\n/g, '<br/>')}</p>`)
+      .join('');
   }
 
-  return `<div class="ai-reply">${formatted}</div>`;
+  let quickReplies = [];
+  if (quickRepliesMatch) {
+    quickReplies = quickRepliesMatch[1].split('|').map(s => s.trim()).filter(Boolean);
+  }
+
+  return {
+    html: `<div class="ai-reply">${answer}</div>`,
+    quickReplies,
+    bookAppointment,
+  };
 }
 
 async function getEmbedding(text) {
   const response = await openai.embeddings.create({
     model: 'text-embedding-ada-002',
-    input: text,
+    input: text.slice(0, 8000),
   });
   return response.data[0].embedding;
 }
@@ -72,7 +114,6 @@ exports.handler = async (event) => {
   if (event.httpMethod === 'OPTIONS') {
     return { statusCode: 204, headers: corsHeaders, body: "" };
   }
-
   if (event.httpMethod !== 'POST') {
     return { statusCode: 405, headers: corsHeaders, body: 'Method Not Allowed' };
   }
@@ -84,15 +125,14 @@ exports.handler = async (event) => {
     return { statusCode: 400, headers: corsHeaders, body: 'Invalid JSON body provided' };
   }
 
-  const { user_request_id, question } = parsedBody;
+  const { user_request_id, question, chat_history = [] } = parsedBody;
 
   if (!user_request_id || !question) {
     return { statusCode: 400, headers: corsHeaders, body: 'Missing user_request_id or question' };
   }
 
-  // ✅ Check query limit for this website in last 24 hours
+  // Check query limit
   const windowStart = new Date(Date.now() - RESET_HOURS * 60 * 60 * 1000).toISOString();
-
   const { data: recentQueries, error: limitCheckError } = await supabase
     .from('agent_conversations')
     .select('id, created_at')
@@ -100,7 +140,6 @@ exports.handler = async (event) => {
     .gte('created_at', windowStart);
 
   if (limitCheckError) {
-    console.error('❌ Failed to check query limits:', limitCheckError);
     return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: 'Failed to verify usage limits' }) };
   }
 
@@ -108,7 +147,6 @@ exports.handler = async (event) => {
     const oldest = recentQueries.sort((a, b) => new Date(a.created_at) - new Date(b.created_at))[0];
     const resetsAt = new Date(new Date(oldest.created_at).getTime() + RESET_HOURS * 60 * 60 * 1000);
     const resetsAtStr = resetsAt.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', timeZoneName: 'short' });
-
     return {
       statusCode: 429,
       headers: corsHeaders,
@@ -120,8 +158,24 @@ exports.handler = async (event) => {
     };
   }
 
+  // ✅ Fetch real company name from Supabase
+  let companyName = 'our company';
   try {
-    // Query expansion for short queries
+    const { data: requestData } = await supabase
+      .from('agent_requests')
+      .select('company_name')
+      .eq('id', user_request_id)
+      .single();
+    if (requestData?.company_name) companyName = requestData.company_name;
+    console.log(`INFO: Using company name: ${companyName}`);
+  } catch (e) {
+    console.warn('Could not fetch company name:', e.message);
+  }
+
+  const systemPrompt = buildSystemPrompt(companyName);
+
+  try {
+    // Query expansion for short inputs
     let searchQuestion = question;
     if (question.split(' ').length <= 3 && !question.includes('?')) {
       try {
@@ -130,57 +184,45 @@ exports.handler = async (event) => {
           temperature: 0,
           messages: [{
             role: 'user',
-            content: `Expand this short query into a detailed natural language search query. Return only the expanded query, nothing else.
-
-Examples:
+            content: `Expand this short query into a detailed search query. Return only the expanded query, nothing else.
 "services" → "What services does this company provide?"
-"pricing" → "What is the pricing information for the products or services offered?"
-"contact" → "How can I contact the company or find their contact information?"
-
+"pricing" → "What is the pricing for services offered?"
+"contact" → "How can I contact the company?"
 Query: "${question}"
 Expanded:`
           }],
         });
-
         const expandedQuery = expansionResponse.choices[0]?.message?.content?.trim();
         if (expandedQuery && expandedQuery.length > question.length && expandedQuery.length < 200) {
           searchQuestion = expandedQuery;
-          console.log(`INFO: Query expanded to: "${searchQuestion}"`);
         }
-      } catch (expansionError) {
-        console.error('Query expansion failed:', expansionError.message);
+      } catch (e) {
+        console.error('Query expansion failed:', e.message);
       }
     }
 
-    // Generate embedding for search
+    // Vector search
     const queryEmbedding = await getEmbedding(searchQuestion);
-
-    // Vector similarity search in Supabase
     const { data: retrievedDocs, error: matchError } = await supabase.rpc('match_documents', {
       query_embedding: queryEmbedding,
       match_threshold: 0.01,
-      match_count: 5,
+      match_count: 8,
     });
 
     if (matchError) {
-      console.error('Vector search failed:', matchError.message);
-      return {
-        statusCode: 500,
-        headers: corsHeaders,
-        body: JSON.stringify({ error: `Vector search failed: ${matchError.message}` }),
-      };
+      return { statusCode: 500, headers: corsHeaders, body: JSON.stringify({ error: `Vector search failed: ${matchError.message}` }) };
     }
 
-    // Filter to only docs for this request
     const relevantDocs = (retrievedDocs || []).filter(doc => doc.user_request_id === user_request_id);
 
     if (relevantDocs.length === 0) {
-      console.log('No relevant documents found after filtering.');
       return {
         statusCode: 200,
         headers: corsHeaders,
         body: JSON.stringify({
-          answer: "I couldn't find relevant information in my knowledge base for that question. Would you like me to connect you with someone from the company?",
+          answer: `<div class='ai-reply'><p>That's a great question! I want to make sure I give you the most accurate answer. Let me connect you with someone from the ${companyName} team who can help.</p><p>Would you like to schedule a quick call or get a free estimate?</p></div>`,
+          quickReplies: ["Schedule a call", "Get a free estimate", "Ask another question"],
+          bookAppointment: false,
           queriesRemaining: MAX_QUERIES_PER_WEBSITE - (recentQueries?.length || 0) - 1,
         }),
       };
@@ -188,39 +230,47 @@ Expanded:`
 
     const context = relevantDocs.map(doc => doc.content).join("\n\n---\n\n");
 
-    // Generate answer with GPT-4o
+    const historyMessages = (chat_history || []).slice(-6).map(msg => ({
+      role: msg.role === 'agent' ? 'assistant' : 'user',
+      content: typeof msg.content === 'string' ? msg.content.replace(/<[^>]*>/g, '') : msg.content,
+    }));
+
     const chatResponse = await openai.chat.completions.create({
       model: 'gpt-4o',
-      temperature: 0.2,
+      temperature: 0.3,
       messages: [
         { role: 'system', content: systemPrompt },
-        { role: 'user', content: `Context:\n${context}\n\nUser Question: ${question}\n\nAnswer based ONLY on the provided context.` },
+        ...historyMessages,
+        {
+          role: 'user',
+          content: `Company website context (use this to answer, but never reference it directly):
+---
+${context}
+---
+
+Customer message: ${question}
+
+Respond as a helpful ${companyName} customer service agent. Be conversational and concise. Always end with a follow-up question or appointment prompt. Use <quick_replies> and <book_appointment> tags as instructed.`
+        },
       ],
     });
 
-    const answer = chatResponse.choices[0]?.message?.content || "I'm not sure how to respond to that.";
+    const rawAnswer = chatResponse.choices[0]?.message?.content || "I'm not sure how to respond to that.";
+    const { html, quickReplies, bookAppointment } = formatResponseToHTML(rawAnswer);
 
-    // Store the Q&A
-    const { error: insertError } = await supabase.from('agent_conversations').insert({
+    await supabase.from('agent_conversations').insert({
       user_request_id,
       question,
-      answer,
+      answer: rawAnswer,
       created_at: new Date().toISOString(),
-    });
-
-    if (insertError) {
-      console.error('Failed to store Q&A:', insertError.message);
-    }
+    }).catch(err => console.error('Failed to store Q&A:', err.message));
 
     const queriesRemaining = MAX_QUERIES_PER_WEBSITE - (recentQueries?.length || 0) - 1;
 
     return {
       statusCode: 200,
       headers: corsHeaders,
-      body: JSON.stringify({
-        answer: formatResponseToHTML(answer),
-        queriesRemaining,
-      }),
+      body: JSON.stringify({ answer: html, quickReplies, bookAppointment, queriesRemaining }),
     };
 
   } catch (error) {
