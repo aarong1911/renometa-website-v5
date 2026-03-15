@@ -5,9 +5,11 @@ import { useToast } from "@/hooks/use-toast";
 import {
   Dialog,
   DialogContent,
+  DialogTitle,
   DialogDescription,
   DialogOverlay,
 } from "@/components/ui/dialog";
+import { VisuallyHidden } from "@radix-ui/react-visually-hidden";
 import { Calendar as CalendarIcon } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { format } from "date-fns";
@@ -166,6 +168,11 @@ export default function ScheduleAppointmentModal({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogOverlay className="bg-black/50" />
       <DialogContent className="fixed z-50 bg-[#1d2531] text-white w-[90%] max-w-[550px] max-h-screen overflow-y-auto rounded-xl shadow-lg px-6 py-12 animate-fade-in-up">
+
+        {/* ✅ FIX: Hidden title for screen reader accessibility */}
+        <VisuallyHidden>
+          <DialogTitle>Schedule an Appointment</DialogTitle>
+        </VisuallyHidden>
         <DialogDescription className="sr-only">
           Book your strategy call.
         </DialogDescription>
