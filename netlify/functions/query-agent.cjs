@@ -230,6 +230,7 @@ Expanded:`
       query_embedding: queryEmbedding,
       match_threshold: 0.01,
       match_count: 8,
+      filter_user_request_id: user_request_id,
     });
 
     if (matchError) {
