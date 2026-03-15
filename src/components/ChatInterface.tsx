@@ -44,7 +44,7 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
   const { toast } = useToast();
   const chatHistoryRef = useRef<{ role: string; content: string }[]>([]);
 
-  const sendMessage = async (messageText?: string) => {
+  const sendMessage = async (messageText?: string, isQuickReply = false) => {
     const text = messageText || input;
     if (!text.trim()) return;
 
@@ -66,14 +66,14 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
 
     // ✅ Keyword trigger — show appointment form immediately
     const lowerText = text.toLowerCase();
-    if (
+    if (!isQuickReply && (
       lowerText.includes("estimate") ||
       lowerText.includes("quote") ||
       lowerText.includes("book") ||
       lowerText.includes("appointment") ||
       lowerText.includes("schedule") ||
       lowerText.includes("consultation")
-    ) {
+    )) {
       setShowEstimateForm(true);
       const agentMsg: ChatMessage = {
         id: (Date.now() + 1).toString(),
@@ -148,7 +148,20 @@ export function ChatInterface({ userData, userRequestId, onClose }: ChatInterfac
   };
 
   const handleQuickReply = (reply: string) => {
-    sendMessage(reply);
+    const bookingKeywords = ["schedule", "book", "estimate", "consultation", "quote", "appointment"];
+    const isBooking = bookingKeywords.some(k => reply.toLowerCase().includes(k));
+    if (isBooking) {
+      setShowEstimateForm(true);
+      const agentMsg: ChatMessage = {
+        id: Date.now().toString(),
+        content: "<div class='ai-reply'><p>I'd love to set that up! Please fill out the form below and our team will reach out to confirm. 📅</p></div>",
+        role: "agent",
+        timestamp: new Date(),
+      };
+      setMessages(prev => [...prev, agentMsg]);
+      return;
+    }
+    sendMessage(reply, true);
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
