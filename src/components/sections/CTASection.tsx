@@ -21,7 +21,7 @@ const CTASection = ({
   return (
     <>
       {/* Original section */}
-      <section className={`${className} w-full py-20 px-6 md:px-8 lg:px-12`}>
+      <section id="contact" className={`${className} w-full py-20 px-6 md:px-8 lg:px-12`}>
         <div className="container-custom">
           <div className="flex flex-col md:flex-row items-center justify-between">
             <div className="w-full md:w-1/2 mb-8 md:mb-0">
