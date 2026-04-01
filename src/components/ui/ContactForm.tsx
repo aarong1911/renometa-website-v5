@@ -131,16 +131,15 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
 
         <div className="md:col-span-2 flex items-start space-x-2">
           <input
-            type="checkbox"
-            id="contact-consent"
-            name="consent"
-            required
-            checked={formData.consent}
-            onChange={handleChange}
-            className="mt-1 h-4 w-4 shrink-0"
-          />
-          <label htmlFor="contact-consent" className="text-xs text-gray-600 leading-snug">
-            By checking this box and submitting this form, you agree to receive SMS messages from RenoMeta related to your inquiry, appointment scheduling, reminders, and service updates. 
+  type="checkbox"
+  id="contact-consent"
+  name="consent"
+  checked={formData.consent}
+  onChange={handleChange}
+  className="mt-1 h-4 w-4 shrink-0"
+/>
+<label htmlFor="contact-consent" className="text-xs text-gray-600 leading-snug">
+  <span className="font-medium">(Optional)</span> By checking this box and submitting this form, you agree to receive SMS messages from RenoMeta related to your inquiry, appointment scheduling, reminders, and service updates. 
             Message frequency varies. Message and data rates may apply. 
             Reply STOP to opt out or HELP for help. Consent is not a condition of purchase. View our{' '}
             <a
