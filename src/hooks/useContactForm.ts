@@ -17,7 +17,6 @@ interface UseContactFormProps {
 
 export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
   const { toast } = useToast();
-
   const [formData, setFormData] = useState<ContactFormData>({
     name: "",
     email: "",
@@ -27,7 +26,6 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
     service: "general",
     consent: false,
   });
-
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = (
@@ -35,7 +33,6 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
   ) => {
     const { name, value, type } = e.target;
     const checked = (e.target as HTMLInputElement).checked;
-
     setFormData((prev) => ({
       ...prev,
       [name]: type === "checkbox" ? checked : value,
@@ -44,15 +41,6 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-
-    if (!formData.consent) {
-      toast({
-        title: "Consent required",
-        description: "Please agree to receive SMS messages before submitting.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     if (!formData.phone.trim()) {
       toast({
@@ -79,7 +67,6 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
 
       if (!res.ok) {
         let errorMessage = `Request failed with status ${res.status}`;
-
         try {
           const errorData = await res.json();
           if (errorData?.error) {
@@ -88,7 +75,6 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
         } catch {
           // ignore non-JSON errors
         }
-
         throw new Error(errorMessage);
       }
 
@@ -113,9 +99,7 @@ export function useContactForm({ onSuccess }: UseContactFormProps = {}) {
         err instanceof Error
           ? err.message
           : "There was a problem sending your message. Please try again later.";
-
       console.error("❌ Error submitting contact form:", err);
-
       toast({
         title: "Error",
         description: message,
