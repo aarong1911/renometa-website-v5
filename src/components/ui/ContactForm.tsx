@@ -139,7 +139,7 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
   className="mt-1 h-4 w-4 shrink-0"
 />
 <label htmlFor="contact-consent" className="text-xs text-gray-600 leading-snug">
-  <span className="font-medium">(Optional)</span> By checking this box, you agree to receive SMS messages from RenoMeta related to your inquiry, appointment scheduling, reminders, and service updates. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.
+  <span className="font-medium">(Optional)</span> By checking this box, you agree to receive SMS messages from RenoMeta. Message frequency varies. Message and data rates may apply. Reply STOP to opt out or HELP for help. Consent is not a condition of purchase.
             View our{' '}
             <a
               href="/privacy-policy"
