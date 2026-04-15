@@ -49,20 +49,24 @@ const ContactForm = ({ onSuccess }: ContactFormProps) => {
           </div>
 
           <div>
-            <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
-              Phone Number *
-            </label>
-            <Input
-              id="phone"
-              name="phone"
-              type="tel"
-              value={formData.phone}
-              onChange={handleChange}
-              placeholder="(123) 456-7890"
-              required
-              className="w-full text-gray-900 placeholder-gray-500"
-            />
-          </div>
+  <label htmlFor="phone" className="block text-sm font-medium text-gray-700 mb-1">
+    Phone Number (optional)
+  </label>
+
+  <Input
+    id="phone"
+    name="phone"
+    type="tel"
+    value={formData.phone}
+    onChange={handleChange}
+    placeholder="(123) 456-7890"
+    className="w-full text-gray-900 placeholder-gray-500"
+  />
+
+  <p className="text-xs text-gray-500 mt-1">
+    Phone number is optional. SMS messages will only be sent if you opt in below.
+  </p>
+</div>
 
           <div>
             <label htmlFor="company" className="block text-sm font-medium text-gray-700 mb-1">
