@@ -31,9 +31,9 @@ const PrivacyPolicy = () => {
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-blue-dark">1. Introduction</h2>
                 <p className="text-lg">
-                  Welcome to RenoMeta Inc (“RenoMeta,” “we,” “us,” or “our”). This Privacy Policy explains how we collect,
+                  Welcome to RenoMeta Inc ("RenoMeta," "we," "us," or "our"). This Privacy Policy explains how we collect,
                   use, disclose, and safeguard information when you use our software, websites, and services
-                  (collectively, the “Services”).
+                  (collectively, the "Services").
                 </p>
               </div>
 
@@ -96,29 +96,61 @@ const PrivacyPolicy = () => {
                 </p>
               </div>
 
-              {/* ✅ SMS section for A2P/Carrier expectations */}
               <div className="space-y-2">
-                <h2 className="text-lg font-semibold text-blue-dark">7. SMS Communications and Consent</h2>
+                <h2 className="text-lg font-semibold text-blue-dark">7. SMS/MMS Communications and Consent</h2>
+
+                <h3 className="text-base font-semibold text-blue-dark mt-4">
+                  7a. SMS Messages Sent Directly by RenoMeta
+                </h3>
                 <p className="text-lg">
-                  RenoMeta may enable businesses that use our Services to communicate with their customers via SMS/MMS
-                  for customer care and operational purposes, such as missed call responses, appointment confirmations,
-                  reminders, and follow-ups.
+                  RenoMeta may send SMS/MMS messages directly to individuals who provide express written consent
+                  through the contact form on our website at{" "}
+                  <a className="text-blue-dark underline" href="https://renometa.com" target="_blank" rel="noopener noreferrer">
+                    https://renometa.com
+                  </a>
+                  . Consent is collected via a separate, optional, unchecked checkbox on the contact form. Providing a
+                  phone number alone does not constitute consent to receive SMS messages. Users who do not check the
+                  SMS opt-in checkbox will not receive any text messages from RenoMeta.
                 </p>
                 <p className="text-lg">
-                  End users provide consent to receive messages by initiating contact with the business (for example,
-                  by calling the business, submitting a website form, requesting an appointment, or otherwise providing
-                  their phone number for customer support or service-related communication). Messages are sent only in
-                  response to inbound inquiries or ongoing customer interactions.
+                  The opt-in checkbox states: "(Optional) By checking this box, you agree to receive SMS messages from
+                  RenoMeta. Message frequency varies (up to 5 messages per month). Message and data rates may apply.
+                  Reply STOP to opt out or HELP for help. Consent is not a condition of purchase."
                 </p>
                 <p className="text-lg">
-                  Message frequency varies based on customer interaction. Recipients can opt out at any time by
-                  replying <span className="font-semibold">STOP</span>. For help, reply{" "}
-                  <span className="font-semibold">HELP</span>. Message and data rates may apply.
+                  Messages sent directly by RenoMeta include responses to inquiries, account notifications,
+                  appointment confirmations, service updates, and customer support communications. These messages
+                  are not marketing or promotional in nature. Message frequency does not exceed 5 messages per month.
                 </p>
                 <p className="text-lg">
-                  RenoMeta does not sell or share SMS consent data with third parties for their own marketing purposes.
-                  Businesses using RenoMeta are responsible for collecting and maintaining appropriate consent where
-                  required by law.
+                  Recipients may opt out at any time by replying <span className="font-semibold">STOP</span> to any
+                  message. For help, reply <span className="font-semibold">HELP</span> or contact us at{" "}
+                  <a className="text-blue-dark underline" href="mailto:Support@RenoMeta.com">
+                    Support@RenoMeta.com
+                  </a>
+                  . Message and data rates may apply.
+                </p>
+
+                <h3 className="text-base font-semibold text-blue-dark mt-4">
+                  7b. SMS Messages Sent Through the RenoMeta Platform
+                </h3>
+                <p className="text-lg">
+                  RenoMeta also provides a software platform that enables businesses (our customers) to communicate
+                  with their own end users via SMS/MMS for customer care and operational purposes, such as missed call
+                  responses, appointment confirmations, reminders, and follow-ups.
+                </p>
+                <p className="text-lg">
+                  Businesses using the RenoMeta platform are solely responsible for obtaining and maintaining
+                  appropriate consent from their own message recipients and for complying with all applicable laws,
+                  regulations, and carrier requirements.
+                </p>
+
+                <h3 className="text-base font-semibold text-blue-dark mt-4">
+                  7c. General SMS Policies
+                </h3>
+                <p className="text-lg">
+                  RenoMeta does not sell, share, or distribute SMS consent data or opt-in information to any third
+                  parties for their own marketing or promotional purposes.
                 </p>
               </div>
 
