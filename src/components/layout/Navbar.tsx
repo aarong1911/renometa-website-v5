@@ -97,7 +97,7 @@ const Navbar = () => {
       >
         <Link to="/" className="flex items-center">
           <img
-            src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png"
+            src="/lovable-uploads/renometa-logo.png"
             alt="RenoMeta Logo"
             className="h-10 md:h-12 mr-2"
           />
