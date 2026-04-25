@@ -38,7 +38,7 @@ const Footer = () => {
           <div className="space-y-6">
             <Link to="/" className="inline-block">
               <img 
-                src="/lovable-uploads/7217f6a6-a095-4b8f-b0b1-4e2142a3baee.png" 
+                src="/lovable-uploads/renometa-logo.png" 
                 alt="RenoMeta Logo" 
                 className="h-12 mb-2"
               />
