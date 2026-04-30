@@ -31,8 +31,8 @@ const TermsOfService = () => {
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-blue-dark">1. Acceptance of Terms</h2>
                 <p className="text-lg">
-                  By accessing or using RenoMeta Inc (“RenoMeta,” “we,” “us,” or “our”) software, websites, and services
-                  (collectively, the “Services”), you agree to be bound by these Terms of Service (“Terms”). If you do
+                  By accessing or using RenoMeta Inc ("RenoMeta," "we," "us," or "our") software, websites, and services
+                  (collectively, the "Services"), you agree to be bound by these Terms of Service ("Terms"). If you do
                   not agree, do not use the Services.
                 </p>
               </div>
@@ -83,22 +83,48 @@ const TermsOfService = () => {
                 <h2 className="text-lg font-semibold text-blue-dark">6. Data Privacy</h2>
                 <p className="text-lg">
                   Our collection and use of information is described in our Privacy Policy. By using the Services, you
-                  consent to the collection, use, and disclosure of information as described in that policy.
+                  consent to the collection, use, and disclosure of information as described in that policy. Your use
+                  of the Services does not constitute consent to receive SMS or MMS messages; SMS consent is collected
+                  separately as described in our Privacy Policy.
                 </p>
               </div>
 
-              {/* ✅ Messaging terms help A2P/Twilio reviews */}
               <div className="space-y-2">
                 <h2 className="text-lg font-semibold text-blue-dark">7. SMS/MMS Messaging Terms</h2>
+
+                <h3 className="text-base font-semibold text-blue-dark mt-4">
+                  7a. SMS Messages Sent Directly by RenoMeta
+                </h3>
                 <p className="text-lg">
-                  The Services may enable you to send or receive SMS/MMS messages to communicate with your customers for
-                  customer care and operational purposes (for example, missed call responses, appointment confirmations,
-                  reminders, and follow-ups).
+                  RenoMeta may send SMS/MMS messages directly to individuals who provide express written consent
+                  through an optional, unchecked checkbox on the contact form at{" "}
+                  <a className="text-blue-dark underline" href="https://renometa.com" target="_blank" rel="noopener noreferrer">
+                    https://renometa.com
+                  </a>
+                  . SMS consent is entirely voluntary and is not required to use the website, submit the contact form,
+                  receive services, make a purchase, or complete any transaction.
                 </p>
                 <p className="text-lg">
-                  You are responsible for obtaining and maintaining any required consents from message recipients and
-                  for complying with all applicable laws and carrier requirements. You must not send messages that are
-                  unsolicited, promotional without consent, or otherwise non-compliant.
+                  Messages sent directly by RenoMeta are limited to transactional and customer care purposes, including
+                  responses to inquiries, appointment confirmations, service updates, and customer support
+                  communications. Message frequency does not exceed 5 messages per month. Recipients may opt out at
+                  any time by replying <span className="font-semibold">STOP</span> and may request assistance by
+                  replying <span className="font-semibold">HELP</span>. Message and data rates may apply.
+                </p>
+
+                <h3 className="text-base font-semibold text-blue-dark mt-4">
+                  7b. SMS Messages Sent Through the RenoMeta Platform
+                </h3>
+                <p className="text-lg">
+                  The Services may also enable businesses (our customers) to send or receive SMS/MMS messages to
+                  communicate with their own customers for customer care and operational purposes (for example, missed
+                  call responses, appointment confirmations, reminders, and follow-ups).
+                </p>
+                <p className="text-lg">
+                  Businesses using the RenoMeta platform are responsible for obtaining and maintaining any required
+                  consents from their own message recipients and for complying with all applicable laws and carrier
+                  requirements. Businesses must not send messages that are unsolicited, promotional without consent,
+                  or otherwise non-compliant.
                 </p>
                 <p className="text-lg">
                   Message frequency varies based on customer interaction. Recipients may opt out at any time by replying{" "}
@@ -112,7 +138,7 @@ const TermsOfService = () => {
                 <p className="text-lg">
                   To the maximum extent permitted by law, RenoMeta will not be liable for any indirect, incidental,
                   consequential, special, or punitive damages arising out of or related to your use of the Services. In
-                  no event will RenoMeta’s total liability exceed the amounts paid by you to RenoMeta for the Services
+                  no event will RenoMeta's total liability exceed the amounts paid by you to RenoMeta for the Services
                   in the twelve (12) months preceding the event giving rise to the claim.
                 </p>
               </div>
