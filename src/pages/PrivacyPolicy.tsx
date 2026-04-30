@@ -115,7 +115,14 @@ const PrivacyPolicy = () => {
                 <p className="text-lg">
                   The opt-in checkbox states: "(Optional) By checking this box, you agree to receive SMS messages from
                   RenoMeta. Message frequency varies (up to 5 messages per month). Message and data rates may apply.
-                  Reply STOP to opt out or HELP for help. Consent is not a condition of purchase."
+                  Reply STOP to opt out or HELP for help. Consent is not a condition of purchase, receiving services,
+                  or completing any transaction. View our Privacy Policy and Terms of Service."
+                </p>
+                <p className="text-lg">
+                  SMS consent is entirely voluntary. You are not required to consent to SMS messaging in order to
+                  use our Services, submit a contact form, receive customer support, make a purchase, or complete
+                  any transaction with RenoMeta. The contact form can be submitted without providing a phone number
+                  and without opting in to SMS.
                 </p>
                 <p className="text-lg">
                   Messages sent directly by RenoMeta include responses to inquiries, account notifications,
@@ -175,7 +182,10 @@ const PrivacyPolicy = () => {
               </div>
 
               <p className="text-lg">
-                By using our Services, you agree to the terms outlined in this Privacy Policy.
+                By using our Services, you acknowledge and agree to the data collection and usage practices
+                described in this Privacy Policy. This acknowledgment does not constitute consent to receive
+                SMS or MMS messages. SMS consent is collected separately and independently as described in
+                Section 7a above.
               </p>
             </div>
           </ScrollReveal>
