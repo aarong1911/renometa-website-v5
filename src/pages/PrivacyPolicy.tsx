@@ -156,8 +156,10 @@ const PrivacyPolicy = () => {
                   7c. General SMS Policies
                 </h3>
                 <p className="text-lg">
-                  RenoMeta does not sell, share, or distribute SMS consent data or opt-in information to any third
-                  parties for their own marketing or promotional purposes.
+                  RenoMeta will not share, sell, or distribute your mobile phone number or SMS consent data to
+                  any third parties or affiliates for their own marketing or promotional purposes. RenoMeta does
+                  not sell, share, or distribute opt-in information to any third parties for their own marketing
+                  or promotional purposes.
                 </p>
               </div>
 
