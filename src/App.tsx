@@ -11,6 +11,7 @@ import Chatbot from "./components/ui/Chatbot";
 import About from "./pages/About";
 import PrivacyPolicy from "@/pages/PrivacyPolicy";
 import TermsOfService from "@/pages/TermsOfService";
+import DataDeletion from "@/pages/DataDeletion";
 import FreeTrial from "./pages/free-trial";
 import TrialSuccess from './pages/trial-success';
 import Pricing from "./pages/Pricing";
@@ -109,6 +110,7 @@ const App = () => (
           <Route path="/about" element={<About />} />
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/terms-of-service" element={<TermsOfService />} />
+          <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="*" element={<NotFound />} />
 
           <Route path="/calendar" element={<CalendarAddPage />} />
