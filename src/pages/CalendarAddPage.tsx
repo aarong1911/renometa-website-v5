@@ -67,6 +67,7 @@ export default function CalendarAddPage() {
     `&dur=0100` +
     `&desc=${details}&in_loc=${location}`;
 
+<<<<<<< HEAD
   const icsHref = `/.netlify/functions/ics?name=${encodeURIComponent(
   name
 )}&email=${encodeURIComponent(email)}&date=${encodeURIComponent(
@@ -74,6 +75,11 @@ export default function CalendarAddPage() {
 )}&time=${encodeURIComponent(time)}&tz=${encodeURIComponent(
   tz
 )}&dur=${dur}&phone=${encodeURIComponent(phone)}`;
+=======
+  const icsHref = `/calendar/appointment-${encodeURIComponent(
+    email
+  )}-${date}.ics`;
+>>>>>>> 367861f (Local changes)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

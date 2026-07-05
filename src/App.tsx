@@ -15,6 +15,8 @@ import DataDeletion from "@/pages/DataDeletion";
 import FreeTrial from "./pages/free-trial";
 import TrialSuccess from './pages/trial-success';
 import Pricing from "./pages/Pricing";
+import CalendarAddPage from "./pages/CalendarAddPage";
+import ReschedulePage from "./pages/ReschedulePage";
 
 import CalendarAddPage from "@/pages/CalendarAddPage";
 import ReschedulePage from "@/pages/ReschedulePage";
@@ -115,7 +117,10 @@ const App = () => (
 
           <Route path="/calendar" element={<CalendarAddPage />} />
           <Route path="/reschedule" element={<ReschedulePage />} />
+<<<<<<< HEAD
 
+=======
+>>>>>>> 367861f (Local changes)
         </Routes>
         <Chatbot />
       </BrowserRouter>

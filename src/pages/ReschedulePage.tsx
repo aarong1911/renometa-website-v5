@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 import { useState, useEffect, useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 import { Calendar as CalendarIcon } from "lucide-react";
@@ -22,12 +23,17 @@ const generateTimeSlots = () => {
   }
   return slots;
 };
+=======
+import { useState } from "react";
+import { useSearchParams } from "react-router-dom";
+>>>>>>> 367861f (Local changes)
 
 export default function ReschedulePage() {
   const [sp] = useSearchParams();
   const apptId = sp.get("appt_id") ?? "";
   const tz = sp.get("tz") ?? "America/New_York";
 
+<<<<<<< HEAD
   const [currentAppt, setCurrentAppt] = useState<{ date: string; time: string } | null>(null);
   const [date, setDate] = useState<Date | undefined>();
   const [time, setTime] = useState("");
@@ -103,21 +109,46 @@ export default function ReschedulePage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!date || !time) return;
+=======
+  const [date, setDate] = useState("");
+  const [time, setTime] = useState("");
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+>>>>>>> 367861f (Local changes)
 
     await fetch("/.netlify/functions/reschedule", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
+<<<<<<< HEAD
       body: JSON.stringify({
         appt_id: apptId,
         date: format(date, "yyyy-MM-dd"),
         time,
         tz,
       }),
+=======
+      body: JSON.stringify({ appt_id: apptId, date, time, tz }),
+>>>>>>> 367861f (Local changes)
     });
 
     alert("✅ Appointment rescheduled successfully!");
   };
 
+<<<<<<< HEAD
+=======
+  // Build dropdown options (8:00 → 17:00, every 30 min)
+  const timeOptions = [];
+  for (let h = 8; h <= 17; h++) {
+    for (let m of [0, 30]) {
+      if (h === 17 && m > 0) continue; // no 5:30
+      const hh = h.toString().padStart(2, "0");
+      const mm = m.toString().padStart(2, "0");
+      timeOptions.push(`${hh}:${mm}`);
+    }
+  }
+
+>>>>>>> 367861f (Local changes)
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="w-full max-w-md bg-white rounded-2xl shadow p-6">
@@ -130,6 +161,7 @@ export default function ReschedulePage() {
           />
         </div>
 
+<<<<<<< HEAD
         <h1 className="text-xl font-semibold text-gray-900 mb-4">Reschedule Appointment</h1>
         <p className="text-sm text-gray-500 mb-6">
           Current Appt:{" "}
@@ -178,6 +210,25 @@ export default function ReschedulePage() {
           </div>
 
           {/* Time */}
+=======
+        <h1 className="text-xl font-semibold text-gray-900 mb-4">
+          Reschedule Appointment
+        </h1>
+        <p className="text-sm text-gray-500 mb-6">Appointment ID: {apptId}</p>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-1">New date</label>
+            <input
+              type="date"
+              value={date}
+              onChange={(e) => setDate(e.target.value)}
+              className="w-full border rounded-lg px-3 py-2"
+              required
+            />
+          </div>
+
+>>>>>>> 367861f (Local changes)
           <div>
             <label className="block text-sm font-medium mb-1">New time</label>
             <select
@@ -187,7 +238,11 @@ export default function ReschedulePage() {
               required
             >
               <option value="">Select a time</option>
+<<<<<<< HEAD
               {availableSlots.map((t) => (
+=======
+              {timeOptions.map((t) => (
+>>>>>>> 367861f (Local changes)
                 <option key={t} value={t}>
                   {t}
                 </option>
@@ -195,12 +250,19 @@ export default function ReschedulePage() {
             </select>
           </div>
 
+<<<<<<< HEAD
           {/* Timezone */}
+=======
+>>>>>>> 367861f (Local changes)
           <div>
             <label className="block text-sm font-medium mb-1">Time zone</label>
             <input
               type="text"
+<<<<<<< HEAD
               value={tzMap[tz] || tz}
+=======
+              value={tz}
+>>>>>>> 367861f (Local changes)
               readOnly
               className="w-full border rounded-lg px-3 py-2 bg-gray-100"
             />
@@ -217,4 +279,7 @@ export default function ReschedulePage() {
     </div>
   );
 }
+<<<<<<< HEAD
 
+=======
+>>>>>>> 367861f (Local changes)

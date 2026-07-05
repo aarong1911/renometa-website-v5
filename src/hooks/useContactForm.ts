@@ -8,7 +8,11 @@ interface ContactFormData {
   company: string;
   message: string;
   service: string;
+<<<<<<< HEAD
   consent: boolean;
+=======
+  consent?: boolean;
+>>>>>>> 367861f (Local changes)
 }
 
 interface UseContactFormProps {

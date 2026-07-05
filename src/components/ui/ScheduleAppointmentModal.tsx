@@ -91,6 +91,7 @@ export default function ScheduleAppointmentModal({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
+<<<<<<< HEAD
     if (
       !formData.name.trim() ||
       !formData.email.trim() ||
@@ -106,6 +107,19 @@ export default function ScheduleAppointmentModal({
       });
       return;
     }
+=======
+  // Insert into Supabase
+  const { error } = await supabase.from('appointments').insert([
+    {
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      appointment_date: formData.date.toISOString().split('T')[0], // format YYYY-MM-DD
+      appointment_time: formData.time,
+      timezone: formData.timezone, // include this if your form includes timezone
+    },
+  ]);
+>>>>>>> 367861f (Local changes)
 
     if (!formData.consent) {
       toast({
@@ -116,7 +130,24 @@ export default function ScheduleAppointmentModal({
       return;
     }
 
+<<<<<<< HEAD
     setIsSubmitting(true);
+=======
+  // Trigger Make.com Webhook
+  await fetch(import.meta.env.VITE_MAKE_WEBHOOK_URL!, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: formData.name,
+      email: formData.email,
+      phone: formData.phone,
+      appointment_date: formData.date.toDateString(),
+      appointment_time: formData.time,
+      timezone: formData.timezone,
+      source: 'form'
+    }),
+  });
+>>>>>>> 367861f (Local changes)
 
     try {
       const response = await fetch("/.netlify/functions/book-appointment", {

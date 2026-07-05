@@ -1,3 +1,4 @@
+// src/pages/free-trial.tsx
 import React from 'react';
 import MainLayout from '@/components/layout/MainLayout';
 import { MessageSquare, BarChart2, Palette, Users } from 'lucide-react';
@@ -6,7 +7,7 @@ import ServiceCard from '@/components/ui/ServiceCard';
 import TestimonialCard from '@/components/ui/TestimonialCard';
 import Chatbot from '@/components/ui/Chatbot';
 import SignupForm from '../components/ui/SignupForm';
-import { Hero } from '@/components/Hero'; // <--- ADD THIS LINE
+import { Hero } from '@/components/Hero';
 
 const FreeTrial = () => {
   const features = [

@@ -1,0 +1,6 @@
+# Redirect non-www /home and www /home → / (prevents soft 404)
+/home                        /    301
+https://www.renometa.com/home     https://renometa.com/    301
+
+# SPA catch-all — must be last
+/*    /index.html    200

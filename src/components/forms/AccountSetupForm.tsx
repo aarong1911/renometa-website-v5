@@ -3,7 +3,6 @@ import { useForm, Controller } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { motion } from "framer-motion";
-
 import { supabase } from "@/lib/supabaseClient";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -16,11 +15,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 
-/* ───────────────── props definition ───────────────── */
+/* ───────────────── props ───────────────── */
 type AccountSetupFormProps = {
   trialId: string;
   defaultEmail: string;
-  onFinish: () => void;
+  onFinish?: () => void;
 };
 
 /* ───────────────── constants ───────────────── */
@@ -61,10 +60,10 @@ const timeZones = [
 
 /* ───────────────── validation ───────────────── */
 const schema = z.object({
-  first_name: z.string().min(2, "First name must be at least 2 characters."),
-  last_name: z.string().min(2, "Last name must be at least 2 characters."),
-  email: z.string().email("Invalid email address."),
-  business_name: z.string().min(2, "Business name must be at least 2 characters."),
+  first_name: z.string().min(2),
+  last_name: z.string().min(2),
+  email: z.string().email(),
+  business_name: z.string().min(2),
   business_niche: z.array(z.string()).min(1).max(2),
   business_phone: z.string().min(6),
   address: z.string().min(4),
@@ -80,19 +79,10 @@ const schema = z.object({
 type AccountForm = z.infer<typeof schema>;
 
 /* ───────────────── component ───────────────── */
-const AccountSetupForm: React.FC<AccountSetupFormProps> = ({
-  trialId,
-  defaultEmail,
-  onFinish,
-}) => {
+const AccountSetupForm: React.FC<AccountSetupFormProps> = ({ trialId, defaultEmail }) => {
   const [submitting, setSubmitting] = useState(false);
-  const [prefill, setPrefill] = useState({
-    first_name: "",
-    last_name: "",
-    email: defaultEmail,
-  });
+  const [prefill, setPrefill] = useState({ first_name: "", last_name: "", email: defaultEmail });
 
-  /* fetch user metadata for defaults */
   useEffect(() => {
     const fetchProfile = async () => {
       const { data: { user } } = await supabase.auth.getUser();
@@ -123,7 +113,6 @@ const AccountSetupForm: React.FC<AccountSetupFormProps> = ({
     },
   });
 
-  /* update defaults when profile arrives */
   useEffect(() => {
     reset({
       ...prefill,
@@ -134,28 +123,35 @@ const AccountSetupForm: React.FC<AccountSetupFormProps> = ({
     });
   }, [prefill, reset]);
 
-  /* ───────── submit (status line removed) ───────── */
   const submit = async (data: AccountForm) => {
     setSubmitting(true);
+    try {
+      const { error } = await supabase
+        .from("trials")
+        .update({
+          ...data,
+          onboarding_status: "ready",
+          other_apps: data.other_apps || null,
+        })
+        .eq("id", trialId);
 
-    const { error } = await supabase
-      .from("trials")
-      .update({
-        ...data,
-        other_apps: data.other_apps || null,
-      })
-      .eq("id", trialId);
+      if (error) throw error;
 
-    setSubmitting(false);
+      localStorage.setItem("renometa_user", JSON.stringify({
+        email: defaultEmail,
+        name: `${data.first_name} ${data.last_name}`,
+        company: data.business_name,
+      }));
 
-    if (error) {
-      console.error("trial update failed:", error);
-      return;
+      window.location.href = "https://connect.renometa.com/dashboard";
+    } catch (err) {
+      console.error("Error saving form to Supabase:", err);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setSubmitting(false);
     }
-    onFinish(); // open the modal
   };
 
-  /* ───────── JSX ───────── */
   return (
     <motion.form
       initial={{ opacity: 0, y: 30 }}
@@ -166,179 +162,70 @@ const AccountSetupForm: React.FC<AccountSetupFormProps> = ({
     >
       <h2 className="text-2xl font-semibold text-center mb-6">Account Setup</h2>
 
-      {/* personal */}
+      {/* Personal */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            First Name <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("first_name")} />
-          {errors.first_name && (
-            <p className="text-sm text-red-600">{errors.first_name.message}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Last Name <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("last_name")} />
-          {errors.last_name && (
-            <p className="text-sm text-red-600">{errors.last_name.message}</p>
-          )}
-        </div>
+        <InputField label="First Name" error={errors.first_name} {...register("first_name")} />
+        <InputField label="Last Name" error={errors.last_name} {...register("last_name")} />
       </div>
 
-      {/* email */}
-      <div>
-        <label className="block text-sm font-semibold mb-1">Email</label>
-        <Input value={prefill.email} disabled readOnly />
-      </div>
+      <Input value={prefill.email} disabled readOnly />
 
-      {/* business name + niche */}
+      {/* Business Name + Niche */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Business Name <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("business_name")} />
-          {errors.business_name && (
-            <p className="text-sm text-red-600">{errors.business_name.message}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Business Niche <span className="text-red-500">*</span>
-          </label>
-          <Controller
-            name="business_niche"
-            control={control}
-            render={({ field }) => (
-              <>
-                <Select
-                  value={field.value[0] ?? undefined}
-                  onValueChange={(v) => field.onChange([v])}
-                >
-                  <SelectTrigger className="w-full">
-                    <SelectValue placeholder="Select a niche" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {trades.map((t) => (
-                      <SelectItem key={t} value={t}>
-                        {t}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-                {errors.business_niche && (
-                  <p className="text-sm text-red-600 mt-1">
-                    {errors.business_niche.message}
-                  </p>
-                )}
-              </>
-            )}
-          />
-        </div>
-      </div>
-
-      {/* phone + address */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Business Phone <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("business_phone")} />
-          {errors.business_phone && (
-            <p className="text-sm text-red-600">
-              {errors.business_phone.message}
-            </p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Street Address <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("address")} />
-          {errors.address && (
-            <p className="text-sm text-red-600">{errors.address.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* city / state / zip */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        {(["city", "state", "zip"] as const).map((k) => (
-          <div key={k}>
-            <label className="block text-sm font-semibold mb-1">
-              {k === "zip"
-                ? "ZIP"
-                : k.charAt(0).toUpperCase() + k.slice(1)}
-              <span className="text-red-500">*</span>
-            </label>
-            <Input {...register(k)} />
-            {errors[k] && (
-              <p className="text-sm text-red-600">{errors[k]?.message}</p>
-            )}
-          </div>
-        ))}
-      </div>
-
-      {/* country + website */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div>
-          <label className="block text-sm font-semibold mb-1">
-            Country <span className="text-red-500">*</span>
-          </label>
-          <Input {...register("country")} />
-          {errors.country && (
-            <p className="text-sm text-red-600">{errors.country.message}</p>
-          )}
-        </div>
-        <div>
-          <label className="block text-sm font-semibold mb-1">Website</label>
-          <Input {...register("website")} />
-          {errors.website && (
-            <p className="text-sm text-red-600">{errors.website.message}</p>
-          )}
-        </div>
-      </div>
-
-      {/* time zone */}
-      <div>
-        <label className="block text-sm font-semibold mb-1">
-          Time Zone <span className="text-red-500">*</span>
-        </label>
+        <InputField label="Business Name" error={errors.business_name} {...register("business_name")} />
         <Controller
-          name="time_zone"
+          name="business_niche"
           control={control}
           render={({ field }) => (
-            <>
-              <Select value={field.value} onValueChange={field.onChange}>
-                <SelectTrigger className="w-full">
-                  <SelectValue placeholder="Select a time zone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {timeZones.map((z) => (
-                    <SelectItem key={z.value} value={z.value}>
-                      {z.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-              {errors.time_zone && (
-                <p className="text-sm text-red-600 mt-1">
-                  {errors.time_zone.message}
-                </p>
-              )}
-            </>
+            <SelectField
+              label="Business Niche"
+              options={trades}
+              value={field.value[0] ?? ""}
+              onChange={(v) => field.onChange([v])}
+              error={errors.business_niche?.message}
+            />
           )}
         />
       </div>
 
-      {/* integrations */}
+      {/* Contact + Address */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField label="Business Phone" error={errors.business_phone} {...register("business_phone")} />
+        <InputField label="Street Address" error={errors.address} {...register("address")} />
+      </div>
+
+      {/* City/State/ZIP */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <InputField label="City" error={errors.city} {...register("city")} />
+        <InputField label="State" error={errors.state} {...register("state")} />
+        <InputField label="ZIP" error={errors.zip} {...register("zip")} />
+      </div>
+
+      {/* Country + Website */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <InputField label="Country" error={errors.country} {...register("country")} />
+        <InputField label="Website" error={errors.website} {...register("website")} />
+      </div>
+
+      {/* Time Zone */}
+      <Controller
+        name="time_zone"
+        control={control}
+        render={({ field }) => (
+          <SelectField
+            label="Time Zone"
+            options={timeZones.map((z) => ({ value: z.value, label: z.label }))}
+            value={field.value}
+            onChange={field.onChange}
+            error={errors.time_zone?.message}
+          />
+        )}
+      />
+
+      {/* Integrations */}
       <div>
         <label className="block text-sm font-semibold mb-2">
-          Select integrations you plan to connect{" "}
-          <span className="text-red-500">*</span>
+          Integrations <span className="text-red-500">*</span>
         </label>
         <Controller
           name="integrations"
@@ -363,27 +250,57 @@ const AccountSetupForm: React.FC<AccountSetupFormProps> = ({
           )}
         />
         {errors.integrations && (
-          <p className="text-sm text-red-600 mt-1">
-            {errors.integrations.message}
-          </p>
+          <p className="text-sm text-red-600 mt-1">{errors.integrations.message}</p>
         )}
       </div>
 
-      {/* other apps */}
-      <div>
-        <label className="block text-sm font-semibold mb-1">Other Apps</label>
-        <Input
-          {...register("other_apps")}
-          placeholder="Any other platform? Tell us here"
-        />
-      </div>
+      {/* Other Apps */}
+      <InputField
+        label="Other Apps"
+        placeholder="Any other platform?"
+        error={errors.other_apps}
+        {...register("other_apps")}
+      />
 
-      {/* submit */}
       <Button type="submit" disabled={submitting} className="w-full">
-        {submitting ? "Submitting…" : "Submit & Continue"}
+        {submitting ? "Submitting..." : "Submit & Continue"}
       </Button>
     </motion.form>
   );
 };
 
 export default AccountSetupForm;
+
+/* Helper Components */
+const InputField = ({ label, error, ...props }: any) => (
+  <div>
+    <label className="block text-sm font-semibold mb-1">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    <Input {...props} />
+    {error && <p className="text-sm text-red-600">{error.message}</p>}
+  </div>
+);
+
+const SelectField = ({ label, options, value, onChange, error }: any) => (
+  <div>
+    <label className="block text-sm font-semibold mb-1">
+      {label} <span className="text-red-500">*</span>
+    </label>
+    <Select value={value} onValueChange={onChange}>
+      <SelectTrigger className="w-full">
+        <SelectValue placeholder={`Select ${label.toLowerCase()}`} />
+      </SelectTrigger>
+      <SelectContent>
+        {options.map((opt: any) => (
+          <SelectItem key={opt.value || opt} value={opt.value || opt}>
+            {opt.label || opt}
+          </SelectItem>
+        ))}
+      </SelectContent>
+    </Select>
+    {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+  </div>
+);
+// This component is used to set up the account during the trial onboarding process.
+// It collects necessary business and personal information, validates it, and submits it to Supabase.

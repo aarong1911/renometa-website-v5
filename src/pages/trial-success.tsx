@@ -31,21 +31,33 @@ export default function TrialSuccess() {
   const [password, setPassword] = useState("");
   const [loginErr, setLoginErr] = useState("");
 
+  // Clean expired hash
+  useEffect(() => {
+    if (window.location.hash.includes("otp_expired") || window.location.hash.includes("access_denied")) {
+      history.replaceState(null, "", window.location.pathname);
+    }
+  }, []);
+
+  // Session exchange and auth
   useEffect(() => {
     let authSub: ReturnType<typeof supabase.auth.onAuthStateChange> | undefined;
 
     (async () => {
       try {
-        await supabase.auth.exchangeCodeForSession(window.location.href).catch(console.error);
+        const urlHasToken = window.location.href.includes("access_token");
+        if (urlHasToken) {
+          await supabase.auth.exchangeCodeForSession(window.location.href);
+        }
 
-        const {
-          data: { user: u },
-        } = await supabase.auth.getUser();
+        const { data: { user: u }, error } = await supabase.auth.getUser();
+        if (error) console.error("getUser error:", error);
 
         if (u) await handleAuthed(u);
 
         authSub = supabase.auth.onAuthStateChange(async (evt, sess) => {
-          if (evt === "SIGNED_IN" && sess?.user) await handleAuthed(sess.user);
+          if (evt === "SIGNED_IN" && sess?.user) {
+            await handleAuthed(sess.user);
+          }
         });
       } finally {
         setLoading(false);
@@ -55,15 +67,34 @@ export default function TrialSuccess() {
     return () => authSub?.data.subscription.unsubscribe();
   }, []);
 
+  // Wait for trial record → then start countdown
+  useEffect(() => {
+    if (trial?.onboarding_status === "pending" && trialChecked && !readyForForm) {
+      const timer = setTimeout(() => {
+        console.log("⏱️ Showing onboarding form after delay");
+        setReadyForForm(true);
+      }, 3000);
+
+      return () => clearTimeout(timer);
+    }
+  }, [trial, trialChecked, readyForForm]);
+
+  // Confirm trial row
+  useEffect(() => {
+    console.log("🧾 Trial:", trial);
+    console.log("✅ Ready for form?", readyForForm);
+  }, [trial, readyForForm]);
+
   const handleAuthed = async (u: any) => {
     setUser(u);
 
-    const { data: row } = await supabase
+    const { data: row, error } = await supabase
       .from("trials")
       .select("*")
       .eq("user_id", u.id)
       .maybeSingle();
 
+    if (error) console.error("❌ Trial lookup failed:", error);
     setTrial(row as TrialRow | null);
     setTrialChecked(true);
 
@@ -83,12 +114,6 @@ export default function TrialSuccess() {
         .subscribe();
     }
 
-    if (row?.onboarding_status === "pending") {
-      setReadyForForm(false);
-      setTimeout(() => setReadyForForm(true), 3000);
-    }
-
-    // Auto-login using saved trial credentials if available
     const localEmail = localStorage.getItem("trial_email");
     const localPassword = localStorage.getItem("trial_password");
 
@@ -102,7 +127,7 @@ export default function TrialSuccess() {
         localStorage.setItem("renometa_user", JSON.stringify({ email: localEmail }));
         localStorage.removeItem("trial_email");
         localStorage.removeItem("trial_password");
-        nav("/dashboard");
+        window.location.href = "https://connect.renometa.com/dashboard";
       }
     }
   };
@@ -124,10 +149,14 @@ export default function TrialSuccess() {
         <div className="bg-white shadow rounded-lg p-8 max-w-[1024px] w-full text-center mt-20">
           <h1 className="text-3xl font-bold mb-6 text-blue-dark">Free-Trial Status</h1>
 
-          {/* ① loading */}
-          {loading && <p>Checking your account…</p>}
+          {/* Loading */}
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+            </div>
+          )}
 
-          {/* ② login needed */}
+          {/* Login fallback */}
           {!loading && !user && (
             <>
               <p className="mb-4">Please log in to complete your free-trial activation.</p>
@@ -150,12 +179,12 @@ export default function TrialSuccess() {
             </>
           )}
 
-          {/* ③ no trial row */}
+          {/* No trial record */}
           {!loading && trialChecked && user && !trial && (
             <p className="text-red-600">We couldn’t locate your trial record. Please contact support.</p>
           )}
 
-          {/* ④ pending → progress bar */}
+          {/* Progress bar */}
           {user && trial?.onboarding_status === "pending" && !readyForForm && (
             <>
               <p className="text-green-600 mb-4">🎉 Your free trial has been activated!</p>
@@ -169,7 +198,7 @@ export default function TrialSuccess() {
             </>
           )}
 
-          {/* ⑤ pending → show form */}
+          {/* Onboarding form */}
           {user && trial?.onboarding_status === "pending" && readyForForm && (
             <>
               <p className="mb-4">
@@ -183,11 +212,14 @@ export default function TrialSuccess() {
             </>
           )}
 
-          {/* ⑥ ready */}
+          {/* Already ready */}
           {user && trial?.onboarding_status === "ready" && (
             <>
               <p className="text-green-600 mb-4">🎉 Your RenoMeta CRM is ready!</p>
-              <Button className="w-full mb-4" onClick={() => nav("/dashboard")}>
+              <Button
+                className="w-full mb-4"
+                onClick={() => (window.location.href = "https://connect.renometa.com/dashboard")}
+              >
                 Open Dashboard
               </Button>
             </>
@@ -195,12 +227,20 @@ export default function TrialSuccess() {
         </div>
       </section>
 
-      {/* ───────── success modal ───────── */}
+      {/* Modal */}
       <Dialog
         open={showModal}
         onOpenChange={(open) => {
           setShowModal(open);
+<<<<<<< HEAD
           if (!open) window.location.href = "https://connect.renometa.com/dashboard";
+=======
+          if (!open) {
+            setTimeout(() => {
+              window.location.href = "https://connect.renometa.com/dashboard";
+            }, 1500);
+          }
+>>>>>>> 367861f (Local changes)
         }}
       >
         <DialogContent className="text-center space-y-4 max-w-md bg-white">
@@ -221,5 +261,8 @@ export default function TrialSuccess() {
     </MainLayout>
   );
 }
+<<<<<<< HEAD
 // This code is a React component for a trial success page in a CRM application.
 // It handles user authentication, checks trial status, and displays appropriate messages or forms based on the user's state.
+=======
+>>>>>>> 367861f (Local changes)
