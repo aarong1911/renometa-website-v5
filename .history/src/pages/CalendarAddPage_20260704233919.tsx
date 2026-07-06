@@ -1,4 +1,3 @@
-//src/pages/CalendarAddPage.tsx
 import { useMemo } from "react";
 import { useSearchParams } from "react-router-dom";
 
@@ -25,14 +24,15 @@ export default function CalendarAddPage() {
   const [sp] = useSearchParams();
   const name = sp.get("name") ?? "Guest";
   const email = sp.get("email") ?? "";
-  const date = sp.get("date")!;
-  const time = sp.get("time")!;
+  const date = sp.get("date")!; // YYYY-MM-DD
+  const time = sp.get("time")!; // HH:mm
   const tz = sp.get("tz") ?? "America/New_York";
   const dur = Number(sp.get("dur") ?? 60);
   const phone = sp.get("phone") ?? "";
 
   const title = `Appointment with RenoMeta`;
 
+  // Build UTC range for Google/Yahoo
   const startLocal = useMemo(() => {
     const [y, m, d] = date.split("-").map(Number);
     const [hh, mm] = time.split(":").map(Number);
@@ -67,13 +67,19 @@ export default function CalendarAddPage() {
     `&dur=0100` +
     `&desc=${details}&in_loc=${location}`;
 
+<<<<<<< HEAD
   const icsHref = `/.netlify/functions/ics?name=${encodeURIComponent(
-    name
-  )}&email=${encodeURIComponent(email)}&date=${encodeURIComponent(
-    date
-  )}&time=${encodeURIComponent(time)}&tz=${encodeURIComponent(
-    tz
-  )}&dur=${dur}&phone=${encodeURIComponent(phone)}`;
+  name
+)}&email=${encodeURIComponent(email)}&date=${encodeURIComponent(
+  date
+)}&time=${encodeURIComponent(time)}&tz=${encodeURIComponent(
+  tz
+)}&dur=${dur}&phone=${encodeURIComponent(phone)}`;
+=======
+  const icsHref = `/calendar/appointment-${encodeURIComponent(
+    email
+  )}-${date}.ics`;
+>>>>>>> 367861f (Local changes)
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">

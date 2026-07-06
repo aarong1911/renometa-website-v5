@@ -1,4 +1,3 @@
-// src/pages/trial-success.tsx
 import React, { useEffect, useState } from "react";
 import { supabase } from "@/lib/supabaseClient";
 import MainLayout from "@/components/layout/MainLayout";
@@ -182,7 +181,7 @@ export default function TrialSuccess() {
 
           {/* No trial record */}
           {!loading && trialChecked && user && !trial && (
-            <p className="text-red-600">We couldn't locate your trial record. Please contact support.</p>
+            <p className="text-red-600">We couldn’t locate your trial record. Please contact support.</p>
           )}
 
           {/* Progress bar */}
@@ -233,7 +232,15 @@ export default function TrialSuccess() {
         open={showModal}
         onOpenChange={(open) => {
           setShowModal(open);
+<<<<<<< HEAD
           if (!open) window.location.href = "https://connect.renometa.com/dashboard";
+=======
+          if (!open) {
+            setTimeout(() => {
+              window.location.href = "https://connect.renometa.com/dashboard";
+            }, 1500);
+          }
+>>>>>>> 367861f (Local changes)
         }}
       >
         <DialogContent className="text-center space-y-4 max-w-md bg-white">
@@ -254,3 +261,8 @@ export default function TrialSuccess() {
     </MainLayout>
   );
 }
+<<<<<<< HEAD
+// This code is a React component for a trial success page in a CRM application.
+// It handles user authentication, checks trial status, and displays appropriate messages or forms based on the user's state.
+=======
+>>>>>>> 367861f (Local changes)
