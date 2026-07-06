@@ -18,9 +18,6 @@ import Pricing from "./pages/Pricing";
 import CalendarAddPage from "./pages/CalendarAddPage";
 import ReschedulePage from "./pages/ReschedulePage";
 
-import CalendarAddPage from "@/pages/CalendarAddPage";
-import ReschedulePage from "@/pages/ReschedulePage";
-
 // Solutions pages
 import SolutionsOverview from "./pages/Solutions/SolutionsOverview";
 import CategoryOverview from "./pages/Solutions/CategoryOverview";
@@ -70,6 +67,8 @@ const App = () => (
           <Route path="/free-trial" element={<FreeTrial />} />
           <Route path="/trial-success" element={<TrialSuccess />} />
           <Route path="/pricing" element={<Pricing />} />
+          <Route path="/calendar" element={<CalendarAddPage />} />
+          <Route path="/reschedule" element={<ReschedulePage />} />
 
           {/* Legacy Service Routes (keeping for backward compatibility) */}
           <Route path="/services/website-development" element={<WebsiteDevelopment />} />
@@ -78,35 +77,35 @@ const App = () => (
           <Route path="/services/automation" element={<Automation />} />
           <Route path="/services/integration" element={<Integration />} />
           <Route path="/services/performance-optimization" element={<PerformanceOptimization />} />
-          
+
           {/* New Solutions Routes */}
           <Route path="/solutions" element={<SolutionsOverview />} />
           <Route path="/solutions/:category" element={<CategoryOverview />} />
-          
+
           {/* CRM Solutions */}
           <Route path="/solutions/crm/organize-customers" element={<OrganizeCustomers />} />
           <Route path="/solutions/crm/online-booking" element={<OnlineBooking />} />
           <Route path="/solutions/crm/customer-portal" element={<CustomerPortal />} />
           <Route path="/solutions/crm/business-automation" element={<BusinessAutomation />} />
-          
+
           {/* Sales Solutions */}
           <Route path="/solutions/sales/sales-pipeline" element={<SalesPipeline />} />
           <Route path="/solutions/sales/convert-upsell" element={<ConvertUpsell />} />
           <Route path="/solutions/sales/get-paid-faster" element={<GetPaidFaster />} />
           <Route path="/solutions/sales/proposal-kit" element={<ProposalKit />} />
-          
+
           {/* Job Management Solutions */}
           <Route path="/solutions/jobs/scheduling-dispatching" element={<SchedulingDispatching />} />
           <Route path="/solutions/jobs/job-costing" element={<JobCosting />} />
           <Route path="/solutions/jobs/mobile-management" element={<MobileManagement />} />
           <Route path="/solutions/jobs/workflow-integration" element={<WorkflowIntegration />} />
-          
+
           {/* Marketing Solutions */}
           <Route path="/solutions/marketing/automation" element={<MarketingAutomation />} />
           <Route path="/solutions/marketing/sms-email" element={<SmsEmail />} />
           <Route path="/solutions/marketing/voicemail" element={<Voicemail />} />
           <Route path="/solutions/marketing/reviews" element={<Reviews />} />
-          
+
           <Route path="/blog" element={<Blog />} />
           <Route path="/blog/:id" element={<BlogPost />} />
           <Route path="/about" element={<About />} />
@@ -114,15 +113,7 @@ const App = () => (
           <Route path="/terms-of-service" element={<TermsOfService />} />
           <Route path="/data-deletion" element={<DataDeletion />} />
           <Route path="*" element={<NotFound />} />
-
-          <Route path="/calendar" element={<CalendarAddPage />} />
-          <Route path="/reschedule" element={<ReschedulePage />} />
-<<<<<<< HEAD
-
-=======
->>>>>>> 367861f (Local changes)
         </Routes>
-        <Chatbot />
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
